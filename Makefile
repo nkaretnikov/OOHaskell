@@ -20,7 +20,7 @@ index.html: pre.html README post.html
  
 OOHaskell.zip: *.hs *.html Makefile README
 	mkdir -p OOHaskell
-	cp --preserve *OO.hs *.in *.ref README OOHaskell
+	cp --preserve *OO.hs *.in *.ref README Makefile OOHaskell
 	zip -r OOHaskell.zip OOHaskell
 	rm -rf OOHaskell
 
