@@ -250,7 +250,11 @@ testExist =
        
        -- iterate through the list
        -- and handle shapes polymorphically
-       drawloop scribble
+       mapM_ ( \(WrapShape shape) -> do
+                  shape # draw
+                  (shape # rMoveTo) 100 100
+                  shape # draw )
+             scribble
 
        -- call a rectangle specific function
        arec <- mfix (rectangle (0::Int) (0::Int) (15::Int) (15::Int))
@@ -263,17 +267,6 @@ data WrapShape =
  forall x. ( Hash (Proxy Draw) x (IO ())
            , Hash (Proxy RMoveTo) x (Int -> Int -> IO ())
            ) => WrapShape x
-
-
-
--- iterate through the list of shapes and draw
-drawloop [] = returnIO ()
-drawloop ((WrapShape x):xs) =
-     do
-         x # draw
-         (x # rMoveTo) 100 100
-         x # draw
-         drawloop xs
 
 
 {-----------------------------------------------------------------------------}
