@@ -1,6 +1,11 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
+-- We need overlapping instances SOLELY for the sake of Label4 below.
+-- We could use (and have used) other ways of representing labels,
+-- such as Label2. The latter requires no overlapping instances.
+-- However, Label4 labels look better in types.
+
 
 -- Link HList source directory to HList subdir.
 -- Use gmake simple
@@ -26,9 +31,7 @@ import TypeEqGeneric1
 import TypeCastGeneric1
 import Label4
 import Data.Typeable -- needed for showing labels
-import Data.STRef
 import Data.IORef
-import Control.Monad.ST
 
 {-
 
@@ -84,7 +87,7 @@ point =
       return
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. moveD    .=.(\d -> do modifyIORef x ((+) d))
+       .*. moveD    .=.(\d -> modifyIORef x ((+) d))
        .*. emptyRecord
 
 
@@ -129,7 +132,6 @@ mySecondOOP =
      p # getX >>= print
 
     
-{-
 
 {- Ocaml Tutorial:
 
@@ -164,15 +166,16 @@ testp2 = do
 	  -- we also re-use the labels that we declared early
 	  let point = 
 		  do
-		  readIORef x0 >>= (writeIORef x0 . (+1))
+		  modifyIORef x0 (+1)
 		  x <- readIORef x0 >>= newIORef
 		  return $ 
-	                      l_field_x .=. x
-	                  .*. l_get_x   .=. readIORef x
-			  .*. l_move    .=.(\d -> do{v<-readIORef x; writeIORef x (d + v)})
+	                      mutableX .=. x
+	                  .*. getX   .=. readIORef x
+			  .*. moveD    .=.(\d -> modifyIORef x ((+) d))
 			  .*. emptyRecord
-	  point >>= ( # l_get_x) >>= print
-	  point >>= ( # l_get_x) >>= print
+	  point >>= ( # getX ) >>= print
+	  point >>= ( # getX ) >>= print
+
 
 {- Ocaml Tutorial:
 The class point can also be abstracted over the initial values of the x
@@ -190,26 +193,33 @@ class point x_init =
    end;;
 -}
 
-l_offset = nextLabel l_field_x "offset"
+data OffsetX;    offsetX    = proxy::Proxy OffsetX
+
+
+-- Methods can be declared separately. In that case, they are all 
+-- surely shared across all objects
+
+method_move x d = modifyIORef x ((+) d)
+method_offset x origin = do{v<-readIORef x; return$ v - origin}
 
 class_point x_init
   = do
       x <- newIORef x_init
       return $ 
-	          l_field_x .=. x
-	      .*. l_get_x   .=. readIORef x
-              .*. l_offset  .=. do{v<-readIORef x; return$ v - x_init}
-              .*. l_move    .=.(\d -> do{v<-readIORef x; writeIORef x (d + v)})
-              .*. emptyRecord
+	        mutableX .=. x
+	    .*. getX   .=. readIORef x
+            .*. offsetX  .=. method_offset x x_init
+            .*. moveD    .=. method_move x
+            .*. emptyRecord
 
 
 testp3 = do
 	  print "testp3"
 	  p <- class_point 1
-	  p # l_get_x >>= print
-	  p # l_move $ 2
-	  p # l_get_x >>= print
-	  p # l_offset >>= print
+	  p # getX >>= print
+	  p # moveD $ 2
+	  p # getX >>= print
+	  p # offsetX >>= print
 	  print "OK"
 
 {- Ocaml Tutorial:
@@ -239,52 +249,20 @@ class_adj_point x_init
       let origin = (x_init `div` 10) * 10
       x <- newIORef origin
       return $ 
-	          l_field_x .=. x
-	      .*. l_get_x   .=. readIORef x
-              .*. l_offset  .=. do{v<-readIORef x; return$ v - origin}
-              .*. l_move    .=.(\d -> do{v<-readIORef x; writeIORef x (d + v)})
-              .*. emptyRecord
+	        mutableX .=. x
+	    .*. getX     .=. readIORef x
+            .*. offsetX  .=. method_offset x origin
+            .*. moveD    .=. method_move x
+            .*. emptyRecord
 
 
 testp4 = do
 	  print "testp4"
 	  p <- class_adj_point 11
-	  p # l_get_x >>= print
-	  p # l_move $ 2
-	  p # l_get_x >>= print
-	  p # l_offset >>= print
+	  p # getX >>= print
+	  p # moveD $ 2
+	  p # getX >>= print
+	  p # offsetX >>= print
 	  print "OK"
 
-{-
- The ST stuff needs more work, due to the fact 's' in ST s is delibreately
- polymorphic. We need a shallow comparision... I know how to do that,
- but let's leave it for later...
 
-class_pointST x_init
-  = do
-      x <- newSTRef x_init
-      return $ 
-	           l_get_x  .=. readSTRef x
-               .*. l_offset .=. do{v<-readSTRef x; return$ v - x_init}
-               .*. l_move   .=.(\d -> do{v<-readSTRef x; writeSTRef x (d + v)})
-               .*. emptyRecord
-
-printST buf val = 
-    do
-      v <- readSTRef buf
-      writeSTRef buf (v ++ (show val) ++ "\n")
-
-
-testoST1 = 
-    let 
-      test :: ST s String
-      test = do
-	      printbuf <- newSTRef ""
-	      p <- class_pointST (1::Int)
---	      (p # l_get_x) >>= (printST printbuf)
-	      (p # l_move $ (2::Int))::ST s ()
-	      readSTRef printbuf
-    in runST test
--}
-
--}
