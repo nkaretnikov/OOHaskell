@@ -12,8 +12,8 @@ OO concepts are demonstrated including basics like inheritance. In the
 following we again quote from the tutorial "Objects in Caml".
 
 NOTE on overlapping: See SimpleOO.hs. In addition, we use overlapping
-for one type-level check for records to contain no proxy values, which
-is used for one possible model of virtual methods; entirely optional.
+for some advanced features of GhcRecord to experiment with a secondary
+model of virtual methods.
 
 See the Makefile for running this file.
 
@@ -25,6 +25,7 @@ module SelfOO where
 
 import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast,typeCast)
 import GhcSyntax
+import GhcRecord
 import GhcExperiments
 import TypeEqBoolGeneric
 import TypeEqGeneric1

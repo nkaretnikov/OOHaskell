@@ -2,10 +2,12 @@
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
 
--- We need overlapping instances SOLELY for the sake of Label4 below.
--- We could use (and have used) other ways of representing labels,
--- such as Label2. The latter requires no overlapping instances.
--- However, Label4 labels look better in types.
+{-
+
+NOTE on overlapping: See SimpleOO.hs. In addition, we use overlapping
+for some advanced features of GhcRecord such as up-casting which in 
+turn uses type cast, which in turn is implemented via overlapping
+instances.
 
 -- The classic Shapes example
 -- http://www.angelfire.com/tx4/cus/shapes/
@@ -14,11 +16,14 @@
 -- Please compare it with the traditional Haskell stuff
 -- http://www.angelfire.com/tx4/cus/shapes/haskell.html
 
+-}
+
 module ShapesOO where
 
 
 import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast, typeCast)
 import GhcSyntax
+import GhcRecord
 import GhcExperiments
 import TypeEqBoolGeneric
 import TypeEqGeneric1
