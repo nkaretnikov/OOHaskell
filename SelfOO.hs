@@ -92,13 +92,18 @@ printable_point x_init s =
         $  mutableX .=. x
        .*. getX     .=. readIORef x
        .*. move     .=. (\d -> modifyIORef x ((+) d))
-       .*. print    .=. print_getX s
+--
+-- To be revealed later
+--     .*. print    .=. print_getX s
+--
+       .*. print    .=. ((s # getX ) >>= Prelude.print)
        .*. emptyRecord
 
 -- We can share this print_getX method across all the objects
 -- that have at least the method getX of type (Show a ) => IO a
 -- The objects in question do not have to belong to the same hierarchy.
 -- We re-use this function in abstract_point' below.
+
 print_getX self = ((self # getX ) >>= Prelude.print)
 
 -- Note that 'mfix' plays the role of 'new' in the OCaml code...
