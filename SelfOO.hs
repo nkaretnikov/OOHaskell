@@ -123,6 +123,13 @@ myPolyOOP =
       p  # print
       p' # print
 
+-- We test the first-class status of classes
+myFirstClassOOP point_class =
+   do
+      p <- mfix (point_class 7)
+      p # move $ 35
+      p # print
+
 -- We notice something that was not available in Ocaml. In Ocaml's example,
 -- x_init was of the type 'int' -- because operation (+) in Ocaml can operate
 -- on integer only. Our point is in contrast, polymorphic. Here's an example
@@ -672,6 +679,7 @@ let r = new ref 1 in r#set 2; (r#get);;
 main = do 
           putStrLn "mySelfishOOP"     ; mySelfishOOP
           putStrLn "myPolyOOP"        ; myPolyOOP
+          putStrLn "myFirstClassOOP"  ; myFirstClassOOP printable_point
           putStrLn "myColoredOOP"     ; myColoredOOP
           putStrLn "myOverridingOOP"  ; myOverridingOOP
           putStrLn "testGeneric"      ; testGeneric
