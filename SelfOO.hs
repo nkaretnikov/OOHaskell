@@ -151,20 +151,20 @@ p'#get_x, p'#get_c;;
 -}
 
 -- We need another label.
-data GetC; getC = proxy::Proxy GetC
+data GetColor; getColor = proxy::Proxy GetColor
 
 -- Inheritance is simple: just adding methods ...
 colored_point x_init (color::String) self =
    do
         p <- printable_point x_init self
-        returnIO $ getC .=. (returnIO color) .*. p
+        returnIO $ getColor .=. (returnIO color) .*. p
 
 
 myColoredOOP =
    do
       p' <- mfix (colored_point 5 "red")
       x  <- p' # getX
-      c  <- p' # getC
+      c  <- p' # getColor
       Prelude.print (x,c)
 
 
@@ -215,7 +215,7 @@ class virtual abstract_point x_init =
      method virtual move : int -> unit
    end;;
 
-class point x_init =
+class concrete_point x_init =
    object
      inherit abstract_point x_init
      method get_x = x
@@ -409,8 +409,7 @@ methods, however, cannot.
 
 -- Any kind of method can be hidden using the removal approach given above.
 -- We could also use a tagging approach (as for virtuals above) to record
--- the status of a method or field to be private. Haskell's existing
--- scoping rules for let bindings etc. seem to be sufficient however.
+-- the status of a method or field to be private.
 
 
 
@@ -456,7 +455,7 @@ class printable_colored_point y c =
                \             |           color_pt3
                 \            |         /
                  \           |        /
-                          final_pt 
+                          complex_pt 
 
 --}
 
@@ -507,7 +506,7 @@ color_pt3 x_init color self
                                putStr   "          color - " 
                                Prelude.print color
                           )
-         .<. getC .=. ((return color)::IO String)
+         .<. getColor .=. ((return color)::IO String)
          .*. p
 
 
@@ -522,7 +521,7 @@ testOverride
 -- One of them is shared with concr_pt1  and concr_pt2, and another
 -- one is inherited from color_pt. Try this with C++!
 
-pt_final x_init color self 
+complex_pt x_init color self 
   = do
      super1 <- concr_pt1 x_init self
      super2 <- concr_pt2 x_init self          -- share the same self!
@@ -546,13 +545,13 @@ pt_final x_init color self
 
 testDiamond
    = do 
-        p <- mfix (pt_final 42 "blue")
+        p <- mfix (complex_pt 42 "blue")
         p # print    -- all points still agree!
         p # move $ 2
         p # print    -- Note that super1,2 are shared, but not 3!
 
 -- Note, try
--- :type pt_final
+-- :type complex_pt
 -- The number of type variables is very impressive!
 
 
