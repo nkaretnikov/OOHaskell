@@ -18,7 +18,7 @@ all: index.html OOHaskell.zip
 index.html: pre.html README post.html
 	cat pre.html README post.html > index.html
  
-OOHaskell.zip: *.hs *.html Makefile README
+OOHaskell.zip: *.hs *.ref *.html Makefile README
 	mkdir -p OOHaskell
 	cp --preserve *OO.hs *.in *.ref README Makefile OOHaskell
 	zip -r OOHaskell.zip OOHaskell
