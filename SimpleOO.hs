@@ -83,9 +83,9 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
 -- First, declare the labels.
 -- We use proxies as of HList/Label4.hs
 
-data MutableX; mutableX = proxy::Proxy MutableX
-data GetX;     getX     = proxy::Proxy GetX
-data MoveD;    moveD    = proxy::Proxy MoveD
+data MutableX deriving Typeable; mutableX = proxy::Proxy MutableX
+data GetX  deriving Typeable;    getX     = proxy::Proxy GetX
+data MoveD deriving Typeable;    moveD    = proxy::Proxy MoveD
 
 -- Note, here the field 'x' here is intentionally public -- just as in the
 -- Ocaml code above
