@@ -5,8 +5,11 @@ hs =	SimpleIO.hs	\
 	SimpleST	\
 	CircBuffer.hs	\
 	Selfish.hs	\
+	Shapes.hs	\
 	SelfReturn.hs	\
-	Covariance.hs
+	Covariance.hs	\
+	LocalSigs.hs	\
+	TwoTables.hs
 
 ##############################################################################
 #
@@ -46,8 +49,10 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 # Run test cases
 #
 test: HList
-	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
-	diff SelfReturn.out SelfReturn.ref
+	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
+	diff LocalSigs.out LocalSigs.ref
+	${ghci}	-v0 TwoTables.hs < Main.in > TwoTables.out
+	diff TwoTables.out TwoTables.ref
 	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
 	diff SimpleIO.out SimpleIO.ref
 	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
@@ -58,6 +63,8 @@ test: HList
 	diff Selfish.out Selfish.ref
 	${ghci}	-v0 Shapes.hs < Main.in > Shapes.out
 	diff Shapes.out Shapes.ref
+	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
+	diff SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
 	diff Covariance.out Covariance.ref
 	(cd interpreter; gmake test)

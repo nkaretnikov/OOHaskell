@@ -333,3 +333,6 @@ testp2 = do
 	  print "OK"
 
 -}
+
+
+main = do testp1 -- ; testp2

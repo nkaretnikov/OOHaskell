@@ -254,4 +254,4 @@ testp2 = do
 	  print (p # getX)
 	  print "OK"
 
-
+main = do testp1; testp2
