@@ -215,11 +215,11 @@ testHList =
 
 
 -- A type code for the polymorphic function on shapes
-data OnShape
+data OnShape -- a type-code only!
 
 -- The polymorphic function on shapes
-instance ( HLookupByLabel (Proxy Draw) r (IO ())
-         , HLookupByLabel (Proxy RMoveTo) r (Int -> Int -> IO ())
+instance ( Hash (Proxy Draw) r (IO ())
+         , Hash (Proxy RMoveTo) r (Int -> Int -> IO ())
          )
       => Apply OnShape r (IO ())
  where
@@ -261,8 +261,8 @@ testExist =
 
 -- The well-quantified existential wrapper
 data WrapOnShape =
- forall x. ( HLookupByLabel (Proxy Draw) x (IO ())
-           , HLookupByLabel (Proxy RMoveTo) x (Int -> Int -> IO ())
+ forall x. ( Hash (Proxy Draw) x (IO ())
+           , Hash (Proxy RMoveTo) x (Int -> Int -> IO ())
            ) => WrapOnShape x
 
 
