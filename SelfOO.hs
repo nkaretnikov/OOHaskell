@@ -62,9 +62,9 @@ choose the name self.)
 class printable_point x_init =
    object (s)
      val mutable x = x_init
-     method get_x = x
+     method getX = x
      method move d = x <- x + d
-     method print = print_int s#get_x
+     method print = print_int s#getX
    end;;
 
 let p = new printable_point 7;;
@@ -142,9 +142,9 @@ class printable_point x_init =
    let origin = (x_init / 10) * 10 in
    object (self)
      val mutable x = origin
-     method get_x = x
+     method getX = x
      method move d = x <- x + d
-     method print = print_int self#get_x
+     method print = print_int self#getX
      initializer print_string "new point at "; self#print; print_newline()
    end;;
 
@@ -172,7 +172,7 @@ class colored_point x (c : string) =
 let p' = new colored_point 5 "red";;
 val p' : colored_point = <obj>
  
-p'#get_x, p'#get_c;;
+p'#getX, p'#get_c;;
 - : int * string = (5, "red")
 
 -}
@@ -219,13 +219,13 @@ myOverridingOOP1 = testPointDouble (\d -> colored_point' d "red")
 {- Ocaml Tutorial: 3.7 Inheritance
 
 A point and a colored point have incompatible types, since a point has no
-method color. However, the function get_x below is a generic function applying
-method get_x to any object p that has this method (and possibly some others,
+method color. However, the function getX below is a generic function applying
+method getX to any object p that has this method (and possibly some others,
 which are represented by an ellipsis in the type). Thus, it applies to both
 points and colored points.
 
-let get_succ_x p = p#get_x + 1;;
-val get_succ_x : < get_x : int; .. > -> int = <fun>
+let get_succ_x p = p#getX + 1;;
+val get_succ_x : < getX : int; .. > -> int = <fun>
 
 get_succ_x p + get_succ_x p';;
 - : int = 8
@@ -256,22 +256,22 @@ can be created). It still defines type abbreviations (treating virtual
 methods as other methods.)
 
 -- We have modified this example in a non-essential way:
--- get_offset was removed.
+-- getOffset was removed.
 -- print was added.
 -- Less code.
 
 class virtual abstract_point x_init =
    object (self)
      val mutable x = x_init
-     method virtual get_x : int
-     method print = print_int self#get_x
+     method virtual getX : int
+     method print = print_int self#getX
      method virtual move : int -> unit
    end;;
 
 class concrete_point x_init =
    object
      inherit abstract_point x_init
-     method get_x = x
+     method getX = x
      method move d = x <- x + d
    end;;
 
@@ -376,7 +376,7 @@ object.
 class restricted_point x_init =
    object (self)
      val mutable x = x_init
-     method get_x = x
+     method getX = x
      method private move d = x <- x + d
      method bump = self#move 1
    end;;
@@ -386,7 +386,7 @@ class restricted_point :
   object
     val mutable x : int
     method bump : unit
-    method get_x : int
+    method getX : int
     method private move : int -> unit
   end
  

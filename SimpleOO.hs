@@ -72,11 +72,11 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
  #class point =
     object
       val mutable x = 0
-      method get_x = x
+      method getX = x
       method move d = x <- x + d
     end;;
  class point :
-   object val mutable x : int method get_x : int method move : int ->unit end
+   object val mutable x : int method getX : int method move : int ->unit end
 
 -}
 
@@ -85,7 +85,7 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
 
 data MutableX deriving Typeable; mutableX = proxy::Proxy MutableX
 data GetX  deriving Typeable;    getX     = proxy::Proxy GetX
-data MoveD deriving Typeable;    moveD    = proxy::Proxy MoveD
+data Move  deriving Typeable;    move     = proxy::Proxy Move
 
 -- Note, here the field 'x' here is intentionally public -- just as in the
 -- Ocaml code above
@@ -96,7 +96,7 @@ point =
       returnIO
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. moveD    .=. (\d -> modifyIORef x ((+) d))
+       .*. move     .=. (\d -> modifyIORef x ((+) d))
        .*. emptyRecord
 
 
@@ -108,17 +108,17 @@ point =
 
  Note that the type of p is point. This is an abbreviation
  automatically defined by the class definition above. It stands for the
- object type <get_x : int; move : int -> unit>, listing the methods of
+ object type <getX : int; move : int -> unit>, listing the methods of
  class point along with their types.
  We now invoke some methods to p:
 
- #p#get_x;;
+ #p#getX;;
  - : int = 0
 
  #p#move 3;;
  - : unit = ()
 
- #p#get_x;;
+ #p#getX;;
  - : int = 3
 
 -}
@@ -131,7 +131,7 @@ myFirstOOP =
   do
      p <- point -- no need for new!
      p # getX >>= print
-     p # moveD $ 3
+     p # move $ 3
      p # getX >>= print
 
 -- The field mutableX is public and can be manipulated directly.
@@ -156,16 +156,16 @@ val x0 : int ref = {contents = 0}
 class incrementing_point =
    object
      val mutable x = incr x0; !x0
-     method get_x  = x
+     method getX  = x
      method move d = x <- x + d
    end;;
 class incrementing_point :
-  object val mutable x : int method get_x : int method move : int -> unit end
+  object val mutable x : int method getX : int method move : int -> unit end
  
-new incrementing_point#get_x;;
+new incrementing_point#getX;;
 - : int = 1
  
-new incrementing_point#get_x;;
+new incrementing_point#getX;;
 - : int = 2
 -}
 
@@ -183,7 +183,7 @@ incrementing_point =
            returnIO
              $  mutableX .=. x
             .*. getX     .=. readIORef x
-            .*. moveD    .=. (\d -> modifyIORef x ((+) d))
+            .*. move     .=. (\d -> modifyIORef x ((+) d))
             .*. emptyRecord
        )
 
@@ -200,14 +200,14 @@ testBody =
 The class point can also be abstracted over the initial values of the
 x coordinate.  The parameter x_init is, of course, visible in the
 whole body of the definition, including methods. For instance, the
-method get_offset in the class below returns the position of the
+method getOffset in the class below returns the position of the
 object relative to its initial position.
 
 class para_point x_init =
    object
      val mutable x     = x_init
-     method get_x      = x
-     method get_offset = x - x_init
+     method getX      = x
+     method getOffset = x - x_init
      method move d     = x <- x + d
    end;;
 
@@ -219,7 +219,7 @@ data GetOffset; getOffset = proxy::Proxy GetOffset
 
 
 -- Methods can be declared separately so that they can be shared.
-method_moveD x d
+method_move x d
   = modifyIORef x ((+) d)
 method_getOffset x x_init
   = do {v <- readIORef x; returnIO $ v - x_init}
@@ -232,14 +232,14 @@ para_point x_init
           $  mutableX  .=. x
          .*. getX      .=. readIORef x
          .*. getOffset .=. method_getOffset x x_init
-         .*. moveD     .=. method_moveD x
+         .*. move      .=. method_move x
          .*. emptyRecord
 
 testPara =
    do
       p <- para_point 1
       p # getX >>= print
-      p # moveD $ 2
+      p # move $ 2
       p # getX >>= print
       p # getOffset >>= print
 
@@ -255,8 +255,8 @@ class adjusted_point x_init =
    let origin = (x_init / 10) * 10 in
    object
      val mutable x     = origin
-     method get_x      = x
-     method get_offset = x - origin
+     method getX       = x
+     method getOffset = x - origin
      method move d     = x <- x + d
    end;;
 
@@ -274,14 +274,14 @@ adjusted_point x_init
         returnIO $  mutableX  .=. x
                 .*. getX      .=. readIORef x
                 .*. getOffset .=. method_getOffset x origin
-                .*. moveD     .=. method_moveD x
+                .*. move      .=. method_move x
                 .*. emptyRecord
 
 testConstr =
    do
       p <- adjusted_point 11
       p # getX >>= print
-      p # moveD $ 2
+      p # move $ 2
       p # getX >>= print
       p # getOffset >>= print
 
