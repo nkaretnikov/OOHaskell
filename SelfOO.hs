@@ -262,8 +262,8 @@ abstract_point (x_init::a) self =
  -- This is an optional part in case we want to fix types of virtuals.
  --
  where
-  _ = upCast self ::  Record (   (Proxy GetX  , IO a)
-                             :*: (Proxy Move  , a -> IO ())
+  _ = constrain self :: Proxy (  (Proxy GetX, IO a)
+                             :*: (Proxy Move, a -> IO ())
                              :*: HNil )
 
 

@@ -153,7 +153,7 @@ main = do
        s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
        s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
        let scribble :: [ShapeInterface Int]
-           scribble = [upCast s1, upCast s2]
+           scribble = [coerce s1, coerce s2]
        
        -- iterate through the array
        -- and handle shapes polymorphically
