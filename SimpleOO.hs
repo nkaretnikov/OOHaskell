@@ -24,6 +24,8 @@ See the Makefile for running this file.
 
 module SimpleOO where
 
+import qualified Prelude (print)
+import Prelude hiding (print)
 
 import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast,typeCast)
 import GhcSyntax
@@ -130,9 +132,9 @@ point =
 myFirstOOP =
   do
      p <- point -- no need for new!
-     p # getX >>= print
+     p # getX >>= Prelude.print
      p # move $ 3
-     p # getX >>= print
+     p # getX >>= Prelude.print
 
 -- The field mutableX is public and can be manipulated directly.
 
@@ -140,7 +142,7 @@ mySecondOOP =
   do 
      p <- point
      writeIORef (p # mutableX) 42
-     p # getX >>= print
+     p # getX >>= Prelude.print
 
     
 
@@ -192,8 +194,8 @@ makeIncrementingPointClass = incrementing_point
 myNestedOOP =
    do
       localClass <- makeIncrementingPointClass
-      localClass >>= ( # getX ) >>= print
-      localClass >>= ( # getX ) >>= print
+      localClass >>= ( # getX ) >>= Prelude.print
+      localClass >>= ( # getX ) >>= Prelude.print
 
 
 
@@ -238,10 +240,10 @@ queryIORef ref f = readIORef ref >>= returnIO . f
 testPara =
    do
       p <- para_point 1
-      p # getX >>= print
+      p # getX >>= Prelude.print
       p # move $ 2
-      p # getX >>= print
-      p # getOffset >>= print
+      p # getX >>= Prelude.print
+      p # getOffset >>= Prelude.print
 
 
 
@@ -280,10 +282,10 @@ adjusted_point x_init
 testConstr =
    do
       p <- adjusted_point 11
-      p # getX >>= print
+      p # getX >>= Prelude.print
       p # move $ 2
-      p # getX >>= print
-      p # getOffset >>= print
+      p # getX >>= Prelude.print
+      p # getOffset >>= Prelude.print
 
 
 main = do 

@@ -113,6 +113,16 @@ mySelfishOOP =
       p # move $ 2
       p # print
 
+-- We test the polymorphism of printable_point
+myPolyOOP =
+   do
+      p  <- mfix (printable_point (1::Int))
+      p' <- mfix (printable_point (1::Double))
+      p  # move $ 2
+      p' # move $ 2.5
+      p  # print
+      p' # print
+
 -- We notice something that was not available in Ocaml. In Ocaml's example,
 -- x_init was of the type 'int' -- because operation (+) in Ocaml can operate
 -- on integer only. Our point is in contrast, polymorphic. Here's an example
@@ -661,6 +671,7 @@ let r = new ref 1 in r#set 2; (r#get);;
 
 main = do 
           putStrLn "mySelfishOOP"     ; mySelfishOOP
+          putStrLn "myPolyOOP"        ; myPolyOOP
           putStrLn "myColoredOOP"     ; myColoredOOP
           putStrLn "myOverridingOOP"  ; myOverridingOOP
           putStrLn "testGeneric"      ; testGeneric
