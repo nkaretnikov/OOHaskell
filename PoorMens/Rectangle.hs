@@ -11,7 +11,7 @@ data Rectangle =
                , getHeight :: Int 
                }
  
--- Sustantiate the subtyping relation
+-- Substantiate the subtyping relation
 instance Subtype Rectangle Shape
  where
   f .?. a = f $ rectangle2shape $ a
@@ -24,6 +24,7 @@ setWidth i = (.!.) (\s -> s { getWidth = i} )
 setHeight :: Subtype a Rectangle => Int -> a -> a
 setHeight i = (.!.) (\s -> s { getHeight = i} )
 
+-- Implement abstract draw method
 instance Draw Rectangle
  where
   draw a =  putStrLn ("Drawing a Rectangle at:("

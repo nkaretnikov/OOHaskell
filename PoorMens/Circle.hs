@@ -10,7 +10,7 @@ data Circle =
             , getRadius :: Int 
             }
 
--- Sustantiate the subtyping relation
+-- Substantiate the subtyping relation
 instance Subtype Circle Shape
  where
   f .?. a = f $ circle2shape $ a
@@ -20,6 +20,7 @@ instance Subtype Circle Shape
 setRadius :: Subtype a Circle => Int -> a -> a
 setRadius i = (.!.) (\s -> s { getRadius = i} )
 
+-- Implement abstract draw method
 instance Draw Circle
  where
   draw a =  putStrLn ("Drawing a Circle at:("
