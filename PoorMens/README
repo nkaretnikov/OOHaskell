@@ -1,0 +1,5 @@
+This directory presents an alternative for the Haskell encoding in the
+Shape suite. We build layered records rather than flat records. This
+allows us to reuse structure from ancestor classes. This also allows
+to reuse inherited methods. On the other hand, we have to make
+explicit the subtyping relation (or substitution).
