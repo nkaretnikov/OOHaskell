@@ -177,18 +177,65 @@ instance (HUpdateAtHNatInPlace n f l, HNat n)
    = HCons e (hUpdateAtHNatInPlace (hPred n) f l)
 
 
+
+--An experiment with iso-recursive types
+
+newtype Point self = Point (Record ((Proxy FieldX,Int) :*:
+			      (Proxy GetX, self -> Int) :*:
+			      (Proxy MoveD,Int -> self -> self) :*:
+			      HNil))
+
+data Fix f = Fix (f (Fix f))
+--type PointObj v = Fix (Point v)
+
+make_point x = Fix $ Point $ 
+	        fieldX .=. x 
+	    .*.	getX   .=. (\ (Fix (Point x)) -> x .!. fieldX)
+	    .*. moveD  .=. (\d (Fix (Point x)) -> 
+			    Fix $ Point $ x .@. (fieldX, (\v -> v+d)))
+			    
+	    .*. emptyRecord
+--case (make_point 7) of (Fix (Point x)) -> x .!. fieldX
+
+testp1 = do
+	  print "testip1"
+	  let p  = make_point 7
+	  print $ case p of (Fix (Point x)) -> x .!. fieldX
+	  print $ case p of (Fix (Point x)) -> (x .!. getX) p
+	  let np = case p of (Fix (Point x)) -> (x .!. moveD) 3 p
+	  print $ case np of (Fix (Point x)) -> (x .!. getX) np
+
+{-
+	  print (((p ## (class_point moveD)) 3) .!. fieldX)
+	  -- Class is first class!
+	  let c x = class_point x
+	  print (((p ## (c moveD)) 3) ## (c getX))
+	  print (p ## (c getX))
+	  print (((p ## (c moveD2)) 3) ## (c getX))
+-}
+	  print "OK"
+
+
+
+{-
 -- Class of 1D points. The class is the dispatcher. It is the
 -- common, shared part of all objects of its class
 
 -- See http://pobox.com/~oleg/ftp/Scheme/pure-oo-system.scm
 
-class_point_message_table self obj  
-       =     getX   .=. (obj .!. fieldX)
-         .*. moveD  .=. (\d -> obj .@. (fieldX,(\v -> v + d)))
+data FO message_table obj_data = FO message_table obj_data
+
+data RD result obj_data = RD result obj_data
+data RO result obj = RO result obj
+
+res (RO result _) = result
+
+class_point_message_table self obj_data
+       =     getX   .=. RD (obj_data .!. fieldX) obj_data
+         .*. moveD  .=. RD () (\d -> obj_data .@. (fieldX,(\v -> v + d)))
 	 -- show off the recursive invocation, and open recursion
 	 -- moveD2 applies moveD twice
-	 .*. moveD2 .=. (\d -> (((obj ## (recur self moveD)) d)
-			        ## (recur self moveD)) d)
+--	 .*. moveD2 .=. (\d -> ((((recur self obj_data) # moveD) d) # moveD) d)
          .*. emptyRecord
 
 make_class message_table label obj = (fix message_table) obj  .!. label
@@ -196,7 +243,7 @@ make_class message_table label obj = (fix message_table) obj  .!. label
 -- The 'label' argument is there just to cancel the monomorphism restriction
 class_point label = make_class class_point_message_table label
 
-recur self label obj = self obj .!. label
+recur mtable obj = FO (make_class mtable) obj
 
 -- The 'variable' part of an object
 obj_point x 
@@ -208,22 +255,35 @@ infixr 9 #
 m # field = (((mtables () .!. (m .!. mTable)) m) .!. field)
 -}
 
-infixr 9 ##
-obj ## f = f obj
+infixr 9 #
+(FO mtable obj_data) # label = 
+    let RD res obj_data' = (mtable label) obj_data
+    in RO res (FO mtable obj_data')
 
+infixr 9 ##
+(RO _ obj) ## label =  obj # label
+
+getField (FO mtable obj_data) label = obj_data .!. label
 
 testp1 = do
 	  print "testp1"
-	  let p = obj_point 7
-	  print (p ## (class_point getX))
+	  let p () = FO class_point (obj_point 7)
+	  print $ (obj_point 7) .!. fieldX
+--	  print $ (p ()) `getField` fieldX
+	  print $ res $ (p ()) # getX
+{-
 	  print (((p ## (class_point moveD)) 3) .!. fieldX)
 	  -- Class is first class!
 	  let c x = class_point x
 	  print (((p ## (c moveD)) 3) ## (c getX))
 	  print (p ## (c getX))
 	  print (((p ## (c moveD2)) 3) ## (c getX))
+-}
+
 	  print "OK"
 
+-}
+{-
 -- Now we try to prove that our functional point is a good one
 -- (see OCaml's tutorial quoted above)
 -- That is, moveD takes effect even in subclasses
@@ -272,3 +332,4 @@ testp2 = do
 	  print (((p ## (c moveD2)) 3) ## (c showP))
 	  print "OK"
 
+-}
