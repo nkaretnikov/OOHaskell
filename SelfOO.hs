@@ -89,7 +89,7 @@ printable_point x_init s =
        .*. ooprint  .=. ((s # getX ) >>= print)
        .*. emptyRecord
 
-testNew
+mySelfishOOP
    = do
         -- Note that 'mfix' plays the role of 'new' in the OCaml code...
         p <- mfix (printable_point 7)
@@ -616,7 +616,7 @@ let r = new ref 1 in r#set 2; (r#get);;
 
 
 main = do 
-          putStrLn "testNew"          ; testNew
+          putStrLn "mySelfishOOP"     ; mySelfishOOP
           putStrLn "testInheritance"  ; testInheritance
           putStrLn "testGeneric"      ; testGeneric
           putStrLn "testVirtual"      ; testVirtual
