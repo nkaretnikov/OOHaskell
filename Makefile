@@ -23,10 +23,13 @@ index.html: pre.html README post.html
 OOHaskell.zip: *.hs *.ref *.html Makefile README
 	mkdir -p OOHaskell
 	cp --preserve *OO.hs *.in *.ref README Makefile OOHaskell
+	(cd interpreter; gmake clean)
+	(cd Rathman; gmake clean)
+	(cd PoorMens; gmake clean)
 	cp --preserve -r interpreter Rathman PoorMens OOHaskell
-	rm -rf interpreter/CVS
-	rm -rf Rathman/CVS
-	rm -rf PoorMens/CVS
+	rm -rf OOHaskell/interpreter/CVS
+	rm -rf OOHaskell/Rathman/CVS
+	rm -rf OOHaskell/PoorMens/CVS
 	zip -r OOHaskell.zip OOHaskell
 	rm -rf OOHaskell
 
