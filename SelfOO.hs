@@ -522,19 +522,19 @@ concrete_point3 x_init self
 -- One of them is shared with concrete_point1  and concrete_point2,
 -- and another is inherited from concrete_point3. Try this with C++!
 
-heavy_point x_init color self 
-  = do
+heavy_point x_init color self =
+  do
      super1 <- concrete_point1 x_init self
-     super2 <- concrete_point2 x_init self    -- Share self!
-     super3 <- mfix (concrete_point3 x_init)  -- Do not share self!
+     super2 <- concrete_point2 x_init self 
+     super3 <- mfix (concrete_point3 x_init)
      let myprint = do
-	              putStr "super1: "; (super1 # print)
+                      putStr "super1: "; (super1 # print)
                       putStr "super2: "; (super2 # print)
                       putStr "super3: "; (super3 # print)
      let mymove  = ( \d -> do
                               super1 # move $ d
                               super2 # move $ d
-	                      super3 # move $ d )
+                              super3 # move $ d )
      return 
        $    print  .=. myprint
       .*.   move   .=. mymove
@@ -544,12 +544,12 @@ heavy_point x_init color self
       .<++. super3
 
 
-testDiamond
-   = do 
-        p <- mfix (heavy_point 42 "blue")
-        p # print    -- all points still agree!
-        p # move $ 2
-        p # print    -- Note that super1,2 are shared, but not 3!
+myDiamondOOP =
+  do 
+     p <- mfix (heavy_point 42 "blue")
+     p # print -- All points still agree!
+     p # move $ 2
+     p # print -- The third point lacks behind!
 
 -- Note, try
 -- :type heavy_point
@@ -627,4 +627,4 @@ main = do
           putStrLn "testVirtual'"     ; testVirtual'
           putStrLn "testRestricted"   ; testRestricted
           putStrLn "testRestricted'"  ; testRestricted'
-          putStrLn "testDiamond"      ; testDiamond
+          putStrLn "myDiamondOOP"     ; myDiamondOOP
