@@ -102,6 +102,33 @@ mySelfishOOP =
       p # move $ 2
       p # print
 
+-- We notice something that was not available in Ocaml. In Ocaml's example,
+-- x_init was of the type 'int' -- because operation (+) in Ocaml can operate
+-- on integer only. Our point is in contrast, polymorphic. Here's an example
+-- to illustrate it:
+
+testPointInt point_class =
+    do
+      p <- mfix (point_class 7)
+      p # move $ (2::Int)
+      -- Uncomment the following to see the type error. We do statically
+      -- track the type of items in our collection.
+      -- p # move $ (2.0::Double)
+      p # print
+
+-- Note something else: our class is first-class.
+
+testPointDouble point_class =
+    do
+      p <- mfix (point_class 11.0)
+      p # move $ 3.0
+      p # print
+
+testPolyPoints = 
+    do
+    testPointInt printable_point
+    testPointDouble printable_point
+
 
 {- Ocaml Tutorial: 3.3 Initializers
 
@@ -184,6 +211,9 @@ myOverridingOOP =
       p  <- mfix (colored_point' 5 "red")
       p  # print
 
+
+
+myOverridingOOP1 = testPointDouble (\d -> colored_point' d "red")
 
 
 {- Ocaml Tutorial: 3.7 Inheritance
