@@ -22,6 +22,8 @@ See the Makefile for running this file.
 
 module SelfOO where
 
+import qualified Prelude (print)
+import Prelude hiding (print)
 
 import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast,typeCast)
 import GhcSyntax
@@ -46,8 +48,8 @@ m # field = (m .!. field)
 
 data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
-data MoveD;    moveD    = proxy::Proxy MoveD
-data OOPrint;  ooprint  = proxy::Proxy OOPrint
+data Move;     move     = proxy::Proxy Move
+data Print;    print    = proxy::Proxy Print
 
 
 {- Ocaml Tutorial: 3.2 Reference to self
@@ -64,11 +66,15 @@ class printable_point x_init =
      method move d = x <- x + d
      method print = print_int s#get_x
    end;;
+
 let p = new printable_point 7;;
 val p : printable_point = <obj>
- 
+
+p#move 2;;
+- : unit = ()
+
 p#print;;
-7- : unit = ()
+9- : unit = ()
 
 Dynamically, the variable s is bound at the invocation of a method. In
 particular, when the class printable_point is inherited, the variable
@@ -85,20 +91,16 @@ printable_point x_init s =
       returnIO
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. moveD    .=. (\d -> modifyIORef x ((+) d))
-       .*. ooprint  .=. ((s # getX ) >>= print)
+       .*. move     .=. (\d -> modifyIORef x ((+) d))
+       .*. print    .=. ((s # getX ) >>= Prelude.print)
        .*. emptyRecord
 
-mySelfishOOP
-   = do
-        -- Note that 'mfix' plays the role of 'new' in the OCaml code...
-        p <- mfix (printable_point 7)
-        p # getX >>= print
-        p # moveD $ 2
-        p # getX >>= print
-        -- Note, we print the state of the mutated obj!
-        p # ooprint
-
+-- Note that 'mfix' plays the role of 'new' in the OCaml code...
+mySelfishOOP =
+   do
+      p <- mfix (printable_point 7)
+      p # move $ 2
+      p # print
 
 
 {- Ocaml Tutorial: 3.3 Initializers
@@ -162,7 +164,7 @@ testInheritance
         p' <- mfix (colored_point 5 "red")
         x  <- p' # getX
         c  <- p' # getColor
-        print (x,c)
+        Prelude.print (x,c)
 
 
 {- Ocaml Tutorial: 3.7 Inheritance
@@ -191,7 +193,7 @@ testGeneric
         let get_succ_x obj = obj # getX >>= (returnIO . (+ 1))
         x  <- get_succ_x p
         x' <- get_succ_x p'
-        print $ x+x'
+        Prelude.print $ x+x'
 
 
 
@@ -233,7 +235,7 @@ abstract_point x_init self
       returnIO $
 	   mutableX  .=. x
        .*. getOffset .=. ((self # getX ) >>= (\v -> returnIO $ v - x_init))
-       .*. ooprint   .=. ((self # getX ) >>= print )
+       .*. print     .=. ((self # getX ) >>= Prelude.print )
        .*. emptyRecord
 
 concrete_point x_init self
@@ -242,7 +244,7 @@ concrete_point x_init self
         returnIO
         -- add the missing (pure virtual) methods
           $  getX  .=. readIORef (self # mutableX)
-         .*. moveD .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+         .*. move .=. (\d -> modifyIORef (self # mutableX) ((+) d))
          .*. p
 
 testVirtual
@@ -256,11 +258,11 @@ testVirtual
         --  No instances for ( HFind (Proxy GetX) HNil n,
         --                     HLookupByHNat n HNil (IO a) )
         --
-        p # getX >>= print
-        p # moveD $ 2
-        p # getOffset >>= print
-        p # getX >>= print
-        p # ooprint
+        p # getX >>= Prelude.print
+        p # move $ 2
+        p # getOffset >>= Prelude.print
+        p # getX >>= Prelude.print
+        p # print
 
 
 -- This abstract point class mentions the type of the virtual methods.
@@ -271,9 +273,9 @@ abstract_point' x_init self
       returnIO $
 	   mutableX  .=. x
        .*. getX      .=. (proxy::Proxy (IO Int))
-       .*. moveD     .=. (proxy::Proxy (Int -> IO ()))
+       .*. move      .=. (proxy::Proxy (Int -> IO ()))
        .*. getOffset .=. ((self # getX ) >>= (\v -> returnIO $ v - x_init))
-       .*. ooprint   .=. ((self # getX ) >>= print )
+       .*. print     .=. ((self # getX ) >>= Prelude.print )
        .*. emptyRecord
 
 
@@ -288,7 +290,7 @@ concrete_point' x_init self
         returnIO
         -- use disciplined record update
            $  getX    .=. readIORef (self # mutableX)
-          .^. moveD   .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+          .^. move   .=. (\d -> modifyIORef (self # mutableX) ((+) d))
           .^. myLabel .=. ()                -- This line could be activated.
 --        .^. myLabel .=. (proxy::Proxy ()) -- A proxy that disables mnew.
           .*. p
@@ -301,11 +303,11 @@ mnew (f::a -> m a) = mfix f
 testVirtual'
    = do
         p <- mnew (concrete_point' 7)
-        p # getX >>= print
-        p # moveD $ 2
-	p # getOffset >>= print
-        p # getX >>= print
-        p # ooprint
+        p # getX >>= Prelude.print
+        p # move $ 2
+	p # getOffset >>= Prelude.print
+        p # getX >>= Prelude.print
+        p # print
 
 
 
@@ -355,19 +357,19 @@ data BumpX; bumpX = proxy::Proxy BumpX
 restricted_point x_init self
   = do
       x <- newIORef x_init
-      let moveD = (\d -> modifyIORef x ((+) d))
+      let move = (\d -> modifyIORef x ((+) d))
       returnIO $
 	   mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. bumpX    .=. moveD 2
+       .*. bumpX    .=. move 2
        .*. emptyRecord
 
 testRestricted
    =  do
        p <- mfix (restricted_point 7)
-       p # getX >>= print
+       p # getX >>= Prelude.print
        p # bumpX
-       p # getX >>= print
+       p # getX >>= Prelude.print
 
 
 -- Unlike the OCaml code, we can also remove a method from the interface.
@@ -378,17 +380,17 @@ bumping_point x_init self
    = do
         p <- printable_point x_init self
         returnIO
-          $  bumpX .=. (self # moveD $ 2)
+          $  bumpX .=. (self # move $ 2)
          .*. p
 
 testRestricted'
    = do
         p  <- mfix (bumping_point 7)
-        let p' = p .-. moveD
-        p' # ooprint
+        let p' = p .-. move
+        p' # print
         p' # bumpX
-        p' # ooprint
-        -- Attempting access to moveD would result in a type error.
+        p' # print
+        -- Attempting access to move would result in a type error.
 
 
 
@@ -461,7 +463,7 @@ class printable_colored_point y c =
 
 -- The following method will be shared across all point objects.
 move_method self
-   = moveD .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+   = move .=. (\d -> modifyIORef (self # mutableX) ((+) d))
 
 
 -- The concrete classes derived from the abstract point class.
@@ -497,12 +499,12 @@ color_pt3 x_init color self
    = do
         p <- concr_pt3 x_init self
         return
-          $  ooprint  .=. ( do 
+          $  print    .=. ( do 
                                putStrLn "color_pt3:"
                                putStr   " uncolored part - "
-                               p # ooprint
+                               p # print
                                putStr   "          color - " 
-                               print color
+                               Prelude.print color
                           )
          .<. getColor .=. ((return color)::IO String)
          .*. p
@@ -511,7 +513,7 @@ color_pt3 x_init color self
 testOverride 
    = do
         p  <- mfix (color_pt3 5 "red")
-        p  # ooprint
+        p  # print
 
 
 -- We compose a class which involves multiple inheritance.
@@ -525,16 +527,16 @@ pt_final x_init color self
      super2 <- concr_pt2 x_init self          -- share the same self!
      super3 <- mfix (color_pt3 x_init color)  -- do not share self!
      let myprint = do
-	              putStr "super1: "; (super1 # ooprint)
-                      putStr "super2: "; (super2 # ooprint)
-                      putStr "super3: "; (super3 # ooprint)
+	              putStr "super1: "; (super1 # print)
+                      putStr "super2: "; (super2 # print)
+                      putStr "super3: "; (super3 # print)
      let mymove  = ( \d -> do
-                              super1 # moveD $ d
-                              super2 # moveD $ d
-	                      super3 # moveD $ d )
+                              super1 # move $ d
+                              super2 # move $ d
+	                      super3 # move $ d )
      return 
-       $    ooprint .=. myprint
-      .*.   moveD   .=. mymove
+       $    print  .=. myprint
+      .*.   move   .=. mymove
       .*.   emptyRecord
       .<++. super1
       .<++. super2
@@ -544,9 +546,9 @@ pt_final x_init color self
 testDiamond
    = do 
         p <- mfix (pt_final 42 "blue")
-        p # ooprint    -- all points still agree!
-        p # moveD $ 2
-        p # ooprint    -- Note that super1,2 are shared, but not 3!
+        p # print    -- all points still agree!
+        p # move $ 2
+        p # print    -- Note that super1,2 are shared, but not 3!
 
 -- Note, try
 -- :type pt_final
