@@ -159,3 +159,16 @@ test3 = do
 	let herbl1 = coerce cow : herbl -- now that works
 	mapM_ ( # printIt ) herbl1
 	print "OK"
+
+{- 
+ Regarding the last block of commented lines above.
+ The Eiffel FAQ says:
+
+ "The compiler must stop us from putting a COW object into a HERBIVORE
+attribute and trying to feed it a PLANT, but we shouldn't be trying to
+do this anyway."
+
+And indeed, GHC does stop us.
+-}
+
+
