@@ -137,7 +137,7 @@ circle x y radius self
 -- This interface is used in Encoding 1 below.  When we want to make a
 -- list of abstract Shapes, then we cast objects to this interface.
 
-type ShapeInterface' a
+type Shape a
  = Record (  (Proxy GetX    , IO a)
          :*: (Proxy GetY    , IO a)
          :*: (Proxy SetX    , a -> IO ())
@@ -148,8 +148,8 @@ type ShapeInterface' a
          :*: HNil )
 
 
--- In fact this interface is sufficent
-type ShapeInterface a
+-- In fact this interface would be sufficent
+type Shape' a
  = Record (  (Proxy RMoveTo , a -> a -> IO ())
          :*: (Proxy Draw    , IO ())
          :*: HNil )
@@ -169,7 +169,7 @@ myShapesOOP =
        -- set up array of shapes
        s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
        s2 <- mfix (circle (15::Int) 25 8)
-       let scribble :: [ShapeInterface Int]
+       let scribble :: [Shape Int]
            scribble = [coerce s1, coerce s2]
        
        -- iterate through the array
