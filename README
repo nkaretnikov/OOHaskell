@@ -1,0 +1,10 @@
+(C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+
+OOHaskell -- Haskell's overlooked object system
+
+This is a very preliminary release. We will eventually release more
+code including several encodings of functional objects. The code
+relies on the HList library. This specific code has been tested with
+GHC 6.2. See the Makefile for ways of running test cases.
+
+Last updated; November 3, 2004

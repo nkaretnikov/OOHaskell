@@ -1,6 +1,7 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 
+-- This module was sent to the Haskell cafe on 13 Oct 2004.
 -- In the following, we refer to the tutorial "Objects in Caml"
 -- http://caml.inria.fr/ocaml/htmlman/manual005.html
 -- 3.2 Reference to self
