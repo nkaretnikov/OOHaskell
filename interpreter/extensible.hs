@@ -1,9 +1,29 @@
+{-
+ 
+OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+ 
+http://homepages.cwi.nl/~ralf/OOHaskell/
+
+Incidentally, this example does *not* use OOHaskell. It rather deals
+with some nice OOP programming bit that is readily enabled in Haskell
+even without OOHaskell skills. We use Haskell's type classes to
+program in a style of extensible datatypes. The example is about a
+tiny interpreter, which we could extend by new syntax, whenever
+necessary.
+
+Also see file "extensible.hs".
+
+-}
+
+
 import Control.Monad.State
 import Data.FiniteMap
 import Data.Maybe
 
+-- Class for expression syntax
 class Exp x
 
+-- Expression syntax so far; could be extended
 data  Zero                       = Zero
 data  Exp x          => Succ x   = Succ x
 data  (Exp x, Exp y) => Then x y = Then x y
@@ -17,7 +37,13 @@ instance                   Exp Var
 instance Exp x          => Exp (Assign x)
 
 type  Id  = String
+
+
+-- Semantic domain
 type  Val = Int
+
+
+-- The monadic interpreter function
 
 class Exp x => Interpret x
  where
@@ -49,6 +75,8 @@ instance Interpret x => Interpret (Assign x)
        () <- put m'
        return v
 
+
+-- Test harness
 main = print $ fst $ runState (interpret
          ( (Assign "a" (Succ Zero))
            `Then`
