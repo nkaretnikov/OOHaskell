@@ -215,7 +215,7 @@ testHList =
 
 
 -- A type code for the polymorphic function on shapes
-data FunOnShape -- a type-code only!
+data FunOnShape -- a type code only!
 
 -- The polymorphic function on shapes
 instance ( Hash (Proxy Draw) r (IO ())
