@@ -81,8 +81,8 @@ s will be correctly bound to the object of the subclass.
 class_printable_point x_init self
   = do
       x <- newIORef x_init
-      returnIO $
-	   mutableX .=. x
+      returnIO
+        $  mutableX .=. x
        .*. getX     .=. readIORef x
        .*. moveD    .=. (\d -> modifyIORef x ((+) d))
        .*. ooprint  .=. ((self # getX ) >>= print)

@@ -33,6 +33,8 @@ test: HList
 	diff SimpleOO.out SimpleOO.ref
 	${ghci}	-v0 SelfOO.hs < Main.in > SelfOO.out
 	diff SelfOO.out SelfOO.ref
+	${ghci}	-v0 ShapesOO.hs < Main.in > ShapesOO.out
+	diff ShapesOO.out ShapesOO.ref
 
 ##############################################################################
 #
@@ -41,6 +43,7 @@ test: HList
 copy:
 	cp SimpleOO.out SimpleOO.ref
 	cp SelfOO.out   SelfOO.ref
+	cp ShapesOO.out ShapesOO.ref
 
 ##############################################################################
 #

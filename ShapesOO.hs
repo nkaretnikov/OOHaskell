@@ -1,6 +1,7 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
+
 -- We need overlapping instances SOLELY for the sake of Label4 below.
 -- We could use (and have used) other ways of representing labels,
 -- such as Label2. The latter requires no overlapping instances.
@@ -13,7 +14,7 @@
 -- Please compare it with the traditional Haskell stuff
 -- http://www.angelfire.com/tx4/cus/shapes/haskell.html
 
-module Shapes where
+module ShapesOO where
 
 
 import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast, typeCast)
@@ -175,8 +176,6 @@ instance Extract rest l v => Extract' HFalse ((l1,v1) :*: rest) l v where
     extract' _ (HCons _ r) = extract r
 
 
-
-
 test = do
        -- set up array to the shapes. We just use list as we traverse
        -- the array sequentially anyway
@@ -198,7 +197,4 @@ test = do
        arec # draw
        print "Done"
 
-
-		    
-
-
+main = test

@@ -105,6 +105,7 @@ point =
 
  #let p = new point;;
  val p : point = <obj>
+
  Note that the type of p is point. This is an abbreviation
  automatically defined by the class definition above. It stands for the
  object type <get_x : int; move : int -> unit>, listing the methods of
