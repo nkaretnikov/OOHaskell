@@ -676,15 +676,17 @@ let r = new ref 1 in r#set 2; (r#get);;
 -- (..., Num a, ...) =>  a -> ...
 
 
-main = do 
-          putStrLn "mySelfishOOP"     ; mySelfishOOP
-          putStrLn "myPolyOOP"        ; myPolyOOP
-          putStrLn "myFirstClassOOP"  ; myFirstClassOOP printable_point
-          putStrLn "myColoredOOP"     ; myColoredOOP
-          putStrLn "myOverridingOOP"  ; myOverridingOOP
-          putStrLn "testGeneric"      ; testGeneric
-          putStrLn "testVirtual"      ; testVirtual
-          putStrLn "testVirtual'"     ; testVirtual'
-          putStrLn "testRestricted"   ; testRestricted
-          putStrLn "testRestricted'"  ; testRestricted'
-          putStrLn "myDiamondOOP"     ; myDiamondOOP
+main =
+  do 
+     putStrLn "mySelfishOOP"     ; mySelfishOOP
+     putStrLn "myPolyOOP"        ; myPolyOOP
+     putStrLn "myFirstClassOOP"  ; myFirstClassOOP printable_point
+     putStrLn "myFirstClassOOP"  ; myFirstClassOOP $ flip colored_point' "red"
+     putStrLn "myColoredOOP"     ; myColoredOOP
+     putStrLn "myOverridingOOP"  ; myOverridingOOP
+     putStrLn "testGeneric"      ; testGeneric
+     putStrLn "testVirtual"      ; testVirtual
+     putStrLn "testVirtual'"     ; testVirtual'
+     putStrLn "testRestricted"   ; testRestricted
+     putStrLn "testRestricted'"  ; testRestricted'
+     putStrLn "myDiamondOOP"     ; myDiamondOOP
