@@ -1,6 +1,5 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
 
 -- Link HList source directory to HList subdir.
 -- Use gmake simple
@@ -23,14 +22,12 @@ import GhcSyntax
 import GhcExperiments
 import TypeEqBoolGeneric
 import TypeEqGeneric1
-import TypeCastGeneric1
-import Label4
+import TypeCastGeneric2
+import Label2
 
 import Data.STRef
 import Data.IORef
 import Control.Monad.ST
-
-{-
 
 ------------------------------------------------------------------------
 -- Warm up: Simulating open products (records as in OCaml)
@@ -38,24 +35,23 @@ import Control.Monad.ST
 --let foo f = f#fld1;;
 --val foo : < fld1 : 'a; .. > -> 'a = <fun>
 
--}
-
 infixr 9 #
 m # field = m .!. field
 
-data Field1 = Field1 deriving Show
-field1 = Label Field1
+data MyNS = MyNS -- a name space for record labels
+-- There are many different ways to declare labels. Here's one
+-- See the simplest implementation in the HObjMap.hs file
+-- data Field1 = Field1
+
+field1 = firstLabel MyNS  "field1"
 
 foo f = f # field1
-{-
-:t foo
-foo :: forall e1 r x y n.
-       (HZip x y r, HFind (Label Field1) x n, HLookupByHNat n y e1) =>
-       Record r -> e1
--}
+-- foo :: forall b m1 m. (HMapAdd m Field1 b m1) => m1 -> b
 
-testfoo  = foo (field1 .=. True .*. emptyRecord)
-
+-- :t foo
+-- Need better label than (Label HZero MyNS)
+-- Use TTypeable or just GHC-specific generic type equality?
+testfoo  = foo (mkRecord (field1 .=. True .*. HNil))
 
 
 ------------------------------------------------------------------------
@@ -63,7 +59,6 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
 -- Sec 3.1 Classes and objects
 
 {- Ocaml Tutorial:
-
  #class point =
     object
       val mutable x = 0
@@ -72,33 +67,27 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
     end;;
  class point :
    object val mutable x : int method get_x : int method move : int ->unit end
-
 -}
 
--- First, declare the labels.
--- We could use proxies to avoid so much names.
--- We do use an extra Label newtype wrapper to appeal to HList.
--- This explicit wrapper makes it easier to instantiate some library classes.
+-- First, declare the labels. We really need a better way of doing it...
+-- Using data declarations... Or explaioning it better...
 
-data MutableX = MutableX deriving Show; mutableX = Label MutableX
-data GetX     = GetX     deriving Show; getX     = Label GetX
-data MoveD    = MoveD    deriving Show; moveD    = Label MoveD
+l_get_x   = nextLabel field1 "get-x"
+l_move    = nextLabel l_get_x "move"
+l_field_x = nextLabel l_move "field x"
 
 -- Note, here the field 'x' here is intentionally public -- just as in the
 -- Ocaml code above
-
 point = 
    do
       x <- newIORef 0
       return $ 
-	          mutableX .=. x
-	      .*. getX     .=. readIORef x
-              .*. moveD    .=.(\d -> do{v<-readIORef x; writeIORef x (d + v)})
+	          l_field_x .=. x
+	      .*. l_get_x   .=. readIORef x
+              .*. l_move    .=.(\d -> do{v<-readIORef x; writeIORef x (d + v)})
               .*. emptyRecord
 
-
 {- Ocaml Tutorial:
-
  #let p = new point;;
  val p : point = <obj>
  Note that the type of p is point. This is an abbreviation
@@ -106,34 +95,26 @@ point =
  object type <get_x : int; move : int -> unit>, listing the methods of
  class point along with their types.
  We now invoke some methods to p:
-
  #p#get_x;;
  - : int = 0
-
  #p#move 3;;
  - : unit = ()
-
  #p#get_x;;
  - : int = 3
-
 -}
 
--- Note how the code below mimics the Ocaml code above.
--- The only notable difference is the use of the monad, needed for mutables.
-
+-- Note how the code below mimics the Ocaml code above
+-- The only notable difference is the use of the monad, needed for mutable
 testp1 = do
 	  print "testp1"
 	  p <- point   -- no `new' necessary. But see the case with open rec
 	  -- print p
-	  p # getX >>= print
-	  p # moveD $ 3
-	  p # getX >>= print
+	  p # l_get_x >>= print
+	  p # l_move $ 3
+	  p # l_get_x >>= print
 	  -- The field x is public and can be manipulated directly
-	  writeIORef (p # mutableX) 7
-	  p # getX >>= print
-
-
-{-
+	  writeIORef (p # l_field_x) 7
+	  p # l_get_x >>= print
 
 {- Ocaml Tutorial:
 
@@ -289,6 +270,4 @@ testoST1 =
 	      (p # l_move $ (2::Int))::ST s ()
 	      readSTRef printbuf
     in runST test
--}
-
 -}
