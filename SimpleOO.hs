@@ -187,11 +187,13 @@ incrementing_point =
             .*. emptyRecord
        )
 
-testBody =
+makeIncrementingPointClass = incrementing_point
+
+myNestedOOP =
    do
-      localPoint <- incrementing_point
-      localPoint >>= ( # getX ) >>= print
-      localPoint >>= ( # getX ) >>= print
+      localClass <- makeIncrementingPointClass
+      localClass >>= ( # getX ) >>= print
+      localClass >>= ( # getX ) >>= print
 
 
 
@@ -287,6 +289,6 @@ testConstr =
 main = do 
           putStrLn "myFirstOOP"  ; myFirstOOP
           putStrLn "mySecondOOP" ; mySecondOOP
-          putStrLn "testBody"    ; testBody
+          putStrLn "myNestedOOP" ; myNestedOOP
           putStrLn "testPara"    ; testPara
           putStrLn "testConstr"  ; testConstr
