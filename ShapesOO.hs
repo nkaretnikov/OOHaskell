@@ -206,7 +206,7 @@ testHList =
        
        -- iterate through the list
        -- and handle shapes polymorphically
-       hMapM_ (undefined::OnShape) scribble
+       hMapM_ (undefined::FunOnShape) scribble
 
        -- call a rectangle specific function
        arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
@@ -215,19 +215,18 @@ testHList =
 
 
 -- A type code for the polymorphic function on shapes
-data OnShape -- a type-code only!
+data FunOnShape -- a type-code only!
 
 -- The polymorphic function on shapes
 instance ( Hash (Proxy Draw) r (IO ())
          , Hash (Proxy RMoveTo) r (Int -> Int -> IO ())
          )
-      => Apply OnShape r (IO ())
- where
-   apply _ x = do
-                  () <- x # draw
-                  () <- (x # rMoveTo) (100::Int) (100::Int)
-                  () <- x # draw
-                  returnIO ()
+      => Apply FunOnShape r (IO ())
+  where
+    apply _ x = do
+                   x # draw
+                   (x # rMoveTo) 100 100
+                   x # draw
 
 
 {-----------------------------------------------------------------------------}
@@ -246,8 +245,8 @@ testExist =
        -- set up list of shapes.
        s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
        s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
-       let scribble = [ WrapOnShape s1
-                      , WrapOnShape s2 ]
+       let scribble = [ WrapShape s1
+                      , WrapShape s2 ]
        
        -- iterate through the list
        -- and handle shapes polymorphically
@@ -260,22 +259,21 @@ testExist =
 
 
 -- The well-quantified existential wrapper
-data WrapOnShape =
+data WrapShape =
  forall x. ( Hash (Proxy Draw) x (IO ())
            , Hash (Proxy RMoveTo) x (Int -> Int -> IO ())
-           ) => WrapOnShape x
+           ) => WrapShape x
 
 
 
 -- iterate through the list of shapes and draw
 drawloop [] = returnIO ()
-drawloop ((WrapOnShape x):xs) =
+drawloop ((WrapShape x):xs) =
      do
-         () <- x # draw
-         () <- (x # rMoveTo) (100::Int) (100::Int)
-         () <- x # draw
+         x # draw
+         (x # rMoveTo) 100 100
+         x # draw
          drawloop xs
-
 
 
 {-----------------------------------------------------------------------------}
