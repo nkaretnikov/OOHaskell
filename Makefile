@@ -45,7 +45,6 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 	rm -rf OOHaskell/PoorMens2/CVS
 	rm -rf OOHaskell/interpreter/CVS
 	zip -r OOHaskell.zip OOHaskell
-	rm -rf OOHaskell
 
 ##############################################################################
 #
