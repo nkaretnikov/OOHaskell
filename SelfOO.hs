@@ -250,21 +250,20 @@ class concrete_point x_init =
 -- Note, compared with printable_point, we omitted the virtual methods.
 -- That made abstract_point uninstantiatable!!!
 
-abstract_point (x_init::a) self =
+-- This is an optional part in case we want to fix types of virtuals.
+abstract_point (x_init::a) self 
+ | const False (constrain self :: Proxy (  (Proxy GetX, IO a)
+                                       :*: (Proxy Move, a -> IO ())
+                                       :*: HNil ))
+ = undefined
+
+abstract_point x_init self =
    do
       x <- newIORef x_init
       returnIO $
            mutableX  .=. x
        .*. print     .=. (self # getX >>= Prelude.print )
        .*. emptyRecord
-
- --
- -- This is an optional part in case we want to fix types of virtuals.
- --
- where
-  _ = constrain self :: Proxy (  (Proxy GetX, IO a)
-                             :*: (Proxy Move, a -> IO ())
-                             :*: HNil )
 
 
 concrete_point x_init self
