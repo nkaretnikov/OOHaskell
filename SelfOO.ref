@@ -21,7 +21,7 @@ testRestricted
 testRestricted'
 7
 9
-testDiamond
+myDiamondOOP
 super1: 42
 super2: 42
 super3: 42
