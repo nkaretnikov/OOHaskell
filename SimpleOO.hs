@@ -129,7 +129,7 @@ point =
 
 myFirstOOP =
   do
-     p <- point
+     p <- point -- no need for new!
      p # getX >>= print
      p # moveD $ 3
      p # getX >>= print
