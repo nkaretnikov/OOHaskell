@@ -205,10 +205,10 @@ object relative to its initial position.
 
 class para_point x_init =
    object
-     val mutable x     = x_init
+     val mutable x    = x_init
      method getX      = x
      method getOffset = x - x_init
-     method move d     = x <- x + d
+     method move d    = x <- x + d
    end;;
 
 -}
@@ -218,12 +218,6 @@ class para_point x_init =
 data GetOffset; getOffset = proxy::Proxy GetOffset
 
 
--- Methods can be declared separately so that they can be shared.
-method_move x d
-  = modifyIORef x ((+) d)
-method_getOffset x x_init
-  = do {v <- readIORef x; returnIO $ v - x_init}
-
 -- OCaml's parameterised class is nothing but a function.
 para_point x_init
    = do
@@ -231,9 +225,13 @@ para_point x_init
         returnIO
           $  mutableX  .=. x
          .*. getX      .=. readIORef x
-         .*. getOffset .=. method_getOffset x x_init
-         .*. move      .=. method_move x
+         .*. getOffset .=. queryIORef x (\v -> v - x_init)
+         .*. move      .=. (\d -> modifyIORef x ((+) d))
          .*. emptyRecord
+
+
+-- A shortcut for IORef processing. Is that somewhere in the libraries?
+queryIORef ref f = readIORef ref >>= returnIO . f
 
 testPara =
    do
@@ -254,10 +252,10 @@ automatically adjusted to the nearest point on a grid, as follows:
 class adjusted_point x_init =
    let origin = (x_init / 10) * 10 in
    object
-     val mutable x     = origin
-     method getX       = x
+     val mutable x    = origin
+     method getX      = x
      method getOffset = x - origin
-     method move d     = x <- x + d
+     method move d    = x <- x + d
    end;;
 
 This ability provides class constructors as can be found in other languages.
@@ -273,8 +271,8 @@ adjusted_point x_init
         x <- newIORef origin
         returnIO $  mutableX  .=. x
                 .*. getX      .=. readIORef x
-                .*. getOffset .=. method_getOffset x origin
-                .*. move      .=. method_move x
+                .*. getOffset .=. queryIORef x (\v -> v - origin)
+                .*. move      .=. (\d -> modifyIORef x ((+) d))
                 .*. emptyRecord
 
 testConstr =
