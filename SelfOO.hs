@@ -230,14 +230,22 @@ data GetOffset; getOffset = proxy::Proxy GetOffset
 -- Note, compared with printable_point, we omitted the virtual methods.
 -- That made abstract_point uninstantiatable!!!
 
-abstract_point x_init self
-  = do
+abstract_point (x_init::a) self =
+   do
       x <- newIORef x_init
       returnIO $
 	   mutableX  .=. x
        .*. getOffset .=. ((self # getX ) >>= (\v -> returnIO $ v - x_init))
        .*. print     .=. ((self # getX ) >>= Prelude.print )
        .*. emptyRecord
+ --
+ -- This is an optional part in case we want to fix types of virtuals.
+ --
+ where
+  _ = upCast self ::  Record (   (Proxy GetX  , IO a)
+                             :*: (Proxy Move  , a -> IO ())
+                             :*: HNil )
+
 
 concrete_point x_init self
    = do
@@ -610,10 +618,10 @@ let r = new ref 1 in r#set 2; (r#get);;
 - : int = 2
 -}
 
--- That is not the problem in OOHaskell
+-- That is not a problem in OOHaskell
 -- If we do
 -- :t printable_point
--- we see that our class already polymorphic:
+-- we see that our class is already polymorphic:
 -- (..., Num a, ...) =>  a -> ...
 
 
