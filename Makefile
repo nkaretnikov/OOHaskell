@@ -32,7 +32,7 @@ index.html: pre.html README post.html
  
 OOHaskell.zip: *.hs *.ref *.html Makefile README
 	mkdir -p OOHaskell
-	cp --preserve ${hs} *.in *.ref README Makefile OOHaskell
+	cp --preserve ${hs} *.in *.ref README LICENSE Makefile OOHaskell
 	(cd Weirich; gmake clean)
 	(cd Rathman; gmake clean)
 	(cd PoorMens; gmake clean)
