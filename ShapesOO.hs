@@ -144,43 +144,12 @@ type ShapeInterface a
 	 :*: HNil )
 
 
---cast_to_interface
-
-class CastToIntf a b where
-    cast_to_interface :: Record a -> Record b
-
-instance CastToIntf a HNil where
-    cast_to_interface _ = emptyRecord
-
-instance (CastToIntf a rest, Extract a l v)
-    => CastToIntf a (HCons (l,v) rest) where
-    cast_to_interface r@(Record rl) = 
-	let item = (extract rl)::(l,v)
-	    Record trest = (cast_to_interface r)::Record rest
-	in  Record $ HCons item trest
-
-class Extract a l v where 
-    extract :: a -> (l,v)
-
-instance (TypeEq l l1 f, Extract' f ((l1,v1) :*: rest) l v)
-    => Extract ((l1,v1) :*: rest) l v where
-    extract = extract' (undefined::f)
-
-class Extract' f a l v where 
-    extract' :: f -> a -> (l,v)
-instance TypeCastGeneric2.TypeCast v1 v
-    => Extract' HTrue ((l,v1) :*: rest) l v where
-    extract' _ (HCons (l,v) _) = (l,TypeCastGeneric2.typeCast v)
-instance Extract rest l v => Extract' HFalse ((l1,v1) :*: rest) l v where
-    extract' _ (HCons _ r) = extract r
-
-
 main = do
        -- set up array to the shapes.
        s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
        s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
        let scribble :: [ShapeInterface Int]
-           scribble = [cast_to_interface s1, cast_to_interface s2]
+           scribble = [upCast s1, upCast s2]
        
        -- iterate through the array
        -- and handle shapes polymorphically
