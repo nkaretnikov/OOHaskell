@@ -25,7 +25,7 @@ import TypeEqBoolGeneric
 import TypeEqGeneric1
 import TypeCastGeneric1
 import Label4
-
+import Data.Typeable -- needed for showing labels
 import Data.STRef
 import Data.IORef
 import Control.Monad.ST
@@ -43,16 +43,9 @@ import Control.Monad.ST
 infixr 9 #
 m # field = m .!. field
 
-data Field1 = Field1 deriving Show
-field1 = Label Field1
+data Field1 deriving Typeable; field1 = proxy::Proxy Field1
 
 foo f = f # field1
-{-
-:t foo
-foo :: forall e1 r x y n.
-       (HZip x y r, HFind (Label Field1) x n, HLookupByHNat n y e1) =>
-       Record r -> e1
--}
 
 testfoo  = foo (field1 .=. True .*. emptyRecord)
 
@@ -76,13 +69,11 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
 -}
 
 -- First, declare the labels.
--- We could use proxies to avoid so much names.
--- We do use an extra Label newtype wrapper to appeal to HList.
--- This explicit wrapper makes it easier to instantiate some library classes.
+-- We use proxies as of HList/Label4.hs
 
-data MutableX = MutableX deriving Show; mutableX = Label MutableX
-data GetX     = GetX     deriving Show; getX     = Label GetX
-data MoveD    = MoveD    deriving Show; moveD    = Label MoveD
+data MutableX; mutableX = proxy::Proxy MutableX
+data GetX;     getX     = proxy::Proxy GetX
+data MoveD;    moveD    = proxy::Proxy MoveD
 
 -- Note, here the field 'x' here is intentionally public -- just as in the
 -- Ocaml code above
@@ -90,11 +81,11 @@ data MoveD    = MoveD    deriving Show; moveD    = Label MoveD
 point = 
    do
       x <- newIORef 0
-      return $ 
-	          mutableX .=. x
-	      .*. getX     .=. readIORef x
-              .*. moveD    .=.(\d -> do{v<-readIORef x; writeIORef x (d + v)})
-              .*. emptyRecord
+      return
+        $  mutableX .=. x
+       .*. getX     .=. readIORef x
+       .*. moveD    .=.(\d -> do modifyIORef x ((+) d))
+       .*. emptyRecord
 
 
 {- Ocaml Tutorial:
@@ -120,19 +111,24 @@ point =
 
 -- Note how the code below mimics the Ocaml code above.
 -- The only notable difference is the use of the monad, needed for mutables.
+-- Note: no `new' necessary. But see the case with open rec.
 
-testp1 = do
-	  print "testp1"
-	  p <- point   -- no `new' necessary. But see the case with open rec
-	  -- print p
-	  p # getX >>= print
-	  p # moveD $ 3
-	  p # getX >>= print
-	  -- The field x is public and can be manipulated directly
-	  writeIORef (p # mutableX) 7
-	  p # getX >>= print
+myFirstOOP =
+  do
+     p <- point
+     p # getX >>= print
+     p # moveD $ 3
+     p # getX >>= print
 
+-- The field mutableX is public and can be manipulated directly.
 
+mySecondOOP =
+  do 
+     p <- point
+     writeIORef (p # mutableX) 42
+     p # getX >>= print
+
+    
 {-
 
 {- Ocaml Tutorial:
