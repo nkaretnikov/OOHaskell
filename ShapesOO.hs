@@ -170,7 +170,7 @@ myShapesOOP =
        s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
        s2 <- mfix (circle (15::Int) 25 8)
        let scribble :: [Shape Int]
-           scribble = [coerce s1, coerce s2]
+           scribble = [narrow s1, narrow s2]
        
        -- iterate through the array
        -- and handle shapes polymorphically
