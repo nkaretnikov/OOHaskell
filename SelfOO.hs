@@ -168,6 +168,31 @@ myColoredOOP =
       Prelude.print (x,c)
 
 
+-- We derive a better class of colored points, which prints more accurately.
+-- To this end, we access the overriden method akin to the OCaml super.
+
+colored_point' x_init color self
+   = do
+        p <- colored_point x_init color self
+        return
+          $  print .=. ( do 
+                            putStr   " uncolored part - "
+                            p # print
+                            putStr   "          color - " 
+                            Prelude.print color
+                       )
+         .<. p
+
+
+myOverridingOOP
+   = do
+        p  <- mfix (colored_point' 5 "red")
+        p  # print
+
+
+
+
+
 {- Ocaml Tutorial: 3.7 Inheritance
 
 A point and a colored point have incompatible types, since a point has no
@@ -458,12 +483,12 @@ class printable_colored_point y c =
                /             |           \
               /              |            \            
              /               |             \
-     concr_pt1         concr_pt2          concr_pt3
-              \	             |               |
-               \             |           color_pt3
-                \            |         /
-                 \           |        /
-                          complex_pt 
+     concrete_point1   concrete_point2  concrete_point3
+              \	             |             /
+               \             |            /
+                \            |           /
+                 \           |          /
+                        heavy_point 
 
 --}
 
@@ -475,7 +500,7 @@ move_method self
 
 
 -- The concrete classes derived from the abstract point class.
-concr_pt1 x_init self
+concrete_point1 x_init self
    = do
         p <- abstract_point x_init self
         returnIO
@@ -483,7 +508,7 @@ concr_pt1 x_init self
          .*. move_method self
          .*. p
 
-concr_pt2 x_init self
+concrete_point2 x_init self
    = do
         p <- abstract_point x_init self
         returnIO
@@ -491,7 +516,7 @@ concr_pt2 x_init self
          .*. move_method self
          .*. p
 
-concr_pt3 x_init self
+concrete_point3 x_init self
    = do
         p <- abstract_point x_init self
         returnIO
@@ -500,40 +525,16 @@ concr_pt3 x_init self
          .*. p
 
 
--- We override the print method in the parent class
--- We also access the overriden method akin to the OCaml super.
-
-color_pt3 x_init color self
-   = do
-        p <- concr_pt3 x_init self
-        return
-          $  print    .=. ( do 
-                               putStrLn "color_pt3:"
-                               putStr   " uncolored part - "
-                               p # print
-                               putStr   "          color - " 
-                               Prelude.print color
-                          )
-         .<. getColor .=. ((return color)::IO String)
-         .*. p
-
-
-testOverride 
-   = do
-        p  <- mfix (color_pt3 5 "red")
-        p  # print
-
-
 -- We compose a class which involves multiple inheritance.
 -- An object of this class has *two* instances of abstract_point.
--- One of them is shared with concr_pt1  and concr_pt2, and another
--- one is inherited from color_pt. Try this with C++!
+-- One of them is shared with concrete_point1  and concrete_point2,
+-- and another is inherited from concrete_point3. Try this with C++!
 
-complex_pt x_init color self 
+heavy_point x_init color self 
   = do
-     super1 <- concr_pt1 x_init self
-     super2 <- concr_pt2 x_init self          -- share the same self!
-     super3 <- mfix (color_pt3 x_init color)  -- do not share self!
+     super1 <- concrete_point1 x_init self
+     super2 <- concrete_point2 x_init self    -- Share self!
+     super3 <- mfix (concrete_point3 x_init)  -- Do not share self!
      let myprint = do
 	              putStr "super1: "; (super1 # print)
                       putStr "super2: "; (super2 # print)
@@ -553,13 +554,13 @@ complex_pt x_init color self
 
 testDiamond
    = do 
-        p <- mfix (complex_pt 42 "blue")
+        p <- mfix (heavy_point 42 "blue")
         p # print    -- all points still agree!
         p # move $ 2
         p # print    -- Note that super1,2 are shared, but not 3!
 
 -- Note, try
--- :type complex_pt
+-- :type heavy_point
 -- The number of type variables is very impressive!
 
 
@@ -628,10 +629,10 @@ let r = new ref 1 in r#set 2; (r#get);;
 main = do 
           putStrLn "mySelfishOOP"     ; mySelfishOOP
           putStrLn "myColoredOOP"     ; myColoredOOP
+          putStrLn "myOverridingOOP"  ; myOverridingOOP
           putStrLn "testGeneric"      ; testGeneric
           putStrLn "testVirtual"      ; testVirtual
           putStrLn "testVirtual'"     ; testVirtual'
           putStrLn "testRestricted"   ; testRestricted
           putStrLn "testRestricted'"  ; testRestricted'
-          putStrLn "testOverride"     ; testOverride
           putStrLn "testDiamond"      ; testDiamond
