@@ -13,7 +13,7 @@ instances.
 -- http://www.angelfire.com/tx4/cus/shapes/
 -- We shall try to emulate the `classical' C++ implementation
 -- http://www.angelfire.com/tx4/cus/shapes/cpp.html
--- Please compare it with the traditional Haskell stuff
+-- Please compare it with the Haskell solution in the shapes suite.
 -- http://www.angelfire.com/tx4/cus/shapes/haskell.html
 
 -}
@@ -134,9 +134,8 @@ class_circle x y radius self
        .*. super
 
 
--- We don't need to define the following. However, we later want
--- to make a list of abstract Shapes, so we define the interface to
--- cast objects to
+-- This interface is used in Encoding 1 below.  When we want to make a
+-- list of abstract Shapes, then we cast objects to this interface.
 
 type ShapeInterface a
  = Record (  (Proxy GetX    , IO a)
@@ -148,14 +147,25 @@ type ShapeInterface a
          :*: (Proxy Draw    , IO ())
          :*: HNil )
 
-main = do
-       -- set up array to the shapes.
+
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+
+
+-- Encoding 1
+-- We build a homogeneous list of shapes.
+-- We use coercion to an interface to harmonise the different shapes.
+
+testCoerce =
+  do
+       -- set up array of shapes.
        s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
        s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
        let scribble :: [ShapeInterface Int]
            scribble = [coerce s1, coerce s2]
        
-       -- iterate through the array
+       -- iterate through the list
        -- and handle shapes polymorphically
        mapM_ (\shape -> do
                            shape # draw
@@ -167,3 +177,106 @@ main = do
        arec <- mfix (class_rectangle (0::Int) (0::Int) (15::Int) (15::Int))
        arec # setWidth $ 30
        arec # draw
+
+
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+
+
+-- Encoding 2
+-- We build a heterogeneous list of shapes.
+-- We use a heterogeneous map over the list.
+-- The polymorphic function of the map is an Apply instance.
+-- We place the label constraints in this instance.
+
+testHList =
+  do
+       -- set up list of shapes.
+       s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
+       s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
+       let scribble = s1 .*. s2 .*. HNil
+       
+       -- iterate through the list
+       -- and handle shapes polymorphically
+       hMapM_ (undefined::OnShape) scribble
+
+       -- call a rectangle specific function
+       arec <- mfix (class_rectangle (0::Int) (0::Int) (15::Int) (15::Int))
+       arec # setWidth $ 30
+       arec # draw
+
+
+-- A type code for the polymorphic function on shapes
+data OnShape
+
+-- The polymorphic function on shapes
+instance ( HLookupByLabel (Proxy Draw) r (IO ())
+         , HLookupByLabel (Proxy RMoveTo) r (Int -> Int -> IO ())
+         )
+      => Apply OnShape r (IO ())
+ where
+   apply _ x = do
+                  () <- x # draw
+                  () <- (x # rMoveTo) (100::Int) (100::Int)
+                  () <- x # draw
+                  returnIO ()
+
+
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+
+
+-- Encoding 3
+-- This time we combine the use of existential quantification
+-- with OOHaskell objects. That is we have quantify the methods
+-- that are going to be invoked for the shape objects.
+-- This quantification requires constraints which are not first-class.
+
+testExist =
+  do
+       -- set up list of shapes.
+       s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
+       s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
+       let scribble = [ WrapOnShape s1
+                      , WrapOnShape s2 ]
+       
+       -- iterate through the list
+       -- and handle shapes polymorphically
+       drawloop scribble
+
+       -- call a rectangle specific function
+       arec <- mfix (class_rectangle (0::Int) (0::Int) (15::Int) (15::Int))
+       arec # setWidth $ 30
+       arec # draw
+
+
+-- The well-quantified existential wrapper
+data WrapOnShape =
+ forall x. ( HLookupByLabel (Proxy Draw) x (IO ())
+           , HLookupByLabel (Proxy RMoveTo) x (Int -> Int -> IO ())
+           ) => WrapOnShape x
+
+
+
+-- iterate through the list of shapes and draw
+drawloop [] = returnIO ()
+drawloop ((WrapOnShape x):xs) =
+     do
+         () <- x # draw
+         () <- (x # rMoveTo) (100::Int) (100::Int)
+         () <- x # draw
+         drawloop xs
+
+
+
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+
+
+main = do 
+          putStrLn "testCoerce"; testCoerce
+          putStrLn "testHList";  testHList
+          putStrLn "testExist";  testExist

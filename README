@@ -7,5 +7,5 @@ The code has been tested with GHC 6.2.
 Because of API renaming, GHC CVS HEAD does not work currently.
 See the Makefile for ways of running test cases.
 
-Last updated; December 19, 2004
+Last updated; December 20, 2004
 
