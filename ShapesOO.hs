@@ -140,14 +140,13 @@ class_circle x y radius self
 
 type ShapeInterface a
  = Record (  (Proxy GetX    , IO a)
-	 :*: (Proxy GetY    , IO a)
-	 :*: (Proxy SetX    , a -> IO ())
-	 :*: (Proxy SetY    , a -> IO ())
-	 :*: (Proxy MoveTo  , a -> a -> IO ())
-	 :*: (Proxy RMoveTo , a -> a -> IO ())
-	 :*: (Proxy Draw    , IO ())
-	 :*: HNil )
-
+         :*: (Proxy GetY    , IO a)
+         :*: (Proxy SetX    , a -> IO ())
+         :*: (Proxy SetY    , a -> IO ())
+         :*: (Proxy MoveTo  , a -> a -> IO ())
+         :*: (Proxy RMoveTo , a -> a -> IO ())
+         :*: (Proxy Draw    , IO ())
+         :*: HNil )
 
 main = do
        -- set up array to the shapes.
