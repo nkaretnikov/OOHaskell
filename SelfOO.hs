@@ -252,10 +252,11 @@ class concrete_point x_init =
 
 -- This is an optional part in case we want to fix types of virtuals.
 abstract_point (x_init::a) self 
- | const False (constrain self :: Proxy (  (Proxy GetX, IO a)
-                                       :*: (Proxy Move, a -> IO ())
-                                       :*: HNil ))
- = undefined
+  | const False (constrain self ::
+                 Proxy (  (Proxy GetX, IO a)
+                      :*: (Proxy Move, a -> IO ())
+                      :*: HNil ))
+  = undefined
 
 abstract_point x_init self =
    do
