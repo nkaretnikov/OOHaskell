@@ -79,14 +79,14 @@ s will be correctly bound to the object of the subclass.
 -}
 
 
-printable_point x_init self
-  = do
+printable_point x_init s =
+   do
       x <- newIORef x_init
       returnIO
         $  mutableX .=. x
        .*. getX     .=. readIORef x
        .*. moveD    .=. (\d -> modifyIORef x ((+) d))
-       .*. ooprint  .=. ((self # getX ) >>= print)
+       .*. ooprint  .=. ((s # getX ) >>= print)
        .*. emptyRecord
 
 testNew
