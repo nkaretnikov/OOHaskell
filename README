@@ -11,12 +11,13 @@ A different model can be used if this is considered an issue.
 
 Here is a brief overview on the sample files:
 
-- SimpleIO.hs   -- Simple objects in classes; in IO monad.
-- SimpleST.hs   -- Incomplete variation: ST monad is used instead.
-- CircBuffer.hs -- A typical polymorphic collection type.
-- Selfish.hs    -- The notion of self, and many dependant OO concepts.
-- Shapes.hs     -- The famous Shapes Benchmark; real OOP code in Haskell.
-- SelfReturn.hs -- Returning self; almost.
+- SimpleIO.hs        -- Simple objects in classes; in IO monad.
+- SimpleST.hs        -- Incomplete variation: ST monad is used instead.
+- CircBuffer.hs      -- A typical polymorphic collection type.
+- Selfish.hs         -- The notion of self, and many dependant OO concepts.
+- Shapes.hs          -- The famous Shapes Benchmark; real OOP code in Haskell.
+- SelfReturn.hs      -- Returning self; almost.
+- CovariantReturn.hs -- Covariant return types as in Java 5
 
 More examples with status "UNDER DEVELOPMENT"
 
@@ -32,4 +33,4 @@ Some extra sample directories:
 - PoorMens2     -- Yet another ...
 - interpreter	-- An idea regarding OO and extensible datatypes
 
-Last updated; January 1, 2005
+Last updated; January 12, 2005

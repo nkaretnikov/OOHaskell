@@ -2,11 +2,17 @@
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
 
-{- Experiments with covariant return types.
-   The example is due to Robin Green 
+{- 
+
+OOHaskell (C) 2004, 2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+
+-- Experiments with covariant return types, as in Java 5
+-- Thanks are due to Robin Green
+-- who triggered this effort and provided the sample scenario.
+
 -}
 
-module CovariantRet where
+module CovariantReturn where
 
 import OOHaskell
 import TypeCastGeneric2
@@ -157,3 +163,7 @@ instance ( DeepNarrow' ItsRecord (Record r) (Record r')
 instance DeepNarrow a b => DeepNarrow' ItsIO (IO a) (IO b) where
     deep'narrow' _ a = a >>= (return . deep'narrow)
 
+
+main = do
+	  test1
+	  test2

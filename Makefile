@@ -1,15 +1,16 @@
 ghci = ghci -i./HList
 #GHC > 6.2 does not work because of API changes for Typeable/Data.
 #ghci = /home/ralf/cvs/software/ghc-fptools/ghc/compiler/stage2/ghc-inplace --interactive -i./HList
-hs =	OOHaskell.hs	\
-	SimpleIO.hs	\
-	SimpleST.hs	\
-	CircBuffer.hs	\
-	Selfish.hs	\
-	Shapes.hs	\
-	SelfReturn.hs	\
-	Covariance.hs	\
-	LocalSigs.hs	\
+hs =	OOHaskell.hs	   \
+	SimpleIO.hs	   \
+	SimpleST.hs	   \
+	CircBuffer.hs	   \
+	Selfish.hs	   \
+	Shapes.hs	   \
+	SelfReturn.hs	   \
+	CovariantReturn.hs \
+	Covariance.hs	   \
+	LocalSigs.hs	   \
 	TwoTables.hs
 
 ##############################################################################
@@ -63,6 +64,8 @@ test: HList
 	diff Shapes.out Shapes.ref
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
 	diff SelfReturn.out SelfReturn.ref
+	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
+	diff CovariantReturn.out CovariantReturn.ref
 	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
 	diff Covariance.out Covariance.ref
 	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
