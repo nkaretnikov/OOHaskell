@@ -49,7 +49,7 @@ class_printable_point (x_init::a) self
        .*. getX   .=. readIORef x
        .*. moveTo    .=. (\d -> modifyIORef x (+ d))
        .*. printIt   .=. ( (self # getX ) >>= print )
-       .*. myself    .=. (upCast self :: PPInterface a)
+       .*. myself    .=. (narrow self :: PPInterface a)
        .*. emptyRecord
 
 testp1 = do
@@ -96,3 +96,5 @@ testp3 = do
 	  pp1 # printIt
 	  print "OK"
 
+
+main = do testp1; testp2; testp3

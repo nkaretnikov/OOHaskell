@@ -111,9 +111,9 @@ test1 = do
 	grass <- mfix class_grass
 	herb  <- mfix class_herbivore
 	herb # eat $ plant
-	-- Alas, the explicit coerce seems to be needed here
+	-- Alas, the explicit narrow seems to be needed here
 	-- monomorphic restriction on herb...
-	herb # eat $ coerce grass
+	herb # eat $ narrow grass
 	print "OK"
 
 class_cow self 
@@ -135,9 +135,9 @@ test2 = do
 	herb # eat $ plant
 	-- cow  # eat $ plant -- that would be an error
 	cow  # eat $ grass
-	-- Alas, the explicit coerce seems to be needed here
+	-- Alas, the explicit narrow seems to be needed here
 	-- monomorphic restriction on herb...
-	herb # eat $ coerce grass
+	herb # eat $ narrow grass
 	print "OK"
 
 test3 = do
@@ -149,14 +149,14 @@ test3 = do
 	herb # eat $ plant
 	-- cow  # eat $ plant -- that would be an error
 	cow  # eat $ grass
-	-- Alas, the explicit coerce seems to be needed here
+	-- Alas, the explicit narrow seems to be needed here
 	-- monomorphic restriction on herb...
-	herb # eat $ coerce grass
+	herb # eat $ narrow grass
 	-- let herbl = [herb]
 	-- let herbl1 = cow : herbl -- can't do that: eat method prevents
-	-- let herbl1 = coerce cow : herbl -- that too: eat method prevents
+	-- let herbl1 = narrow cow : herbl -- that too: eat method prevents
 	let herbl = [herb .-. eat]
-	let herbl1 = coerce cow : herbl -- now that works
+	let herbl1 = narrow cow : herbl -- now that works
 	mapM_ ( # printIt ) herbl1
 	print "OK"
 
@@ -172,3 +172,4 @@ And indeed, GHC does stop us.
 -}
 
 
+main = do test1; test2; test3

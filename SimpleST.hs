@@ -142,3 +142,8 @@ testoST2 =
 	      p2 # getX >>= (printST printbuf)
 	      readSTRef printbuf
     in runST test
+
+
+main = do 
+          testoST1
+          testoST2

@@ -1,6 +1,12 @@
 ghci = ghci -i./HList
 #GHC > 6.2 does not work because of API changes for Typeable/Data.
 #ghci = /home/ralf/cvs/software/ghc-fptools/ghc/compiler/stage2/ghc-inplace --interactive -i./HList
+hs =	SimpleIO.hs	\
+	SimpleST	\
+	CircBuffer.hs	\
+	Selfish.hs	\
+	SelfReturn.hs	\
+	Covariance.hs
 
 ##############################################################################
 #
@@ -22,7 +28,7 @@ index.html: pre.html README post.html
  
 OOHaskell.zip: *.hs *.ref *.html Makefile README
 	mkdir -p OOHaskell
-	cp --preserve *OO.hs *.in *.ref README Makefile OOHaskell
+	cp --preserve *OO.hs Covariance.hs *.in *.ref README Makefile OOHaskell
 	(cd interpreter; gmake clean)
 	(cd Rathman; gmake clean)
 	(cd PoorMens; gmake clean)
@@ -40,25 +46,25 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 # Run test cases
 #
 test: HList
-	${ghci}	-v0 SimpleOO.hs < Main.in > SimpleOO.out
-	diff SimpleOO.out SimpleOO.ref
-	${ghci}	-v0 SelfOO.hs < Main.in > SelfOO.out
-	diff SelfOO.out SelfOO.ref
-	${ghci}	-v0 ShapesOO.hs < Main.in > ShapesOO.out
-	diff ShapesOO.out ShapesOO.ref
+	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
+	diff SelfReturn.out SelfReturn.ref
+	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
+	diff SimpleIO.out SimpleIO.ref
+	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
+	diff SimpleST.out SimpleST.ref
+	${ghci}	-v0 CircBuffer.hs < Main.in > CircBuffer.out
+	diff CircBuffer.out CircBuffer.ref
+	${ghci}	-v0 Selfish.hs < Main.in > Selfish.out
+	diff Selfish.out Selfish.ref
+	${ghci}	-v0 Shapes.hs < Main.in > Shapes.out
+	diff Shapes.out Shapes.ref
+	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
+	diff Covariance.out Covariance.ref
 	(cd interpreter; gmake test)
 	(cd Rathman; gmake test)
 	(cd PoorMens; gmake test)
 	(cd PoorMens2; gmake test)
 
-##############################################################################
-#
-# Approve generated output as test results
-#
-copy:
-	cp SimpleOO.out SimpleOO.ref
-	cp SelfOO.out   SelfOO.ref
-	cp ShapesOO.out ShapesOO.ref
 
 ##############################################################################
 #

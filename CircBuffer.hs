@@ -144,3 +144,6 @@ in a local scope. Classes are top level objects. In Haskell, an OO
 Class is just a parameterized object, which is first-class. We can
 declare a class in a local scope -- without giving this any thought.
 -}
+
+
+main = do test1; test2
