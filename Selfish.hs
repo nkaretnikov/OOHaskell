@@ -6,42 +6,23 @@
 
 OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
-This module goes beyond the simple examples in SimpleOO.hs. The new
-samples here start to use self - i.e., open recursion. A number of key
-OO concepts are demonstrated including basics like inheritance. In the
-following we again quote from the tutorial "Objects in Caml".
-
-NOTE on overlapping: See SimpleOO.hs. In addition, we use overlapping
-for some advanced features of GhcRecord to experiment with a secondary
-model of virtual methods.
-
-See the Makefile for running this file.
+This module illustrates the notion of self, i.e., open recursion. A
+number of key OO concepts are demonstrated including basics like
+inheritance. In the following we again quote from the tutorial
+"Objects in Caml".
 
 -}
 
 
-module SelfOO where
+module Selfish where
 
+import OOHaskell
 import qualified Prelude (print)
 import Prelude hiding (print)
 
-import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast,typeCast)
-import GhcSyntax
-import GhcRecord
-import GhcExperiments
-import TypeEqBoolGeneric
-import TypeEqGeneric1
-import TypeCastGeneric1
-import Label4
-
-import Data.STRef
-import Data.IORef
-import Control.Monad.ST
-import Control.Monad.Fix
-import GHC.IOBase
-
 infixr 9 #
-m # field = (m .!. field) 
+m # field = (m .!. field)
+
 
 -- First, declare the labels.
 -- We use proxies as of HList/Label4.hs

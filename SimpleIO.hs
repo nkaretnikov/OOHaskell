@@ -12,32 +12,17 @@ following we quote from the tutorial "Objects in Caml", Sec 3.1
 Classes and objects, http://caml.inria.fr/ocaml/htmlman/manual005.html
 The idea is to reconstruct these examples very directly in OOHaskell.
 
-NOTE on overlapping: We need overlapping instances SOLELY for the sake
-of Label4 below. We could use (and have used) other ways of
-representing labels, such as Label2. The latter requires no
-overlapping instances. However, Label4 labels look better in types.
-
-See the Makefile for running this file.
-
 -}
 
 
-module SimpleOO where
+module SimpleIO where
 
+import OOHaskell
 import qualified Prelude (print)
 import Prelude hiding (print)
 
-import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast,typeCast)
-import GhcSyntax
-import GhcExperiments
-import TypeEqBoolGeneric
-import TypeEqGeneric1
-import TypeCastGeneric1
-import Label4
-import Data.Typeable -- needed for showing labels
-import Data.IORef
-import GHC.IOBase
-
+infixr 9 #
+m # field = (m .!. field) 
 
 {-
 
@@ -48,11 +33,6 @@ let foo f = f#fld1;;
 val foo : < fld1 : 'a; .. > -> 'a = <fun>
 
 -}
-
-
--- We reuse record selection from HList
-infixr 9 #
-m # field = m .!. field
 
 -- This is how we define labels
 data Field1 deriving Typeable; field1 = proxy::Proxy Field1

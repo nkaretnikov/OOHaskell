@@ -1,39 +1,35 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
--- We need overlapping instances SOLELY for the sake of Label4 below.
--- We could use (and have used) other ways of representing labels,
--- such as Label2. The latter requires no overlapping instances.
--- However, Label4 labels look better in types.
 
+{-
+ 
+OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+
+UNDER DEVELOPMENT
 
 -- Pure objects with open recursion
 -- In the following, we refer to the tutorial "Objects in Caml"
 -- http://caml.inria.fr/ocaml/htmlman/manual005.html
--- 3.12                             Functional objects
+-- 3.12 Functional objects
+
+An approach that uses separate tables for data and methods.
+
+-}
 
 
-module PureSelfObj where
+module TwoTables where
 
 
-import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast,typeCast)
-import GhcSyntax hiding ((.@.))
-import GhcExperiments
-import TypeEqBoolGeneric
-import TypeEqGeneric1
-import TypeCastGeneric1
-import Label4
+import OOHaskell hiding ((.@.))
 
 
-import Control.Monad.Fix
+{- Ocaml Tutorial: 3.12 Functional objects
 
-
-{- Ocaml Tutorial:
-3.12                             Functional objects
-It is possible to write a version of class point without assignments on the
-instance variables. The construct {< ... >} returns a copy of ``self'' (that
-is, the current object), possibly changing the value of some instance
-variables.
+It is possible to write a version of class point without assignments
+on the instance variables. The construct {< ... >} returns a copy of
+``self'' (that is, the current object), possibly changing the value of
+some instance variables.
 
 class functional_point y =
    object

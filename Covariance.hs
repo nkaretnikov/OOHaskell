@@ -2,26 +2,23 @@
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
 
+{-
+
+OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+
+UNDER DEVELOPMENT
+
 -- Playing with covariance
 -- http://www.faqs.org/faqs/eiffel-faq/
 -- Question 
 -- LCON: Please explain and discuss covariance vs. contravariance.
 
+-}
+
+
 module Covariance where
 
-import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast, typeCast)
-import GhcSyntax
-import GhcRecord
-import GhcExperiments
-import TypeEqBoolGeneric
-import TypeEqGeneric1
-import TypeCastGeneric1
-import qualified TypeCastGeneric2
-import Label4
-
-import Data.IORef
-import Control.Monad.Fix
-import GHC.IOBase
+import OOHaskell
 
 infixr 9 #
 m # field = (m .!. field) 

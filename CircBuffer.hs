@@ -2,28 +2,19 @@
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
 
--- Circular buffer: a naturally polymorphic collection
--- with strongly-typed access
--- Classes in local scope
+{-
 
+OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+
+Illustration of a circular buffer, which is a naturally polymorphic
+collection with strongly-typed access. We also illustrate classes in
+local scope.
+
+-}
 
 module CircBuffer where
 
-import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast, typeCast)
-import GhcSyntax
-import GhcRecord
-import GhcExperiments
-import TypeEqBoolGeneric
-import TypeEqGeneric1
-import TypeCastGeneric1
-import qualified TypeCastGeneric2
-import Label4
-
-import Data.IORef
-import Control.Monad.Fix
-import Control.Monad
-import GHC.IOBase
-
+import OOHaskell
 import Data.Array.IO
 
 infixr 9 #

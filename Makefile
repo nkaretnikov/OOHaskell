@@ -1,8 +1,9 @@
 ghci = ghci -i./HList
 #GHC > 6.2 does not work because of API changes for Typeable/Data.
 #ghci = /home/ralf/cvs/software/ghc-fptools/ghc/compiler/stage2/ghc-inplace --interactive -i./HList
-hs =	SimpleIO.hs	\
-	SimpleST	\
+hs =	OOHaskell.hs	\
+	SimpleIO.hs	\
+	SimpleST.hs	\
 	CircBuffer.hs	\
 	Selfish.hs	\
 	Shapes.hs	\
@@ -31,16 +32,18 @@ index.html: pre.html README post.html
  
 OOHaskell.zip: *.hs *.ref *.html Makefile README
 	mkdir -p OOHaskell
-	cp --preserve *OO.hs Covariance.hs *.in *.ref README Makefile OOHaskell
-	(cd interpreter; gmake clean)
+	cp --preserve ${hs} *.in *.ref README Makefile OOHaskell
+	(cd Weirich; gmake clean)
 	(cd Rathman; gmake clean)
 	(cd PoorMens; gmake clean)
 	(cd PoorMens2; gmake clean)
-	cp --preserve -r interpreter Rathman PoorMens PoorMens2 OOHaskell
-	rm -rf OOHaskell/interpreter/CVS
+	(cd interpreter; gmake clean)
+	cp --preserve -r Weirich Rathman PoorMens PoorMens2 interpreter OOHaskell
+	rm -rf OOHaskell/Weirich/CVS
 	rm -rf OOHaskell/Rathman/CVS
 	rm -rf OOHaskell/PoorMens/CVS
 	rm -rf OOHaskell/PoorMens2/CVS
+	rm -rf OOHaskell/interpreter/CVS
 	zip -r OOHaskell.zip OOHaskell
 	rm -rf OOHaskell
 
@@ -49,10 +52,6 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 # Run test cases
 #
 test: HList
-	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
-	diff LocalSigs.out LocalSigs.ref
-	${ghci}	-v0 TwoTables.hs < Main.in > TwoTables.out
-	diff TwoTables.out TwoTables.ref
 	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
 	diff SimpleIO.out SimpleIO.ref
 	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
@@ -67,6 +66,10 @@ test: HList
 	diff SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
 	diff Covariance.out Covariance.ref
+	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
+	diff LocalSigs.out LocalSigs.ref
+	${ghci}	-v0 TwoTables.hs < Main.in > TwoTables.out
+	diff TwoTables.out TwoTables.ref
 	(cd interpreter; gmake test)
 	(cd Rathman; gmake test)
 	(cd PoorMens; gmake test)
@@ -90,9 +93,10 @@ HList:
 #
 clean:
 	rm -f *~
+	rm -f *.out
 	rm -f index.html OOHaskell.zip
-	(cd interpreter; gmake clean)
+	(cd Weirich; gmake clean)
 	(cd Rathman; gmake clean)
 	(cd PoorMens; gmake clean)
 	(cd PoorMens2; gmake clean)
-	(cd Weirich; gmake clean)
+	(cd interpreter; gmake clean)

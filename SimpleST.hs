@@ -1,53 +1,25 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
--- We need overlapping instances SOLELY for the sake of Label4 below.
--- We could use (and have used) other ways of representing labels,
--- such as Label2. The latter requires no overlapping instances.
--- However, Label4 labels look better in types.
 
--- Link HList source directory to HList subdir.
--- Use gmake simple
--- which expands to ghci -i./HList  simple.hs
+{-
 
--- Simple objects, classes, interfaces (not involving open recursion,
--- i.e., the use of self)
--- In the following, we refer to the tutorial "Objects in Caml"
--- http://caml.inria.fr/ocaml/htmlman/manual005.html
--- Sec 3.1 Classes and objects
+OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
+This is a variation on SimpleIO.hs. (In fact, this is not a complete
+reconstruction, but only a sketch.)  Using objects with mutable fields
+in the context of ST monad Notable point: our labels and objects must
+depend on the type 's' that represents a thread. This is natural: once
+an object is instantiated, it can be used only in the same thread that
+created that. In that sense, objects are a generalization of a STRef.
 
--- Using objects with mutable fields in the context of ST monad
--- Notable point: our labels and objects must depend on the
--- type 's' that represents a thread. This is natural:
--- once an object is instantiated, it can be used only in the same
--- thread that created that. In that sense, objects are a generalization
--- of a STRef.
+-}
 
 
-module SimpleSTObj where
 
+module SimpleST where
 
-import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast,typeCast)
-import GhcSyntax
-import GhcExperiments
-import TypeEqBoolGeneric
-import TypeEqGeneric1
-import TypeCastGeneric1
-import Label4
-import Data.Typeable -- needed for showing labels
-import Data.STRef
-import Data.IORef
-import Control.Monad.ST
-
--- First, declare the labels.
--- We use proxies as of HList/Label4.hs
--- We explicitly carry the ST thread type 's' in the type of the label
-
-data MutableX; mutableX (_::st s t)  = proxy::Proxy (s, MutableX)
-data GetX;     getX (_::st s t)      = proxy::Proxy (s, GetX)
-data MoveD;    moveD (_::st s t)     = proxy::Proxy (s, MoveD)
-data OffsetX;  offsetX (_::st s t)   = proxy::Proxy (s, OffsetX)
+import OOHaskell
 
 -- Our records are wrapped up in STRecord that carries the 's'
 -- type (as a phantom type)
@@ -64,6 +36,16 @@ infixr 9 #
 m@(STRecord r) # field = r .!. (field m)
 
 blessST (_::st s a) (r::r)  = (STRecord r) :: STRecord s r
+
+
+-- First, declare the labels.
+-- We use proxies as of HList/Label4.hs
+-- We explicitly carry the ST thread type 's' in the type of the label
+
+data MutableX; mutableX (_::st s t)  = proxy::Proxy (s, MutableX)
+data GetX;     getX (_::st s t)      = proxy::Proxy (s, GetX)
+data MoveD;    moveD (_::st s t)     = proxy::Proxy (s, MoveD)
+data OffsetX;  offsetX (_::st s t)   = proxy::Proxy (s, OffsetX)
 
 -- test that hLookupByHNat works even on lists that contain ST s t
 -- with s being the quantified (eventually) variable

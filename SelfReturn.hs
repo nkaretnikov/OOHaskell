@@ -2,6 +2,10 @@
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
 
+{-
+
+OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+
 -- A method that returns Self
 
 -- We cannot return just polymorphic Self
@@ -9,24 +13,15 @@
 -- This is the same situation as in C++/Java
 -- (where the return type of a method must be declared anyway)
 
-module SelfObj where
+-}
 
-import CommonMain hiding (HDeleteMany, hDeleteMany, TypeCast, typeCast)
-import GhcSyntax
-import GhcRecord
-import GhcExperiments
-import TypeEqBoolGeneric
-import TypeEqGeneric1
-import TypeCastGeneric1
-import qualified TypeCastGeneric2
-import Label4
+module SelfReturn where
 
-import Data.IORef
-import Control.Monad.Fix
-import GHC.IOBase
+import OOHaskell
 
 infixr 9 #
 m # field = (m .!. field) 
+
 
 data FieldX;   fieldX   = proxy::Proxy FieldX
 data GetX;     getX     = proxy::Proxy GetX

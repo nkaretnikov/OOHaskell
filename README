@@ -6,6 +6,30 @@ The code relies on the HList library.
 The code has been tested with GHC 6.2.
 Because of API renaming, GHC CVS HEAD does not work currently.
 See the Makefile for ways of running test cases.
+We use overlapping instances because of the favoured model of labels.
+A different model can be used if this is considered an issue.
 
-Last updated; December 20, 2004
+Here is a brief overview on the sample files:
 
+- SimpleIO.hs   -- Simple objects in classes; in IO monad.
+- SimpleST.hs   -- Incomplete variation: ST monad is used instead.
+- CircBuffer.hs -- A typical polymorphic collection type.
+- Selfish.hs    -- The notion of self, and many dependant OO concepts.
+- Shapes.hs     -- The famous Shapes Benchmark; real OOP code in Haskell.
+- SelfReturn.hs -- Returning self; almost.
+
+More examples with status "UNDER DEVELOPMENT"
+
+- Covariance.hs -- Investigation of co/contra-variance.
+- LocalSigs.hs  -- Functional objects with local signatures.
+- TwoTables.hs  -- Functional objects with methods and data separated.
+
+Some extra sample directories:
+
+- Weirich	-- The C++ implementation from the Shapes Benchmark Suite.
+- Rathman	-- The Haskell implementation from the Shape Benchmark Suite.
+- PoorMens      -- Another Haskell implementation of Shapes.
+- PoorMens2     -- Yet another ...
+- interpreter	-- An idea regarding OO and extensible datatypes
+
+Last updated; December 21, 2004
