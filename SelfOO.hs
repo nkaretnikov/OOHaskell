@@ -171,25 +171,18 @@ myColoredOOP =
 -- We derive a better class of colored points, which prints more accurately.
 -- To this end, we access the overriden method akin to the OCaml super.
 
-colored_point' x_init color self
-   = do
-        p <- colored_point x_init color self
-        return
-          $  print .=. ( do 
-                            putStr   " uncolored part - "
-                            p # print
-                            putStr   "          color - " 
-                            Prelude.print color
-                       )
-         .<. p
+colored_point' x_init color self =
+   do
+      p <- colored_point x_init color self
+      return $  print .=. (
+              do putStr "so far - "; p # print
+                 putStr "color  - "; Prelude.print color )
+            .<. p
 
-
-myOverridingOOP
-   = do
-        p  <- mfix (colored_point' 5 "red")
-        p  # print
-
-
+myOverridingOOP =
+   do
+      p  <- mfix (colored_point' 5 "red")
+      p  # print
 
 
 
