@@ -225,11 +225,16 @@ virtual, and cannot be instantiated (that is, no object of this class
 can be created). It still defines type abbreviations (treating virtual
 methods as other methods.)
 
+-- We have modified this example in a non-essential way:
+-- get_offset was removed.
+-- print was added.
+-- Less code.
+
 class virtual abstract_point x_init =
    object (self)
      val mutable x = x_init
      method virtual get_x : int
-     method get_offset = self#get_x - x_init
+     method print = print_int self#get_x
      method virtual move : int -> unit
    end;;
 
@@ -242,9 +247,6 @@ class concrete_point x_init =
 
 -}
 
--- A new label is needed for this example.
-data GetOffset; getOffset = proxy::Proxy GetOffset
-
 -- Note, compared with printable_point, we omitted the virtual methods.
 -- That made abstract_point uninstantiatable!!!
 
@@ -252,10 +254,10 @@ abstract_point (x_init::a) self =
    do
       x <- newIORef x_init
       returnIO $
-	   mutableX  .=. x
-       .*. getOffset .=. ((self # getX ) >>= (\v -> returnIO $ v - x_init))
-       .*. print     .=. ((self # getX ) >>= Prelude.print )
+           mutableX  .=. x
+       .*. print     .=. (self # getX >>= Prelude.print )
        .*. emptyRecord
+
  --
  -- This is an optional part in case we want to fix types of virtuals.
  --
@@ -287,7 +289,6 @@ testVirtual
         --
         p # getX >>= Prelude.print
         p # move $ 2
-        p # getOffset >>= Prelude.print
         p # getX >>= Prelude.print
         p # print
 
@@ -301,7 +302,6 @@ abstract_point' x_init self
 	   mutableX  .=. x
        .*. getX      .=. (proxy::Proxy (IO Int))
        .*. move      .=. (proxy::Proxy (Int -> IO ()))
-       .*. getOffset .=. ((self # getX ) >>= (\v -> returnIO $ v - x_init))
        .*. print     .=. ((self # getX ) >>= Prelude.print )
        .*. emptyRecord
 
@@ -332,7 +332,6 @@ testVirtual'
         p <- mnew (concrete_point' 7)
         p # getX >>= Prelude.print
         p # move $ 2
-	p # getOffset >>= Prelude.print
         p # getX >>= Prelude.print
         p # print
 

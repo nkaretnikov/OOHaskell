@@ -3,18 +3,16 @@ mySelfishOOP
 myColoredOOP
 (5,"red")
 myOverridingOOP
- uncolored part - 5
-          color - "red"
+so far - 5
+color  - "red"
 testGeneric
 14
 testVirtual
 7
-2
 9
 9
 testVirtual'
 7
-2
 9
 9
 testRestricted
