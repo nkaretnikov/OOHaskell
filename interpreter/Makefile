@@ -11,5 +11,5 @@ test:
 
 clean:
 	rm -f *~
-	rm *.out
-	rm reference
+	rm -f *.out
+	rm -f reference

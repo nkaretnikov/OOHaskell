@@ -37,6 +37,9 @@ test: HList
 	diff SelfOO.out SelfOO.ref
 	${ghci}	-v0 ShapesOO.hs < Main.in > ShapesOO.out
 	diff ShapesOO.out ShapesOO.ref
+	(cd interpreter; gmake test)
+	(cd Rathman; gmake test)
+	(cd PoorMens; gmake test)
 
 ##############################################################################
 #
@@ -65,3 +68,6 @@ HList:
 clean:
 	rm -f *~
 	rm -f index.html OOHaskell.zip
+	(cd interpreter; gmake clean)
+	(cd Rathman; gmake clean)
+	(cd PoorMens; gmake clean)
