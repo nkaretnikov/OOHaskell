@@ -11,7 +11,7 @@ program in a style of extensible datatypes. The example is about a
 tiny interpreter, which we could extend by new syntax, whenever
 necessary.
 
-Also see file "extensible.hs".
+Also see file "nonextensible.hs".
 
 -}
 
