@@ -79,7 +79,7 @@ s will be correctly bound to the object of the subclass.
 -}
 
 
-class_printable_point x_init self
+printable_point x_init self
   = do
       x <- newIORef x_init
       returnIO
@@ -92,7 +92,7 @@ class_printable_point x_init self
 testNew
    = do
         -- Note that 'mfix' plays the role of 'new' in the OCaml code...
-        p <- mfix (class_printable_point 7)
+        p <- mfix (printable_point 7)
         p # getX >>= print
         p # moveD $ 2
         p # getX >>= print
@@ -152,14 +152,14 @@ p'#get_x, p'#color;;
 data GetColor; getColor = proxy::Proxy GetColor
 
 -- Inheritance is simple: just adding methods ...
-class_colored_point x_init (color::String) self
+colored_point x_init (color::String) self
    = do
-        p <- class_printable_point x_init self
+        p <- printable_point x_init self
         returnIO $ getColor .=. (returnIO color) .*. p
 
 testInheritance
    = do
-        p' <- mfix (class_colored_point 5 "red")
+        p' <- mfix (colored_point 5 "red")
         x  <- p' # getX
         c  <- p' # getColor
         print (x,c)
@@ -186,8 +186,8 @@ get_succ_x p + get_succ_x p';;
 
 testGeneric
    = do
-        p  <- mfix (class_printable_point 7)
-        p' <- mfix (class_colored_point 5 "red")
+        p  <- mfix (printable_point 7)
+        p' <- mfix (colored_point 5 "red")
         let get_succ_x obj = obj # getX >>= (returnIO . (+ 1))
         x  <- get_succ_x p
         x' <- get_succ_x p'
@@ -225,9 +225,9 @@ class point x_init =
 data GetOffset; getOffset = proxy::Proxy GetOffset
 
 -- Note, compared with printable_point, we omitted the virtual methods.
--- That made class_abstract_point uninstantiatable!!!
+-- That made abstract_point uninstantiatable!!!
 
-class_abstract_point x_init self
+abstract_point x_init self
   = do
       x <- newIORef x_init
       returnIO $
@@ -236,9 +236,9 @@ class_abstract_point x_init self
        .*. ooprint   .=. ((self # getX ) >>= print )
        .*. emptyRecord
 
-class_concrete_point x_init self
+concrete_point x_init self
    = do
-        p <- class_abstract_point x_init self -- inherit ...
+        p <- abstract_point x_init self -- inherit ...
         returnIO
         -- add the missing (pure virtual) methods
           $  getX  .=. readIORef (self # mutableX)
@@ -247,10 +247,10 @@ class_concrete_point x_init self
 
 testVirtual
    = do
-        p  <- mfix (class_concrete_point 7)
+        p  <- mfix (concrete_point 7)
         --
         -- Note, if the latter is uncommented
-        --     p' <- mfix (class_abstract_point 7)
+        --     p' <- mfix (abstract_point 7)
         -- we see an error that means "field getX missing"
         -- which reads as follows:
         --  No instances for ( HFind (Proxy GetX) HNil n,
@@ -265,7 +265,7 @@ testVirtual
 
 -- This abstract point class mentions the type of the virtual methods.
 
-class_abstract_point' x_init self
+abstract_point' x_init self
   = do
       x <- newIORef x_init
       returnIO $
@@ -282,9 +282,9 @@ data MyLabel; myLabel = proxy::Proxy MyLabel
 
 
 -- This concrete class implements all virtual methods
-class_concrete_point' x_init self
+concrete_point' x_init self
    = do
-        p <- class_abstract_point' x_init self -- inherit ...
+        p <- abstract_point' x_init self -- inherit ...
         returnIO
         -- use disciplined record update
            $  getX    .=. readIORef (self # mutableX)
@@ -300,7 +300,7 @@ mnew (f::a -> m a) = mfix f
 
 testVirtual'
    = do
-        p <- mnew (class_concrete_point' 7)
+        p <- mnew (concrete_point' 7)
         p # getX >>= print
         p # moveD $ 2
 	p # getOffset >>= print
@@ -352,7 +352,7 @@ data BumpX; bumpX = proxy::Proxy BumpX
 -- So they are not put into the record of an object.
 -- We could achieve sharing of methods between different objects via lets.
 
-class_restricted_point x_init self
+restricted_point x_init self
   = do
       x <- newIORef x_init
       let moveD = (\d -> modifyIORef x ((+) d))
@@ -364,7 +364,7 @@ class_restricted_point x_init self
 
 testRestricted
    =  do
-       p <- mfix (class_restricted_point 7)
+       p <- mfix (restricted_point 7)
        p # getX >>= print
        p # bumpX
        p # getX >>= print
@@ -374,16 +374,16 @@ testRestricted
 -- This allows us to make methods private for existing objects.
 -- We first add the bump method that uses the private method move.
 
-class_bumping_point x_init self
+bumping_point x_init self
    = do
-        p <- class_printable_point x_init self
+        p <- printable_point x_init self
         returnIO
           $  bumpX .=. (self # moveD $ 2)
          .*. p
 
 testRestricted'
    = do
-        p  <- mfix (class_bumping_point 7)
+        p  <- mfix (bumping_point 7)
         let p' = p .-. moveD
         p' # ooprint
         p' # bumpX
@@ -465,25 +465,25 @@ move_method self
 
 
 -- The concrete classes derived from the abstract point class.
-class_concr_pt1 x_init self
+concr_pt1 x_init self
    = do
-        p <- class_abstract_point x_init self
+        p <- abstract_point x_init self
         returnIO
           $  getX .=. readIORef (self # mutableX)
          .*. move_method self
          .*. p
 
-class_concr_pt2 x_init self
+concr_pt2 x_init self
    = do
-        p <- class_abstract_point x_init self
+        p <- abstract_point x_init self
         returnIO
           $  getX .=. ((return 42):: IO Int)
          .*. move_method self
          .*. p
 
-class_concr_pt3 x_init self
+concr_pt3 x_init self
    = do
-        p <- class_abstract_point x_init self
+        p <- abstract_point x_init self
         returnIO
           $  getX .=. readIORef (self # mutableX)
          .*. move_method self
@@ -493,12 +493,12 @@ class_concr_pt3 x_init self
 -- We override the print method in the parent class
 -- We also access the overriden method akin to the OCaml super.
 
-class_color_pt3 x_init color self
+color_pt3 x_init color self
    = do
-        p <- class_concr_pt3 x_init self
+        p <- concr_pt3 x_init self
         return
           $  ooprint  .=. ( do 
-                               putStrLn "class_color_pt3:"
+                               putStrLn "color_pt3:"
                                putStr   " uncolored part - "
                                p # ooprint
                                putStr   "          color - " 
@@ -510,7 +510,7 @@ class_color_pt3 x_init color self
 
 testOverride 
    = do
-        p  <- mfix (class_color_pt3 5 "red")
+        p  <- mfix (color_pt3 5 "red")
         p  # ooprint
 
 
@@ -519,11 +519,11 @@ testOverride
 -- One of them is shared with concr_pt1  and concr_pt2, and another
 -- one is inherited from color_pt. Try this with C++!
 
-class_pt_final x_init color self 
+pt_final x_init color self 
   = do
-     super1 <- class_concr_pt1 x_init self
-     super2 <- class_concr_pt2 x_init self          -- share the same self!
-     super3 <- mfix (class_color_pt3 x_init color)  -- do not share self!
+     super1 <- concr_pt1 x_init self
+     super2 <- concr_pt2 x_init self          -- share the same self!
+     super3 <- mfix (color_pt3 x_init color)  -- do not share self!
      let myprint = do
 	              putStr "super1: "; (super1 # ooprint)
                       putStr "super2: "; (super2 # ooprint)
@@ -543,13 +543,13 @@ class_pt_final x_init color self
 
 testDiamond
    = do 
-        p <- mfix (class_pt_final 42 "blue")
+        p <- mfix (pt_final 42 "blue")
         p # ooprint    -- all points still agree!
         p # moveD $ 2
         p # ooprint    -- Note that super1,2 are shared, but not 3!
 
 -- Note, try
--- :type class_pt_final
+-- :type pt_final
 -- The number of type variables is very impressive!
 
 
@@ -610,7 +610,7 @@ let r = new ref 1 in r#set 2; (r#get);;
 
 -- That is not the problem in OOHaskell
 -- If we do
--- :t class_printable_point
+-- :t printable_point
 -- we see that our class already polymorphic:
 -- (..., Num a, ...) =>  a -> ...
 

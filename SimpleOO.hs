@@ -203,7 +203,7 @@ whole body of the definition, including methods. For instance, the
 method get_offset in the class below returns the position of the
 object relative to its initial position.
 
-class point x_init =
+class para_point x_init =
    object
      val mutable x     = x_init
      method get_x      = x
@@ -225,7 +225,7 @@ method_getOffset x x_init
   = do {v <- readIORef x; returnIO $ v - x_init}
 
 -- OCaml's parameterised class is nothing but a function.
-class_point x_init
+para_point x_init
    = do
         x <- newIORef x_init
         returnIO
@@ -237,7 +237,7 @@ class_point x_init
 
 testPara =
    do
-      p <- class_point 1
+      p <- para_point 1
       p # getX >>= print
       p # moveD $ 2
       p # getX >>= print

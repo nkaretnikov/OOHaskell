@@ -23,17 +23,17 @@ testRestricted'
 7
 9
 testOverride
-class_color_pt3:
+color_pt3:
  uncolored part - 5
           color - "red"
 testDiamond
 super1: 42
 super2: 42
-super3: class_color_pt3:
+super3: color_pt3:
  uncolored part - 42
           color - "blue"
 super1: 46
 super2: 46
-super3: class_color_pt3:
+super3: color_pt3:
  uncolored part - 44
           color - "blue"
