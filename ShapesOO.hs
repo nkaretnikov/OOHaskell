@@ -137,13 +137,20 @@ class_circle x y radius self
 -- This interface is used in Encoding 1 below.  When we want to make a
 -- list of abstract Shapes, then we cast objects to this interface.
 
-type ShapeInterface a
+type ShapeInterface' a
  = Record (  (Proxy GetX    , IO a)
          :*: (Proxy GetY    , IO a)
          :*: (Proxy SetX    , a -> IO ())
          :*: (Proxy SetY    , a -> IO ())
          :*: (Proxy MoveTo  , a -> a -> IO ())
          :*: (Proxy RMoveTo , a -> a -> IO ())
+         :*: (Proxy Draw    , IO ())
+         :*: HNil )
+
+
+-- In fact this interface is sufficent
+type ShapeInterface a
+ = Record (  (Proxy RMoveTo , a -> a -> IO ())
          :*: (Proxy Draw    , IO ())
          :*: HNil )
 
@@ -160,8 +167,8 @@ type ShapeInterface a
 testCoerce =
   do
        -- set up array of shapes.
-       s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
-       s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
+       s1 <- mfix (class_rectangle (10::Int) (20::Int) 5 6)
+       s2 <- mfix (class_circle (15::Int) 25 8)
        let scribble :: [ShapeInterface Int]
            scribble = [coerce s1, coerce s2]
        
@@ -174,7 +181,7 @@ testCoerce =
              scribble
 
        -- call a rectangle specific function
-       arec <- mfix (class_rectangle (0::Int) (0::Int) (15::Int) (15::Int))
+       arec <- mfix (class_rectangle (0::Int) (0::Int) 15 15)
        arec # setWidth $ 30
        arec # draw
 
@@ -193,8 +200,8 @@ testCoerce =
 testHList =
   do
        -- set up list of shapes.
-       s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
-       s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
+       s1 <- mfix (class_rectangle (10::Int) (20::Int) 5 6)
+       s2 <- mfix (class_circle (15::Int) 25 8)
        let scribble = s1 .*. s2 .*. HNil
        
        -- iterate through the list
@@ -202,7 +209,7 @@ testHList =
        hMapM_ (undefined::OnShape) scribble
 
        -- call a rectangle specific function
-       arec <- mfix (class_rectangle (0::Int) (0::Int) (15::Int) (15::Int))
+       arec <- mfix (class_rectangle (0::Int) (0::Int) 15 15)
        arec # setWidth $ 30
        arec # draw
 
