@@ -153,19 +153,19 @@ different values for two different objects.
 let x0 = ref 0;;
 val x0 : int ref = {contents = 0}
  
-class point =
+class incrementing_point =
    object
      val mutable x = incr x0; !x0
      method get_x  = x
      method move d = x <- x + d
    end;;
-class point :
+class incrementing_point :
   object val mutable x : int method get_x : int method move : int -> unit end
  
-new point#get_x;;
+new incrementing_point#get_x;;
 - : int = 1
  
-new point#get_x;;
+new incrementing_point#get_x;;
 - : int = 2
 -}
 
@@ -174,7 +174,7 @@ new point#get_x;;
 -- increment through all object creations. We also re-use the labels
 -- that we declared earlier.
 
-incrementingPoint = 
+incrementing_point = 
    do 
       x0 <- newIORef 0
       returnIO (
@@ -189,7 +189,7 @@ incrementingPoint =
 
 testBody =
    do
-      localPoint <- incrementingPoint
+      localPoint <- incrementing_point
       localPoint >>= ( # getX ) >>= print
       localPoint >>= ( # getX ) >>= print
 
