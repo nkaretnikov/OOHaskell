@@ -55,7 +55,7 @@ data Draw;     draw     = proxy::Proxy Draw
 -- Those fields can be any Num.
 -- The fields are private, just as they are in C++ code
 
-class_shape x_init y_init self
+shape x_init y_init self
   = do
       x <- newIORef x_init
       y <- newIORef y_init
@@ -93,9 +93,9 @@ newtype LS = LS String
 ls = return . LS
 instance Show LS where show (LS x) = x
 
-class_rectangle x y width height self
+rectangle x y width height self
   = do
-      super <- class_shape x y self
+      super <- shape x y self
       w <- newIORef width
       h <- newIORef height
       returnIO $
@@ -118,9 +118,9 @@ class_rectangle x y width height self
 data GetRadius;    getRadius     = proxy::Proxy GetRadius
 data SetRadius;    setRadius     = proxy::Proxy SetRadius
 
-class_circle x y radius self
+circle x y radius self
   = do
-      super <- class_shape x y self
+      super <- shape x y self
       r <- newIORef radius
       returnIO $
            getRadius  .=. readIORef r
@@ -164,15 +164,15 @@ type ShapeInterface a
 -- We build a homogeneous list of shapes.
 -- We use coercion to an interface to harmonise the different shapes.
 
-testCoerce =
+myShapesOOP =
   do
-       -- set up array of shapes.
-       s1 <- mfix (class_rectangle (10::Int) (20::Int) 5 6)
-       s2 <- mfix (class_circle (15::Int) 25 8)
+       -- set up array of shapes
+       s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
+       s2 <- mfix (circle (15::Int) 25 8)
        let scribble :: [ShapeInterface Int]
            scribble = [coerce s1, coerce s2]
        
-       -- iterate through the list
+       -- iterate through the array
        -- and handle shapes polymorphically
        mapM_ (\shape -> do
                            shape # draw
@@ -181,7 +181,7 @@ testCoerce =
              scribble
 
        -- call a rectangle specific function
-       arec <- mfix (class_rectangle (0::Int) (0::Int) 15 15)
+       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
        arec # setWidth $ 30
        arec # draw
 
@@ -200,8 +200,8 @@ testCoerce =
 testHList =
   do
        -- set up list of shapes.
-       s1 <- mfix (class_rectangle (10::Int) (20::Int) 5 6)
-       s2 <- mfix (class_circle (15::Int) 25 8)
+       s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
+       s2 <- mfix (circle (15::Int) 25 8)
        let scribble = s1 .*. s2 .*. HNil
        
        -- iterate through the list
@@ -209,7 +209,7 @@ testHList =
        hMapM_ (undefined::OnShape) scribble
 
        -- call a rectangle specific function
-       arec <- mfix (class_rectangle (0::Int) (0::Int) 15 15)
+       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
        arec # setWidth $ 30
        arec # draw
 
@@ -244,8 +244,8 @@ instance ( HLookupByLabel (Proxy Draw) r (IO ())
 testExist =
   do
        -- set up list of shapes.
-       s1 <- mfix (class_rectangle (10::Int) (20::Int) (5::Int) (6::Int))
-       s2 <- mfix (class_circle (15::Int) (25::Int) (8::Int))
+       s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
+       s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
        let scribble = [ WrapOnShape s1
                       , WrapOnShape s2 ]
        
@@ -254,7 +254,7 @@ testExist =
        drawloop scribble
 
        -- call a rectangle specific function
-       arec <- mfix (class_rectangle (0::Int) (0::Int) (15::Int) (15::Int))
+       arec <- mfix (rectangle (0::Int) (0::Int) (15::Int) (15::Int))
        arec # setWidth $ 30
        arec # draw
 
@@ -284,6 +284,6 @@ drawloop ((WrapOnShape x):xs) =
 
 
 main = do 
-          putStrLn "testCoerce"; testCoerce
+          putStrLn "testCoerce"; myShapesOOP
           putStrLn "testHList";  testHList
           putStrLn "testExist";  testExist

@@ -47,6 +47,7 @@ test: HList
 	(cd interpreter; gmake test)
 	(cd Rathman; gmake test)
 	(cd PoorMens; gmake test)
+	(cd PoorMens2; gmake test)
 
 ##############################################################################
 #
@@ -59,7 +60,7 @@ copy:
 
 ##############################################################################
 #
-# Remind the use of the need to link to HList library
+# Remind the user of the need to link to HList library
 #
 HList:
 	@echo
@@ -78,3 +79,5 @@ clean:
 	(cd interpreter; gmake clean)
 	(cd Rathman; gmake clean)
 	(cd PoorMens; gmake clean)
+	(cd PoorMens2; gmake clean)
+	(cd Weirich; gmake clean)
