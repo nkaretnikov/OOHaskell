@@ -1,4 +1,6 @@
 ghci = ghci -i./HList
+#GHC > 6.2 does not work because of API changes for Typeable/Data.
+#ghci = /home/ralf/cvs/software/ghc-fptools/ghc/compiler/stage2/ghc-inplace --interactive -i./HList
 
 ##############################################################################
 #
