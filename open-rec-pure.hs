@@ -191,17 +191,17 @@ data UF field a = UF (forall r. UpdateableField field r a)
 make_uf:: field -> (a->a) -> UF field a
 make_uf field f = UF (\self -> self .@. (field,f))
 
-type HasField field r v = forall x y n. (HZip x y r, HFind field x n, 
-					 HLookupByHNat n y v) =>
-    Record r -> v
+type HasField field r v w = forall x y n. (HZip x y r, HFind field x n, 
+					   HLookupByHNat n y v) =>
+    Record r -> w
 
-data HF field a = HF (forall r. HasField field r a)
-make_f:: field -> HF field a
-make_f field = HF ( .!. field)
+data HF field a b = HF (forall r. HasField field r a b)
+make_f:: field -> (a->b) -> HF field a b
+make_f field tr = HF ( tr . (.!. field))
 
 class_point (y::y) :: r
   = 	   fieldX .=. y
-       .*. getX   .=. (make_f fieldX)
+       .*. getX   .=. (make_f fieldX id)
        .*. moveD  .=. (\d -> make_uf fieldX ((\v->v+d)::(y->y)))
        .*. emptyRecord
 
@@ -233,9 +233,13 @@ data PrintP;  printP    = proxy::Proxy PrintP
 
 -- and a printable point as a subclass of point
 -- But that is difficult to do...
-{-
+
+
+--make_af:: l -> (a1->b) -> HF l (HF l1 a a1) b
+--make_af method tr = HF (\self-> case (self .!. method ) of HF g -> tr (g self))
+
 class_printable_point y
-  =         printP   .=. (\self-> show (self # getX ) )
+  =         printP   .=. make_f getX id
        .*. (class_point y)
 
 
@@ -244,9 +248,10 @@ testp2 = do
 	  -- Note that 'fix' plays the role of 'new' in the OCaml code...
 	  let p = class_printable_point 7
 	  print (p # getX)
-	  --print (p # printP)
+	  print (case (p # printP) of HF g -> show (g p))
 	  print (((p `contrav` moveD) 3) .!. fieldX)
+	  print (((p `contrav` moveD) 3) # getX)
 	  print (p # getX)
 	  print "OK"
--}
+
 
