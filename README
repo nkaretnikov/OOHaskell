@@ -1,4 +1,4 @@
-(C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+(C) 2004-2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
 OOHaskell -- Haskell's overlooked object system
 
@@ -18,6 +18,7 @@ Here is a brief overview on the sample files:
 - Shapes.hs          -- The famous Shapes Benchmark; real OOP code in Haskell.
 - SelfReturn.hs      -- Returning self; almost.
 - CovariantReturn.hs -- Covariant return types as in Java 5
+- List.hs            -- Illustration of recursive classes
 
 More examples with status "UNDER DEVELOPMENT"
 
@@ -33,4 +34,4 @@ Some extra sample directories:
 - PoorMens2     -- Yet another ...
 - interpreter	-- An idea regarding OO and extensible datatypes
 
-Last updated; January 12, 2005
+Last updated; January 18, 2005

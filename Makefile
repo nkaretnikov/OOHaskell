@@ -9,6 +9,7 @@ hs =	OOHaskell.hs	   \
 	Shapes.hs	   \
 	SelfReturn.hs	   \
 	CovariantReturn.hs \
+	List.hs 	   \
 	Covariance.hs	   \
 	LocalSigs.hs	   \
 	TwoTables.hs
@@ -65,7 +66,9 @@ test: HList
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
 	diff SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
-	diff CovariantReturn.out CovariantReturn.ref
+	diff SelfReturn.out SelfReturn.ref
+	${ghci}	-v0 List.hs < Main.in > List.out
+	diff List.out List.ref
 	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
 	diff Covariance.out Covariance.ref
 	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
