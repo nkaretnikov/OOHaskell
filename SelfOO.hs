@@ -139,32 +139,33 @@ class colored_point x (c : string) =
    object
      inherit point x
      val c = c
-     method color = c
+     method get_c = c
    end;;
 
 let p' = new colored_point 5 "red";;
 val p' : colored_point = <obj>
  
-p'#get_x, p'#color;;
+p'#get_x, p'#get_c;;
 - : int * string = (5, "red")
 
 -}
 
 -- We need another label.
-data GetColor; getColor = proxy::Proxy GetColor
+data GetC; getC = proxy::Proxy GetC
 
 -- Inheritance is simple: just adding methods ...
-colored_point x_init (color::String) self
-   = do
+colored_point x_init (color::String) self =
+   do
         p <- printable_point x_init self
-        returnIO $ getColor .=. (returnIO color) .*. p
+        returnIO $ getC .=. (returnIO color) .*. p
 
-testInheritance
-   = do
-        p' <- mfix (colored_point 5 "red")
-        x  <- p' # getX
-        c  <- p' # getColor
-        Prelude.print (x,c)
+
+myColoredOOP =
+   do
+      p' <- mfix (colored_point 5 "red")
+      x  <- p' # getX
+      c  <- p' # getC
+      Prelude.print (x,c)
 
 
 {- Ocaml Tutorial: 3.7 Inheritance
@@ -506,7 +507,7 @@ color_pt3 x_init color self
                                putStr   "          color - " 
                                Prelude.print color
                           )
-         .<. getColor .=. ((return color)::IO String)
+         .<. getC .=. ((return color)::IO String)
          .*. p
 
 
@@ -619,7 +620,7 @@ let r = new ref 1 in r#set 2; (r#get);;
 
 main = do 
           putStrLn "mySelfishOOP"     ; mySelfishOOP
-          putStrLn "testInheritance"  ; testInheritance
+          putStrLn "myColoredOOP"     ; myColoredOOP
           putStrLn "testGeneric"      ; testGeneric
           putStrLn "testVirtual"      ; testVirtual
           putStrLn "testVirtual'"     ; testVirtual'
