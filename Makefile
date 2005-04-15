@@ -9,7 +9,7 @@ hs =	OOHaskell.hs	   \
 	Shapes.hs	   \
 	SelfReturn.hs	   \
 	CovariantReturn.hs \
-	List.hs 	   \
+	RecList.hs 	   \
 	Covariance.hs	   \
 	LocalSigs.hs	   \
 	TwoTables.hs
@@ -35,11 +35,11 @@ index.html: pre.html README post.html
 OOHaskell.zip: *.hs *.ref *.html Makefile README
 	mkdir -p OOHaskell
 	cp --preserve ${hs} *.in *.ref README LICENSE Makefile OOHaskell
-	(cd Weirich; gmake clean)
-	(cd Rathman; gmake clean)
-	(cd PoorMens; gmake clean)
-	(cd PoorMens2; gmake clean)
-	(cd interpreter; gmake clean)
+	(cd Weirich; make clean)
+	(cd Rathman; make clean)
+	(cd PoorMens; make clean)
+	(cd PoorMens2; make clean)
+	(cd interpreter; make clean)
 	cp --preserve -r Weirich Rathman PoorMens PoorMens2 interpreter OOHaskell
 	rm -rf OOHaskell/Weirich/CVS
 	rm -rf OOHaskell/Rathman/CVS
@@ -54,31 +54,31 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 #
 test: HList
 	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
-	diff SimpleIO.out SimpleIO.ref
+	diff -b SimpleIO.out SimpleIO.ref
 	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
-	diff SimpleST.out SimpleST.ref
+	diff -b SimpleST.out SimpleST.ref
 	${ghci}	-v0 CircBuffer.hs < Main.in > CircBuffer.out
-	diff CircBuffer.out CircBuffer.ref
+	diff -b CircBuffer.out CircBuffer.ref
 	${ghci}	-v0 Selfish.hs < Main.in > Selfish.out
-	diff Selfish.out Selfish.ref
+	diff -b Selfish.out Selfish.ref
 	${ghci}	-v0 Shapes.hs < Main.in > Shapes.out
-	diff Shapes.out Shapes.ref
+	diff -b Shapes.out Shapes.ref
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
-	diff SelfReturn.out SelfReturn.ref
+	diff -b SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
-	diff SelfReturn.out SelfReturn.ref
-	${ghci}	-v0 List.hs < Main.in > List.out
-	diff List.out List.ref
+	diff -b SelfReturn.out SelfReturn.ref
+	${ghci}	-v0 RecList.hs < Main.in > RecList.out
+	diff -b RecList.out RecList.ref
 	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
-	diff Covariance.out Covariance.ref
+	diff -b Covariance.out Covariance.ref
 	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
-	diff LocalSigs.out LocalSigs.ref
+	diff -b LocalSigs.out LocalSigs.ref
 	${ghci}	-v0 TwoTables.hs < Main.in > TwoTables.out
-	diff TwoTables.out TwoTables.ref
-	(cd interpreter; gmake test)
-	(cd Rathman; gmake test)
-	(cd PoorMens; gmake test)
-	(cd PoorMens2; gmake test)
+	diff -b TwoTables.out TwoTables.ref
+	(cd interpreter; make test)
+	(cd Rathman; make test)
+	(cd PoorMens; make test)
+	(cd PoorMens2; make test)
 
 
 ##############################################################################
@@ -100,8 +100,8 @@ clean:
 	rm -f *~
 	rm -f *.out
 	rm -f index.html OOHaskell.zip
-	(cd Weirich; gmake clean)
-	(cd Rathman; gmake clean)
-	(cd PoorMens; gmake clean)
-	(cd PoorMens2; gmake clean)
-	(cd interpreter; gmake clean)
+	(cd Weirich; make clean)
+	(cd Rathman; make clean)
+	(cd PoorMens; make clean)
+	(cd PoorMens2; make clean)
+	(cd interpreter; make clean)

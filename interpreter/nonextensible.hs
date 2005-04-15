@@ -20,7 +20,7 @@ Also see file "extensible.hs".
 
 
 import Control.Monad.State
-import Data.FiniteMap
+import Data.Map
 import Data.Maybe
 
 
@@ -39,16 +39,16 @@ type Val = Int
 
 
 -- The monadic interpreter function
-interpret :: Exp -> State (FiniteMap Id Val) Val
+interpret :: Exp -> State (Map Id Val) Val
 interpret Zero         = return 0
 interpret (Succ x)     = interpret x >>= return . (+) 1
 interpret (Then x y)   = interpret x >>= const (interpret y)
-interpret (Var i)      = get >>= return . fromJust . flip lookupFM i
+interpret (Var i)      = get >>= return . fromJust . Data.Map.lookup i
 interpret (Assign i x) =
   do 
      v <- interpret x
      m <- get
-     let m' = addToFM m i v
+     let m' = Data.Map.insert i v m
      () <- put m'
      return v
 
@@ -60,4 +60,4 @@ main = print $ fst $ runState (interpret
            (Assign "a" (Succ (Var "a")))
            `Then`
            Succ (Var "a") )
-         ) emptyFM
+         ) Data.Map.empty

@@ -52,4 +52,4 @@ import Data.Typeable
 import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
-import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef)
+import GHC.IOBase hiding (unsafeIOToST, stToIO, writeIORef, readIORef, newIORef, IORef)

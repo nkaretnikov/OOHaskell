@@ -17,7 +17,7 @@ Also see file "nonextensible.hs".
 
 
 import Control.Monad.State
-import Data.FiniteMap
+import Data.Map
 import Data.Maybe
 
 -- Class for expression syntax
@@ -47,7 +47,7 @@ type  Val = Int
 
 class Exp x => Interpret x
  where
-  interpret :: x -> State (FiniteMap Id Val) Val
+  interpret :: x -> State (Map Id Val) Val
 
 instance Interpret Zero
  where
@@ -63,7 +63,7 @@ instance (Interpret x, Interpret y) => Interpret (Then x y)
 
 instance Interpret Var
  where
-  interpret (Var i) = get >>= return . fromJust . flip lookupFM i
+  interpret (Var i) = get >>= return . fromJust . Data.Map.lookup i
 
 instance Interpret x => Interpret (Assign x)
  where
@@ -71,7 +71,7 @@ instance Interpret x => Interpret (Assign x)
     do 
        v <- interpret x
        m <- get
-       let m' = addToFM m i v
+       let m' = insert i v m
        () <- put m'
        return v
 
@@ -83,4 +83,4 @@ main = print $ fst $ runState (interpret
            (Assign "a" (Succ (Var "a")))
            `Then`
            Succ (Var "a") )
-         ) emptyFM
+         ) Data.Map.empty

@@ -17,7 +17,7 @@ fact, we have functional lists behind an OOish interface.
 
 -}
 
-module List where
+module RecList where
 
 import OOHaskell
 

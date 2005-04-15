@@ -3,8 +3,7 @@
 OOHaskell -- Haskell's overlooked object system
 
 The code relies on the HList library.
-The code has been tested with GHC 6.2.
-Because of API renaming, GHC CVS HEAD does not work currently.
+The code has been released for GHC 6.4.
 See the Makefile for ways of running test cases.
 We use overlapping instances because of the favoured model of labels.
 A different model can be used if this is considered an issue.
@@ -18,7 +17,7 @@ Here is a brief overview on the sample files:
 - Shapes.hs          -- The famous Shapes Benchmark; real OOP code in Haskell.
 - SelfReturn.hs      -- Returning self; almost.
 - CovariantReturn.hs -- Covariant return types as in Java 5
-- List.hs            -- Illustration of recursive classes
+- RecList.hs         -- Illustration of recursive classes
 
 More examples with status "UNDER DEVELOPMENT"
 
@@ -34,4 +33,4 @@ Some extra sample directories:
 - PoorMens2     -- Yet another ...
 - interpreter	-- An idea regarding OO and extensible datatypes
 
-Last updated; January 18, 2005
+Last updated; April 14, 2005

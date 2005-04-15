@@ -49,6 +49,7 @@ data OffsetX;  offsetX (_::st s t)   = proxy::Proxy (s, OffsetX)
 
 -- test that hLookupByHNat works even on lists that contain ST s t
 -- with s being the quantified (eventually) variable
+test1 :: ST s Bool
 test1 = do 
 	x <- newSTRef True
 	let p = HCons x (HCons (readSTRef x) HNil)
