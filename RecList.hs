@@ -11,7 +11,7 @@ Illustration of recursive lists.
 We use newtypes to make a type distinction for list objects.  This
 illustrates nominal types for classes. In fact, we needed a type
 distinction to encode ISO-recursive types. Note that we have added a
-Hash instance so that "#" can be used as before.  Also note that we
+HasField instance so that "#" can be used as before.  Also note that we
 have encoded immutable lists here, but this is a detail ... Well, in
 fact, we have functional lists behind an OOish interface.
 
@@ -45,11 +45,11 @@ newtype ListObj a =
 
 
 -- Method access skips newtype
-instance Hash l (ListInterface a) v =>
-         Hash l (ListObj a) v
+instance HasField l (ListInterface a) v =>
+         HasField l (ListObj a) v
   where
-    hLookupByLabel l (ListObj x) =
-     hLookupByLabel l x
+  hLookupByLabel l (ListObj x) = 
+      hLookupByLabel l x
 
 
 -- The class for empty lists

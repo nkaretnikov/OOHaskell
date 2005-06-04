@@ -204,8 +204,8 @@ testHList =
 data FunOnShape -- a type code only!
 
 -- The polymorphic function on shapes
-instance ( Hash (Proxy Draw) r (IO ())
-         , Hash (Proxy RMoveTo) r (Int -> Int -> IO ())
+instance ( HasField (Proxy Draw) r (IO ())
+         , HasField (Proxy RMoveTo) r (Int -> Int -> IO ())
          )
       => Apply FunOnShape r (IO ())
   where
@@ -250,8 +250,8 @@ testExist =
 
 -- The well-quantified existential wrapper
 data WrapShape =
- forall x. ( Hash (Proxy Draw) x (IO ())
-           , Hash (Proxy RMoveTo) x (Int -> Int -> IO ())
+ forall x. ( HasField (Proxy Draw) x (IO ())
+           , HasField (Proxy RMoveTo) x (Int -> Int -> IO ())
            ) => WrapShape x
 
 

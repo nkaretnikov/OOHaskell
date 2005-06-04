@@ -186,11 +186,13 @@ data UF field a = UF (forall r. UpdateableField field r a)
 make_uf:: field -> (a->a) -> UF field a
 make_uf field f = UF (\self -> self .@. (field,f))
 
+{-
 type HasField field r v w = forall x y n. (HZip x y r, HFind field x n, 
 					   HLookupByHNat n y v) =>
     Record r -> w
+-}
 
-data HF field a b = HF (forall r. HasField field r a b)
+data HF field a b = HF (forall r. HasField field r a => Record r -> b)
 make_f:: field -> (a->b) -> HF field a b
 make_f field tr = HF ( tr . (.!. field))
 
