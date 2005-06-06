@@ -136,29 +136,18 @@ instance DeepNarrow' ItsRecord r (Record HNil) where
 -- by GHC. I merely wrote the body of the function deep'narrow' below
 -- the compiler suggested to add a few constrainst, and I did so.
 instance ( DeepNarrow' ItsRecord (Record r) (Record r')
-	 , HZip ls vs r
-	 , HFind l ls n
-	 , HLookupByHNat n vs v
-	 , HLookupByHNat n ls l
+         , H2ProjectByLabels (HCons l HNil) r (HCons (l, v) HNil) rout
 	 , IsIORecord v f, DeepNarrow' f v v'
-	 , HExtend (l,v') (Record r') (Record (HCons (l,v') r'))
-
-         , HZip tx ty r'
-	 , HExtend l tx (HCons l tx)
-	 , HExtend v' ty (HCons v' ty)
-	 , HMember l tx HFalse
-	 , HLabelSet tx
+	 , HRLabelSet (HCons (l,v') r')
 	 )
     => DeepNarrow' ItsRecord (Record r) (Record (HCons (l,v') r')) where
-    deep'narrow' _ r@(Record ur) = result
+    deep'narrow' _ r = result
 	where
 	r'       = (deep'narrow r) :: (Record r')
-	(ls,vs)  = hUnzip ur
-	n        = hFind (undefined::l) ls
-	v        = hLookupByHNat n vs
-	l        = hLookupByHNat n ls
+	labels   = HCons (undefined::l) HNil
+	Record (HCons (l,v) HNil) = hProjectByLabels labels  r
 	(v'::v') = deep'narrow v
-	result   = hExtend (l,v') r'
+	result   = (l,v') .*. r'
 		  
 instance DeepNarrow a b => DeepNarrow' ItsIO (IO a) (IO b) where
     deep'narrow' _ a = a >>= (return . deep'narrow)

@@ -20,7 +20,7 @@ fact, we have functional lists behind an OOish interface.
 module RecList where
 
 import OOHaskell
-
+import Record
 infixr 9 #
 
 m # field = (m .!. field) 

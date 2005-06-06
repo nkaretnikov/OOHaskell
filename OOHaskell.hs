@@ -38,7 +38,7 @@ import CommonMain hiding ( HDeleteMany
                          , TypeCast
                          , typeCast
                          )
-import GhcSyntax
+import GhcSyntax hiding (( .*. ))
 import GhcRecord
 import GhcExperiments
 import TypeEqBoolGeneric
@@ -53,3 +53,6 @@ import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
 import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef)
+
+infixr 2 .*.
+(l,v) .*. (Record r) = mkRecord (HCons (l,v) r)

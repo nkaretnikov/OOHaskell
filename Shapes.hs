@@ -169,6 +169,7 @@ myShapesOOP =
        -- call a rectangle specific function
        arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
        arec # setWidth $ 30
+--       arec # setRadius $ 40
        arec # draw
 
 
@@ -188,7 +189,7 @@ testHList =
        -- set up list of shapes.
        s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
        s2 <- mfix (circle (15::Int) 25 8)
-       let scribble = s1 .*. s2 .*. HNil
+       let scribble = s1 `HCons` (s2 `HCons` HNil)
        
        -- iterate through the list
        -- and handle shapes polymorphically

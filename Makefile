@@ -67,8 +67,8 @@ test: HList
 	diff -b SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
 	diff -b SelfReturn.out SelfReturn.ref
-#	${ghci}	-v0 RecList.hs < Main.in > RecList.out
-#	diff -b RecList.out RecList.ref
+	${ghci}	-v0 RecList.hs < Main.in > RecList.out
+	diff -b RecList.out RecList.ref
 	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
 	diff -b Covariance.out Covariance.ref
 	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
