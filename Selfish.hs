@@ -55,7 +55,7 @@ p#move 2;;
 - : unit = ()
 
 p#print;;
-9- : unit = ()
+- : unit = ()
 
 Dynamically, the variable s is bound at the invocation of a method. In
 particular, when the class printable_point is inherited, the variable
@@ -290,6 +290,7 @@ class concrete_point x_init =
 -- That made abstract_point uninstantiatable!!!
 
 -- This is an optional part in case we want to fix types of virtuals.
+
 abstract_point (x_init::a) self 
   | const False (constrain self ::
                  Proxy (  (Proxy GetX, IO a)
@@ -320,12 +321,10 @@ testVirtual
         p  <- mfix (concrete_point 7)
         --
         -- Note, if the latter is uncommented
-        --     p' <- mfix (abstract_point 7)
+        --   p' <- mfix (abstract_point 7)
         -- we see an error that means "field getX missing"
         -- which reads as follows:
-        --  No instances for ( HFind (Proxy GetX) HNil n,
-        --                     HLookupByHNat n HNil (IO a) )
-        --
+        -- (HasField (Proxy GetX) HNil (IO a))
         p # getX >>= Prelude.print
         p # move $ 2
         p # getX >>= Prelude.print
