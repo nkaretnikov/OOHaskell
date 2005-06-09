@@ -8,7 +8,7 @@ public:
    void setY(int newy);
    void moveTo(int newx, int newy);
    void rMoveTo(int deltax, int deltay);
-   virtual void draw();
+   virtual void draw() = 0;
 
 private:
    int x;

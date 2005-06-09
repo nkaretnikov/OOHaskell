@@ -218,38 +218,38 @@ instance ( HZip la va a
     (la,_) = hUnzip a
     (lb,_) = hUnzip b
 
-class HLub l e | l -> e
+class LubCast l e | l -> e
  where
-  hLub :: l -> [e]
+  lubCast :: l -> [e]
 
 instance ( LubNarrow h h' e
          )
-      => HLub (HCons h (HCons h' HNil)) e
+      => LubCast (HCons h (HCons h' HNil)) e
  where
-  hLub (HCons h (HCons h' _)) = [fst ee, snd ee]
+  lubCast (HCons h (HCons h' _)) = [fst ee, snd ee]
    where
     ee = lubNarrow h h'
 
-instance ( HLub (HCons h (HCons h'' t)) e'
-         , HLub (HCons h' (HCons h'' t)) e''
+instance ( LubCast (HCons h (HCons h'' t)) e'
+         , LubCast (HCons h' (HCons h'' t)) e''
          , LubNarrow e' e'' e
-         , HLub (HCons e (HCons h'' t)) e
+         , LubCast (HCons e (HCons h'' t)) e
          )
-      => HLub (HCons h (HCons h' (HCons h'' t))) e
+      => LubCast (HCons h (HCons h' (HCons h'' t))) e
  where
-  hLub (HCons h (HCons h' t)) = fst e : ( snd e : tail r )
+  lubCast (HCons h (HCons h' t)) = fst e : ( snd e : tail r )
    where
-    e' = hLub (HCons h t)
-    e'' = hLub (HCons h' t)
+    e' = lubCast (HCons h t)
+    e'' = lubCast (HCons h' t)
     e = lubNarrow (head e') (head e'')
-    r = hLub (HCons (fst e) t)
+    r = lubCast (HCons (fst e) t)
 
 yaShapesOOP =
   do
        -- set up array of shapes
        s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
        s2 <- mfix (circle (15::Int) 25 8)
-       let scribble = hLub (HCons s1 (HCons s2 HNil))
+       let scribble = lubCast (HCons s1 (HCons s2 HNil))
        
        -- iterate through the array
        -- and handle shapes polymorphically

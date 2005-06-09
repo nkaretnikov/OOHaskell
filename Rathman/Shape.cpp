@@ -20,6 +20,3 @@ void Shape::rMoveTo(int deltax, int deltay) {
    moveTo(getX() + deltax, getY() + deltay);
 }
 
-// abstract draw method
-void Shape::draw() {
-}
