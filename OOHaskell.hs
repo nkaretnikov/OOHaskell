@@ -52,7 +52,7 @@ import Data.Typeable
 import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
-import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef)
+import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef,unsafeIOToST)
 
 infixr 2 .*.
 (l,v) .*. (Record r) = mkRecord (HCons (l,v) r)
