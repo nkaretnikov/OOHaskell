@@ -141,6 +141,7 @@ type Shape' a
          :*: HNil )
 
 
+
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
@@ -157,6 +158,98 @@ myShapesOOP =
        s2 <- mfix (circle (15::Int) 25 8)
        let scribble :: [Shape Int]
            scribble = [narrow s1, narrow s2]
+       
+       -- iterate through the array
+       -- and handle shapes polymorphically
+       mapM_ (\shape -> do
+                           shape # draw
+                           (shape # rMoveTo) 100 100
+                           shape # draw)
+             scribble
+
+       -- call a rectangle specific function
+       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
+       arec # setWidth $ 30
+--       arec # setRadius $ 40
+       arec # draw
+
+
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+
+--
+-- Experimental code; don't mind.
+-- Should go elsewhere eventually.
+-- 
+
+class UpCastTo f t1 t2 | t1 -> t2
+ where
+  upCastTo :: f -> t1 -> t2
+
+instance UpCastTo f ty1 ty2 => UpCastTo f (tx -> ty1) ty2
+ where
+  upCastTo f _ = upCastTo f (undefined::ty1) 
+
+instance Narrow f t => UpCastTo (Record f) (Record t) (Record t)
+ where
+  upCastTo f _ = narrow f
+
+
+class LubNarrow a b c | a b -> c
+ where
+  lubNarrow :: a -> b -> (c,c)
+
+instance ( HZip la va a
+         , HZip lb vb b
+         , HTIntersect la lb lc
+         , H2ProjectByLabels lc a c aout
+         , H2ProjectByLabels lc b c bout
+         , HRLabelSet c
+         )
+      => LubNarrow (Record a) (Record b) (Record c)
+ where
+  lubNarrow ra@(Record a) rb@(Record b) =
+     ( hProjectByLabels lc ra
+     , hProjectByLabels lc rb
+     )
+   where
+    lc = hTIntersect la lb
+    (la,_) = hUnzip a
+    (lb,_) = hUnzip b
+
+class HLub l e | l -> e
+ where
+  hLub :: l -> [e]
+
+instance ( LubNarrow h h' e
+         )
+      => HLub (HCons h (HCons h' HNil)) e
+ where
+  hLub (HCons h (HCons h' _)) = [fst ee, snd ee]
+   where
+    ee = lubNarrow h h'
+
+instance ( HLub (HCons h (HCons h'' t)) e'
+         , HLub (HCons h' (HCons h'' t)) e''
+         , LubNarrow e' e'' e
+         , HLub (HCons e (HCons h'' t)) e
+         )
+      => HLub (HCons h (HCons h' (HCons h'' t))) e
+ where
+  hLub (HCons h (HCons h' t)) = fst e : ( snd e : tail r )
+   where
+    e' = hLub (HCons h t)
+    e'' = hLub (HCons h' t)
+    e = lubNarrow (head e') (head e'')
+    r = hLub (HCons (fst e) t)
+
+yaShapesOOP =
+  do
+       -- set up array of shapes
+       s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
+       s2 <- mfix (circle (15::Int) 25 8)
+       let scribble = hLub (HCons s1 (HCons s2 HNil))
        
        -- iterate through the array
        -- and handle shapes polymorphically
@@ -263,5 +356,6 @@ data WrapShape =
 
 main = do 
           putStrLn "testCoerce"; myShapesOOP
+          putStrLn "testLub"; yaShapesOOP
           putStrLn "testHList";  testHList
           putStrLn "testExist";  testExist
