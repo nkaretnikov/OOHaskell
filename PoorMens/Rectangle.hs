@@ -10,7 +10,13 @@ data Rectangle =
                , getWidth  :: Int 
                , getHeight :: Int 
                }
- 
+
+-- Constructor
+rectangle x y w h
+ = Rectangle { rectangle2shape = shape x y
+             , getWidth  = w
+             , getHeight = h }
+
 -- Substantiate the subtyping relation
 instance Subtype Rectangle Shape
  where

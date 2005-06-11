@@ -2,36 +2,42 @@
 
 module Polymorph where
 
-import Subtype
 import Shape
 import Circle
 import Rectangle
 
--- We are going to build lists of drawables.
-data Drawable = forall a. Draw a => Drawable a
+{-
 
--- The main function, very much like Rathman's.
+   Compared to the "type extension by polymorphic record tails"
+   approach, the only difference is that we do not necessarily face
+   Shape records but potentially also records that contain Shape
+   records. The only place where this detail matters is in the
+   definition of the existential envelope.
+
+-}
+
+-- Existential envelope for `drawables'
+data Drawable = forall a. Draw a
+  => Drawable a
+
+-- Weirich's / Rathman's test case
 main =
       do
-         -- handle the shapes polymorphically
-         drawloop scribble
+         -- Handle the shapes polymorphically
+         mapM_ ( \(Drawable x) -> 
+                   do
+                      draw x
+                      draw (rMoveTo 100 100 x))
+               scribble
 
-         -- handle rectangle specific instance
+         -- Handle rectangle-specific instance
          draw $ setWidth 30 arectangle
 
       where
-         -- create some shape instances (using existential wrapper)
+         -- Create some shape instances
          scribble = [
-            Drawable (Rectangle (Shape 10 20) 5 6),
-            Drawable (Circle (Shape 15 25) 8)]
+            Drawable (rectangle 10 20 5 6),
+            Drawable (circle 15 25 8)]
 
-         -- create a rectangle instance
-         arectangle = (Rectangle (Shape 0 0) 15 15)
-
--- Iterate through the list of shapes and draw
-drawloop [] = return True
-drawloop (Drawable x:xs) =
-      do
-         draw x
-         draw (rMoveTo 100 100 x)
-         drawloop xs
+         -- Create a rectangle instance
+         arectangle = (rectangle 0 0 15 15)

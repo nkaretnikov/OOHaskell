@@ -11,6 +11,10 @@ data Shape =
            , getY    :: Int
            }
 
+-- Constructor for shapes
+shape x y = Shape { getX = x
+                  , getY = y }
+
 -- Setters
 setX :: Subtype a Shape => Int -> a -> a
 setX i = (.!.) (\s -> s { getX = i} )
@@ -27,7 +31,6 @@ rMoveTo deltax deltay a = moveTo x y a
  where
   x = getX .?. a + deltax
   y = getY .?. a + deltay
-
 
 -- The abstract method for drawing shapes
 class Subtype a Shape => Draw a

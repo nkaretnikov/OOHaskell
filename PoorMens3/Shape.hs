@@ -6,12 +6,12 @@ module Shape where
 data Shape w =
      Shape { getX     :: Int
            , getY     :: Int
-           , shapeExt :: w
-           }
+           , shapeExt :: w }
+
+-- Constructor for shapes
 shape x y w = Shape { getX = x
                     , getY = y
-                    , shapeExt = w
-                    }
+                    , shapeExt = w }
 
 -- Setters
 setX :: Int -> Shape w -> Shape w
