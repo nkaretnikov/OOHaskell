@@ -39,12 +39,14 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 	(cd Rathman; make clean)
 	(cd PoorMens; make clean)
 	(cd PoorMens2; make clean)
+	(cd PoorMens3; make clean)
 	(cd interpreter; make clean)
-	cp --preserve -r Weirich Rathman PoorMens PoorMens2 interpreter OOHaskell
+	cp --preserve -r Weirich Rathman PoorMens PoorMens2 PoorMens3 interpreter OOHaskell
 	rm -rf OOHaskell/Weirich/CVS
 	rm -rf OOHaskell/Rathman/CVS
 	rm -rf OOHaskell/PoorMens/CVS
 	rm -rf OOHaskell/PoorMens2/CVS
+	rm -rf OOHaskell/PoorMens3/CVS
 	rm -rf OOHaskell/interpreter/CVS
 	zip -r OOHaskell.zip OOHaskell
 
@@ -79,6 +81,7 @@ test: HList
 	(cd Rathman; make test)
 	(cd PoorMens; make test)
 	(cd PoorMens2; make test)
+	(cd PoorMens3; make test)
 
 
 ##############################################################################
@@ -124,4 +127,5 @@ clean:
 	(cd Rathman; make clean)
 	(cd PoorMens; make clean)
 	(cd PoorMens2; make clean)
+	(cd PoorMens3; make clean)
 	(cd interpreter; make clean)
