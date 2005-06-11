@@ -670,3 +670,7 @@ main =
      putStrLn "testRestricted"   ; testRestricted
      putStrLn "testRestricted'"  ; testRestricted'
      putStrLn "myDiamondOOP"     ; myDiamondOOP
+
+
+-- :t colored_point
+-- :t mfix $ colored_point (1::Int) "red"

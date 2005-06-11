@@ -94,6 +94,26 @@ HList:
 
 ##############################################################################
 #
+# Start a ghci session for the shapes benchmark
+#
+shapes:
+	${ghci} \
+		-fallow-overlapping-instances \
+		-fallow-undecidable-instances \
+		-i./HList Shapes.hs
+
+##############################################################################
+#
+# Start a ghci session for selfish examples
+#
+self:
+	${ghci} \
+		-fallow-overlapping-instances \
+		-fallow-undecidable-instances \
+		-i./HList Selfish.hs
+
+##############################################################################
+#
 # Clean up file system
 #
 clean:

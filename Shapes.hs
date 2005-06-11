@@ -41,24 +41,26 @@ data Draw;     draw     = proxy::Proxy Draw
 -- Those fields can be any Num.
 -- The fields are private, just as they are in C++ code
 
-shape x_init y_init self
+shape (x_init::t) (y_init::t) self
   = do
       x <- newIORef x_init
       y <- newIORef y_init
       returnIO $
            getX     .=. readIORef x
        .*. getY     .=. readIORef y
-       .*. setX     .=. (\newx -> writeIORef x newx)
-       .*. setY     .=. (\newy -> writeIORef y newy)
-       .*. moveTo   .=. (\newx newy -> do
+       .*. setX     .=. (\(newx::t) -> writeIORef x newx)
+       .*. setY     .=. (\(newy::t) -> writeIORef y newy)
+       .*. moveTo   .=. (\(newx::t) (newy::t) -> do
                                         (self # setX) newx
                                         (self # setY) newy 
+                                        returnIO () -- optional
                         )
-       .*. rMoveTo  .=. (\deltax deltay ->
+       .*. rMoveTo  .=. (\(deltax::t) (deltay::t) ->
                  do
-                    x <- self # getX
-                    y <- self # getY
-                    (self # moveTo) (x + deltax) (y + deltay)
+                    x  <- self # getX
+                    y  <- self # getY
+                    () <- (self # moveTo) (x + deltax) (y + deltay)
+                    returnIO () -- optional
                         )
        .*. emptyRecord
 
@@ -359,3 +361,5 @@ main = do
           putStrLn "testLub"; yaShapesOOP
           putStrLn "testHList";  testHList
           putStrLn "testExist";  testExist
+
+-- :t mfix $ rectangle (1::Int) (2::Int) (3::Int) (4::Int)
