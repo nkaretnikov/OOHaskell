@@ -41,26 +41,24 @@ data Draw;     draw     = proxy::Proxy Draw
 -- Those fields can be any Num.
 -- The fields are private, just as they are in C++ code
 
-shape (x_init::t) (y_init::t) self
+shape x_init y_init self
   = do
       x <- newIORef x_init
       y <- newIORef y_init
       returnIO $
            getX     .=. readIORef x
        .*. getY     .=. readIORef y
-       .*. setX     .=. (\(newx::t) -> writeIORef x newx)
-       .*. setY     .=. (\(newy::t) -> writeIORef y newy)
-       .*. moveTo   .=. (\(newx::t) (newy::t) -> do
+       .*. setX     .=. (\newx -> writeIORef x newx)
+       .*. setY     .=. (\newy -> writeIORef y newy)
+       .*. moveTo   .=. (\newx newy -> do
                                         (self # setX) newx
                                         (self # setY) newy 
-                                        returnIO () -- optional
                         )
-       .*. rMoveTo  .=. (\(deltax::t) (deltay::t) ->
+       .*. rMoveTo  .=. (\deltax deltay ->
                  do
                     x  <- self # getX
                     y  <- self # getY
-                    () <- (self # moveTo) (x + deltax) (y + deltay)
-                    returnIO () -- optional
+                    (self # moveTo) (x + deltax) (y + deltay)
                         )
        .*. emptyRecord
 
