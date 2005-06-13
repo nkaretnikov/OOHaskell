@@ -6,3 +6,4 @@ test:
 
 clean:
 	rm -f *~
+	rm -f *.exe

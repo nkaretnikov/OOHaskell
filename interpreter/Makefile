@@ -12,4 +12,5 @@ test:
 clean:
 	rm -f *~
 	rm -f *.out
+	rm -f *.exe
 	rm -f reference
