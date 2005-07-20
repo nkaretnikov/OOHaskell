@@ -5,13 +5,16 @@ import Circle
 import Rectangle
 
 
--- Tag the shape delta as needed for embedding
+-- Tag the shape delta as needed for embedding into Either
 
 tagShape :: (w -> w') -> Shape w -> Shape w'
 tagShape f s = s { rest = f (rest s) }
 
-untagShape :: (Shape w -> t) -> (Shape w' -> t) -> Shape (Either w w') -> t
-untagShape f g s
+
+-- Discriminate on Either-typed rest of shape
+
+eitherShape :: (Shape w -> t) -> (Shape w' -> t) -> Shape (Either w w') -> t
+eitherShape f g s
   = case rest s of
       (Left s')  -> f (s { rest = s' })
       (Right s') -> g (s { rest = s' })
@@ -21,7 +24,7 @@ untagShape f g s
 
 instance (Draw a, Draw b) => Draw (Either a b)
  where
-  draw = untagShape draw draw
+  draw = eitherShape draw draw
 
 
 -- Weirich's / Rathman's test case
@@ -45,7 +48,7 @@ main =
 
 -- ---------------------------------------------------------------------------
 -- BiFunctors -- should be somewhere in library
--- not needed for this variation on the encoding
+-- Not needed for this variation on the encoding
 
 class BiFunctor f where
   bimap :: (a -> b) -> (c -> d) -> f a c -> f b d
