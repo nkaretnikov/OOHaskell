@@ -4,26 +4,28 @@ import Shape
 
 
 -- The delta of circles
-data CircleDelta =
-     CircleDelta { getRadius :: Int }
+data CircleDelta w =
+     CircleDelta { getRadius  :: Int
+                 , circleTail :: w }
 
 
 -- An extension of Shape
-type Circle = Shape CircleDelta
+type Circle w = Shape (CircleDelta w)
 
 
 -- A "closed" constructor
 circle x y r
- = shape x y $ CircleDelta { getRadius = r }
+ = shape x y $ CircleDelta { getRadius  = r
+                           , circleTail = () }
 
 
 -- Setter
-setRadius :: Int -> Circle -> Circle
-setRadius i s = s { rest = (rest s) { getRadius = i } }
+setRadius :: Int -> Circle w -> Circle w
+setRadius i s = s { shapeTail = (shapeTail s) { getRadius = i } }
 
 
 -- Implement abstract draw method
-instance Draw CircleDelta
+instance Draw (CircleDelta w)
  where
   draw s
     =  putStrLn ("Drawing a Circle at:("
@@ -31,4 +33,4 @@ instance Draw CircleDelta
     ++ ","
     ++ (show (getY s))
     ++ "), radius "
-    ++ (show (getRadius (rest s))))
+    ++ (show (getRadius (shapeTail s))))

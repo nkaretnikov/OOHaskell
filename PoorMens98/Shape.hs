@@ -4,12 +4,12 @@ module Shape where
 data Shape w =
      Shape { getX :: Int
            , getY :: Int
-           , rest :: w }
+           , shapeTail :: w }
 
 -- Constructor for shapes
 shape x y w = Shape { getX = x
                     , getY = y
-                    , rest = w }
+                    , shapeTail = w }
 
 
 -- Reusable functionality on shapes

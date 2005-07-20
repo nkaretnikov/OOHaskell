@@ -8,16 +8,16 @@ import Rectangle
 -- Tag the shape delta as needed for embedding into Either
 
 tagShape :: (w -> w') -> Shape w -> Shape w'
-tagShape f s = s { rest = f (rest s) }
+tagShape f s = s { shapeTail = f (shapeTail s) }
 
 
--- Discriminate on Either-typed rest of shape
+-- Discriminate on Either-typed tail of shape
 
 eitherShape :: (Shape w -> t) -> (Shape w' -> t) -> Shape (Either w w') -> t
 eitherShape f g s
-  = case rest s of
-      (Left s')  -> f (s { rest = s' })
-      (Right s') -> g (s { rest = s' })
+  = case shapeTail s of
+      (Left s')  -> f (s { shapeTail = s' })
+      (Right s') -> g (s { shapeTail = s' })
 
 
 -- Define draw for tagged shapes

@@ -4,34 +4,35 @@ import Shape
 
 
 -- The delta of rectangles
-data RectangleDelta =
-     RectangleDelta { getWidth     :: Int 
-                    , getHeight    :: Int
-                    }
+data RectangleDelta w =
+     RectangleDelta { getWidth      :: Int 
+                    , getHeight     :: Int
+                    , rectangleTail :: w }
 
 
 -- An extension of Shape
-type Rectangle = Shape RectangleDelta
+type Rectangle w = Shape (RectangleDelta w)
 
 
 -- A "closed" constructor
 rectangle x y w h
  = shape x y $ RectangleDelta {
-                 getWidth = w
-               , getHeight = h
+                 getWidth      = w
+               , getHeight     = h
+               , rectangleTail = ()
                }
 
 
 -- Setters
-setHeight :: Int -> Rectangle -> Rectangle
-setHeight i s = s { rest = (rest s) { getHeight = i } }
+setHeight :: Int -> Rectangle w -> Rectangle w
+setHeight i s = s { shapeTail = (shapeTail s) { getHeight = i } }
 
-setWidth :: Int -> Rectangle -> Rectangle
-setWidth i s = s { rest = (rest s) { getWidth = i } }
+setWidth :: Int -> Rectangle w -> Rectangle w
+setWidth i s = s { shapeTail = (shapeTail s) { getWidth = i } }
 
 
 -- Implement abstract draw method
-instance Draw RectangleDelta
+instance Draw (RectangleDelta w)
  where
   draw s
     =   putStrLn ("Drawing a Rectangle at:("
@@ -39,6 +40,6 @@ instance Draw RectangleDelta
     ++ ","
     ++ (show (getY s))
     ++ "), width "
-    ++ (show (getWidth (rest s)))
+    ++ (show (getWidth (shapeTail s)))
     ++ ", height "
-    ++ (show (getHeight (rest s))))
+    ++ (show (getHeight (shapeTail s))))
