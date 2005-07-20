@@ -44,18 +44,3 @@ main =
 
          -- Handle rectangle-specific instance
          draw $ setWidth 30 (rectangle 0 0 15 15)
-
-
--- ---------------------------------------------------------------------------
--- BiFunctors -- should be somewhere in library
--- Not needed for this variation on the encoding
-
-class BiFunctor f where
-  bimap :: (a -> b) -> (c -> d) -> f a c -> f b d
-
-instance BiFunctor Either where
-  bimap f g (Left  x)  = Left (f x)
-  bimap f g (Right x') = Right (g x')
-
-bimap1 f g p1    = bimap (f p1)    (g p1)  
-bimap2 f g p1 p2 = bimap (f p1 p2) (g p1 p2)  

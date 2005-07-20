@@ -24,12 +24,10 @@ rectangle x y w h
 
 -- Setters
 setHeight :: Int -> Rectangle -> Rectangle
-setHeight i s
- = s { rest = (rest s) { getHeight = i } }
+setHeight i s = s { rest = (rest s) { getHeight = i } }
 
 setWidth :: Int -> Rectangle -> Rectangle
-setWidth i s
- = s { rest = (rest s) { getWidth = i } }
+setWidth i s = s { rest = (rest s) { getWidth = i } }
 
 
 -- Implement abstract draw method

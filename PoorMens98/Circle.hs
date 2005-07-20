@@ -19,8 +19,7 @@ circle x y r
 
 -- Setter
 setRadius :: Int -> Circle -> Circle
-setRadius i s
- = s { rest = (rest s) { getRadius = i } }
+setRadius i s = s { rest = (rest s) { getRadius = i } }
 
 
 -- Implement abstract draw method
