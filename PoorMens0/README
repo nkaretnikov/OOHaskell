@@ -1,4 +1,0 @@
-This directory presents an alternative for the Haskell encoding in the
-Shape suite. We do not go beyond Haskell 98. We use a non-extensible
-datatype that anticipates all forms of shapes. Subtyping polymorphism
-becomes a non-issue because all shape entities are of the same type.
