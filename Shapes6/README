@@ -1,0 +1,6 @@
+This is (too) complicated variation on Shapes5.
+We use a general two-parameter class Subtype.
+(Before we use one type class per OO class.)
+We only place the observation/mutation helpers in the Subtype class.
+(Before we placed all OO methods in the type class.)
+This seems to be limiting because virtual methods need extra classes.

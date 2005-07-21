@@ -1,0 +1,6 @@
+Polymorph.hs: Haskell 98 encoding
+Existential.hs: variation that uses forall
+ 
+We use record types that are polymorphic in their tail.
+The Haskell 98 encoding models polym. collections through Either-typed tails.
+

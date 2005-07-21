@@ -1,0 +1,4 @@
+This is a Haskell 98 encoding of the shapes example.
+We use a single algebraic datatype for all kinds of shapes.
+This encoding lacks the OO-like extensibility.
+Also, the encoding is not totally type safe.

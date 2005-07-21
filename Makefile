@@ -37,18 +37,22 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 	cp --preserve ${hs} *.in *.ref README LICENSE Makefile OOHaskell
 	(cd Weirich; make clean)
 	(cd Rathman; make clean)
-	(cd PoorMens0; make clean)
-	(cd PoorMens1; make clean)
-	(cd PoorMens2; make clean)
-	(cd PoorMens3; make clean)
+	(cd Shapes1; make clean)
+	(cd Shapes2; make clean)
+	(cd Shapes3; make clean)
+	(cd Shapes4; make clean)
+	(cd Shapes5; make clean)
+	(cd Shapes6; make clean)
 	(cd interpreter; make clean)
-	cp --preserve -r Weirich Rathman PoorMens0 PoorMens1 PoorMens2 PoorMens3 interpreter OOHaskell
+	cp --preserve -r Weirich Rathman Shapes1 Shapes2 Shapes3 Shapes4 Shapes5 Shapes6 interpreter OOHaskell
 	rm -rf OOHaskell/Weirich/CVS
 	rm -rf OOHaskell/Rathman/CVS
-	rm -rf OOHaskell/PoorMens0/CVS
-	rm -rf OOHaskell/PoorMens1/CVS
-	rm -rf OOHaskell/PoorMens2/CVS
-	rm -rf OOHaskell/PoorMens3/CVS
+	rm -rf OOHaskell/Shapes1/CVS
+	rm -rf OOHaskell/Shapes2/CVS
+	rm -rf OOHaskell/Shapes3/CVS
+	rm -rf OOHaskell/Shapes4/CVS
+	rm -rf OOHaskell/Shapes5/CVS
+	rm -rf OOHaskell/Shapes6/CVS
 	rm -rf OOHaskell/interpreter/CVS
 	zip -r OOHaskell.zip OOHaskell
 
@@ -81,10 +85,12 @@ test: HList
 	diff -b TwoTables.out TwoTables.ref
 	(cd interpreter; make test)
 	(cd Rathman; make test)
-	(cd PoorMens0; make test)
-	(cd PoorMens1; make test)
-	(cd PoorMens2; make test)
-	(cd PoorMens3; make test)
+	(cd Shapes1; make test)
+	(cd Shapes2; make test)
+	(cd Shapes3; make test)
+	(cd Shapes4; make test)
+	(cd Shapes5; make test)
+	(cd Shapes6; make test)
 
 
 ##############################################################################
@@ -128,8 +134,10 @@ clean:
 	rm -f index.html OOHaskell.zip
 	(cd Weirich; make clean)
 	(cd Rathman; make clean)
-	(cd PoorMens0; make clean)
-	(cd PoorMens1; make clean)
-	(cd PoorMens2; make clean)
-	(cd PoorMens3; make clean)
+	(cd Shapes1; make clean)
+	(cd Shapes2; make clean)
+	(cd Shapes3; make clean)
+	(cd Shapes4; make clean)
+	(cd Shapes5; make clean)
+	(cd Shapes6; make clean)
 	(cd interpreter; make clean)

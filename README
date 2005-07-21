@@ -27,11 +27,9 @@ More examples with status "UNDER DEVELOPMENT"
 
 Some extra sample directories:
 
-- Weirich	-- The C++ implementation from the Shapes Benchmark Suite.
-- Rathman	-- The Haskell implementation from the Shape Benchmark Suite.
-- PoorMens      -- Another Haskell implementation of Shapes.
-- PoorMens2     -- Yet another ...
-- PoorMens3     -- Yet another ...
-- interpreter	-- An idea regarding OO and extensible datatypes
+- Weirich	-- The C++ implementation from the Shapes Code Suite.
+- Rathman	-- The Haskell implementation from the Shape Code Suite.
+- Shapes1 .. 6  -- non-OOHaskell-based implementations of shapes example.
+- interpreter	-- An example that simulates extensible datatypes
 
-Last updated; June 10, 2005
+Last updated; July 21, 2005

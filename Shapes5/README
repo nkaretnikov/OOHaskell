@@ -1,0 +1,11 @@
+Polymorph.hs: Haskell 98 encoding
+Existential.hs: variation that uses forall
+Heterogeneous.hs: variation that uses HList
+Inference.hs: illustration of full type inference
+ 
+We compose together record types from supertype(s) and subtype data.
+We use one type class per OO class.
+We use default methods in the type classes for OO method inheritance.
+The Haskell 98 encoding models polym. collections through Either-typed tails.
+The Existential.hs encoding wraps shapes in ex. envelopes instead.
+The Heterogeneous.hs encoding builds a heterogeneous list instead.
