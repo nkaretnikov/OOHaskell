@@ -19,8 +19,7 @@ rectangle x y w h
  = shape x y $ RectangleDelta {
                  getWidth      = w
                , getHeight     = h
-               , rectangleTail = ()
-               }
+               , rectangleTail = () }
 
 
 -- Setters

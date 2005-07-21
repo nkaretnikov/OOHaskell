@@ -3,10 +3,6 @@ module Rectangle where
 import Shape
 
 
--- An extension of Shape
-type Rectangle w = Shape (RectangleDelta w)
-
-
 -- The delta for rectangles
 data RectangleDelta w =
      RectangleDelta { getWidth'     :: Int 
@@ -15,6 +11,10 @@ data RectangleDelta w =
                     , setHeight'    :: Int -> Rectangle w
                     , rectangleTail :: w
                     }
+
+
+-- An extension of Shape
+type Rectangle w = Shape (RectangleDelta w)
 
 
 -- Closed constructor for rectangles

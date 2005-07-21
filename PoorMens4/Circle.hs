@@ -3,16 +3,16 @@ module Circle where
 import Shape
 
 
--- An extension of Shape
-type Circle w = Shape (CircleDelta w)
-
-
 -- The delta of circles
 data CircleDelta w =
      CircleDelta { getRadius'  :: Int
                  , setRadius'  :: Int -> Circle w
                  , circleTail  :: w
                  }
+
+
+-- An extension of Shape
+type Circle w = Shape (CircleDelta w)
 
 
 -- Closed constructor for circles
