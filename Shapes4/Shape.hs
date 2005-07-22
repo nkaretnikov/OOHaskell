@@ -23,12 +23,12 @@ data Shape w =
 
 -- Constructor for shapes
 
-shape x y d t
+shape x y d t s
   = do
        xRef <- newIORef x
        yRef <- newIORef y
        t'   <- t
-       let s = Shape
+       return Shape
                 { getX      = readIORef xRef
                 , getY      = readIORef yRef
                 , setX      = \x' -> writeIORef xRef x'
@@ -42,7 +42,6 @@ shape x y d t
                 , draw      = d s
                 , shapeTail = t' s
                 }
-       return s
 
 
 -- OOish syntax

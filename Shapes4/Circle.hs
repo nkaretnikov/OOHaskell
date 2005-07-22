@@ -4,6 +4,7 @@
 
 module Circle where
 
+import Control.Monad.Fix
 import Data.IORef
 import Shape
 
@@ -24,7 +25,8 @@ type Circle w = Shape (CircleDelta w)
 
 -- Closed constructor for circles
 
-circle x y r = shape x y drawCircle shapeTail
+circle x y r
+  = mfix $ shape x y drawCircle shapeTail
  where
 
   drawCircle s
