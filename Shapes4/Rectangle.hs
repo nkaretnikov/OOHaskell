@@ -31,19 +31,19 @@ rectangle x y w h
   = mfix $ shape x y drawRectangle shapeTail
  where
 
-  drawRectangle s
+  drawRectangle self
     =  
        putStr "Drawing a Rectangle at:(" <<
-       getX s << ls "," << getY s <<
-       ls "), width " << getWidth s <<
-       ls ", height " << getHeight s <<
+       getX self << ls "," << getY self <<
+       ls "), width " << getWidth self <<
+       ls ", height " << getHeight self <<
        ls "\n"
 
   shapeTail
     = do 
          wRef <- newIORef w
          hRef <- newIORef h
-         return (\s -> 
+         return ( \self -> 
             RectangleDelta
                 { getWidth'     = readIORef wRef 
                 , getHeight'    = readIORef hRef

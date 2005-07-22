@@ -29,17 +29,17 @@ circle x y r
   = mfix $ shape x y drawCircle shapeTail
  where
 
-  drawCircle s
+  drawCircle self
     =  
        putStr  "Drawing a Circle at:(" <<
-       getX s << ls "," << getY s <<
-       ls "), radius " << getRadius s <<
+       getX self << ls "," << getY self <<
+       ls "), radius " << getRadius self <<
        ls "\n"
 
   shapeTail 
     = do 
          rRef <- newIORef r
-         return (\s -> 
+         return ( \self -> 
             CircleDelta
                 { getRadius' = readIORef rRef
                 , setRadius' = \r' ->  writeIORef rRef r'

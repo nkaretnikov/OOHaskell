@@ -23,24 +23,24 @@ data Shape w =
 
 -- Constructor for shapes
 
-shape x y d t s
+shape x y concreteDraw tail self
   = do
-       xRef <- newIORef x
-       yRef <- newIORef y
-       t'   <- t
+       xRef  <- newIORef x
+       yRef  <- newIORef y
+       tail' <- tail
        return Shape
                 { getX      = readIORef xRef
                 , getY      = readIORef yRef
                 , setX      = \x' -> writeIORef xRef x'
                 , setY      = \y' -> writeIORef yRef y'
-                , moveTo    = \x' y' -> do { setX s x'; setY s y' }
+                , moveTo    = \x' y' -> do { setX self x'; setY self y' }
                 , rMoveTo   = \deltax deltay -> 
                                 do
-                                   x <- getX s
-                                   y <- getY s
-                                   moveTo s (x+deltax) (y+deltay)
-                , draw      = d s
-                , shapeTail = t' s
+                                   x <- getX self
+                                   y <- getY self
+                                   moveTo self (x+deltax) (y+deltay)
+                , draw      = concreteDraw self
+                , shapeTail = tail' self
                 }
 
 
