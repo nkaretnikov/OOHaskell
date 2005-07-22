@@ -7,6 +7,7 @@ module Polymorph where
 import Shape
 import Circle
 import Rectangle
+import Control.Monad.Fix
 
 
 -- Narrow shapes to a uniform base type
@@ -21,8 +22,8 @@ main =
       do
 
          -- Handle the shapes polymorphically
-         s1 <- rectangle 10 20 5 6
-         s2 <- circle 15 25 8
+         s1 <- mfix $ rectangle 10 20 5 6
+         s2 <- mfix $ circle 15 25 8
          let scribble = [ narrowToShape s1
                         , narrowToShape s2
                         ]
@@ -35,6 +36,6 @@ main =
                scribble
 
          -- Handle rectangle-specific instance
-         s3 <- rectangle 0 0 15 15
+         s3 <- mfix $ rectangle 0 0 15 15
          setWidth s3 30
          draw s3

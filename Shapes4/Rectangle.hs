@@ -4,7 +4,6 @@
 
 module Rectangle where
 
-import Control.Monad.Fix
 import Data.IORef
 import Shape
 
@@ -25,10 +24,10 @@ data RectangleDelta w =
 type Rectangle w = Shape (RectangleDelta w)
 
 
--- Closed constructor for rectangles
+-- Constructor for rectangles
 
 rectangle x y w h
-  = mfix $ shape x y drawRectangle shapeTail
+  = shape x y drawRectangle shapeTail
  where
 
   drawRectangle self
