@@ -12,15 +12,12 @@ import Rectangle
 -- Narrow shapes to a uniform base type
 
 narrowToShape :: Shape w -> Shape ()
-narrowToShape s = Shape { getX      = getX s
-                        , getY      = getY s
-                        , setX      = narrowToShape . setX s 
-                        , setY      = narrowToShape . setY s 
-                        , moveTo    = \z -> narrowToShape . moveTo s z 
-                        , rMoveTo   = \z -> narrowToShape . rMoveTo s z 
-                        , draw      = draw s
-                        , shapeTail = ()
-                        }
+narrowToShape s = s { setX      = narrowToShape . setX s
+                    , setY      = narrowToShape . setY s 
+                    , moveTo    = \z -> narrowToShape . moveTo s z 
+                    , rMoveTo   = \z -> narrowToShape . rMoveTo s z
+                    , shapeTail = ()
+                    }
 
 
 -- Weirich's / Rathman's test case

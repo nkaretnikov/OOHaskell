@@ -4,7 +4,7 @@
 
 module Shape where
 
--- Mutable data of extensible shapes
+-- Data of extensible shapes
 
 data Shape w =
      Shape { getX :: Int
@@ -20,6 +20,7 @@ shape x y w = Shape { getX = x
 
 
 -- Reusable functionality on shapes
+-- (These cannot be overridden.)
 
 setX :: Int -> Shape w -> Shape w
 setX i s = s { getX = i }
@@ -38,6 +39,7 @@ rMoveTo deltax deltay s = moveTo x y s
 
 
 -- A class for type-specific drawing
+-- (Virtual methods are generally mapped to such classes.)
 
 class Draw w
  where

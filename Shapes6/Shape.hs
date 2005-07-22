@@ -9,7 +9,7 @@ import Subtype
 import GHC.IOBase
 
 
--- Mutable data of shapes
+-- Data of shapes
 
 data Shape =
      Shape { getX    :: Int

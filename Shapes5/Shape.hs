@@ -5,7 +5,7 @@
 module Shape where
 
 
--- Mutable data of shapes
+-- Data of shapes
 
 data ShapeData =
      ShapeData { valX :: Int
