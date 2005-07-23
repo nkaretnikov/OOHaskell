@@ -4,8 +4,9 @@
 
 module Rectangle where
 
-import Data.IORef
 import Shape
+import GHC.IOBase
+import Data.IORef
 
 
 -- The delta for rectangles
@@ -28,6 +29,36 @@ type Rectangle w = Shape (RectangleDelta w)
 
 rectangle x y w h
   = shape x y drawRectangle shapeTail
+ where
+
+  drawRectangle self
+    =  
+       putStr "Drawing a Rectangle at:(" <<
+       getX self << ls "," << getY self <<
+       ls "), width " << getWidth self <<
+       ls ", height " << getHeight self <<
+       ls "\n"
+
+  shapeTail
+    = do 
+         wRef <- newIORef w
+         hRef <- newIORef h
+         return ( \self -> 
+            RectangleDelta
+                { getWidth'     = readIORef wRef 
+                , getHeight'    = readIORef hRef
+                , setWidth'     = \w' -> writeIORef wRef w'
+                , setHeight'    = \h' -> writeIORef hRef h'
+                , rectangleTail = ()
+                } )
+
+
+-- An alternative constructor for rectangles
+
+rectangle' x y w h self
+  = do 
+       super <- shape' x y shapeTail self
+       returnIO super { draw = drawRectangle self }
  where
 
   drawRectangle self

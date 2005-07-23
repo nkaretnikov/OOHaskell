@@ -4,6 +4,7 @@
 
 module Shape where
 
+import GHC.IOBase
 import Data.IORef
 
 
@@ -28,20 +29,43 @@ shape x y concreteDraw tail self
        xRef  <- newIORef x
        yRef  <- newIORef y
        tail' <- tail
-       return Shape
-                { getX      = readIORef xRef
-                , getY      = readIORef yRef
-                , setX      = \x' -> writeIORef xRef x'
-                , setY      = \y' -> writeIORef yRef y'
-                , moveTo    = \x' y' -> do { setX self x'; setY self y' }
-                , rMoveTo   = \deltax deltay -> 
-                                do
-                                   x <- getX self
-                                   y <- getY self
-                                   moveTo self (x+deltax) (y+deltay)
-                , draw      = concreteDraw self
-                , shapeTail = tail' self
-                }
+       returnIO Shape
+                 { getX      = readIORef xRef
+                 , getY      = readIORef yRef
+                 , setX      = \x' -> writeIORef xRef x'
+                 , setY      = \y' -> writeIORef yRef y'
+                 , moveTo    = \x' y' -> do { setX self x'; setY self y' }
+                 , rMoveTo   = \deltax deltay -> 
+                                 do
+                                    x <- getX self
+                                    y <- getY self
+                                    moveTo self (x+deltax) (y+deltay)
+                 , draw      = concreteDraw self
+                 , shapeTail = tail' self
+                 }
+
+
+-- An alternative constructor
+
+shape' x y tail self
+  = do
+       xRef  <- newIORef x
+       yRef  <- newIORef y
+       tail' <- tail
+       returnIO Shape
+                 { getX      = readIORef xRef
+                 , getY      = readIORef yRef
+                 , setX      = \x' -> writeIORef xRef x'
+                 , setY      = \y' -> writeIORef yRef y'
+                 , moveTo    = \x' y' -> do { setX self x'; setY self y' }
+                 , rMoveTo   = \deltax deltay -> 
+                                 do
+                                    x <- getX self
+                                    y <- getY self
+                                    moveTo self (x+deltax) (y+deltay)
+                 , draw      = putStrLn "Nothing to dwaw"
+                 , shapeTail = tail' self
+                 }
 
 
 -- OOish syntax

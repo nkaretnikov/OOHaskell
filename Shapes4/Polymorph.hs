@@ -36,6 +36,6 @@ main =
                scribble
 
          -- Handle rectangle-specific instance
-         s3 <- mfix $ rectangle 0 0 15 15
+         s3 <- mfix $ rectangle' 0 0 15 15
          setWidth s3 30
          draw s3
