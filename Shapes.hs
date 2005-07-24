@@ -41,6 +41,17 @@ data Draw;     draw     = proxy::Proxy Draw
 -- Those fields can be any Num.
 -- The fields are private, just as they are in C++ code
 
+-- This is an optional part in case we want to fix types of virtuals.
+-- We need this order unless we dare to see an overlapping pattern warning.
+
+shape x_init y_init self 
+  | const False (constrain self ::
+                 Proxy (  (Proxy Draw, IO ())
+                      :*: HNil ))
+  = undefined
+
+-- This is the actual definition
+
 shape x_init y_init self
   = do
       x <- newIORef x_init
@@ -63,6 +74,33 @@ shape x_init y_init self
        .*. emptyRecord
 
 
+-- We make the instantiation test.
+-- This one should throw *if* the draw method is required.
+-- Unfortunately, it does not throw when polymorphism is still present.
+-- GHC 6.4 is very lazy when it comes to instance resolution.1
+
+-- complete_shape  
+--  = concrete $ shape (1::Int) (2::Int)
+
+{-
+
+-- A sort of type annotation
+-- In general, we need explicit eq because of order of structural types
+
+complete_shape = shape
+ where
+  _ = (mfix (shape (1::Int) (2::Int) . narrow)) :: IO (Shape Int)
+
+-}
+
+{-
+    Couldn't match `(:*:) (Proxy Draw, IO ()) HNil' against `HNil'
+      Expected type: Shape Int -> IO (Shape Int)
+      Inferred type: Record ((:*:) (Proxy GetX, IO Int)
+                                   ((:*:) (Proxy GetY, IO Int)
+                                          ((:*:) (Proxy SetX, Int -> IO ())
+                                                 ...
+-}
 
 -- Rectange: inherits from Shape
 -- Again, it is polymorphic in the types of its fields
@@ -286,7 +324,7 @@ testHList =
        
        -- iterate through the list
        -- and handle shapes polymorphically
-       hMapM_ (undefined::FunOnShape) scribble
+       hMapM_ (undefined::ScribbleBody) scribble
 
        -- call a rectangle specific function
        arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
@@ -295,13 +333,13 @@ testHList =
 
 
 -- A type code for the polymorphic function on shapes
-data FunOnShape -- a type code only!
+data ScribbleBody -- a type code only!
 
 -- The polymorphic function on shapes
 instance ( HasField (Proxy Draw) r (IO ())
          , HasField (Proxy RMoveTo) r (Int -> Int -> IO ())
          )
-      => Apply FunOnShape r (IO ())
+      => Apply ScribbleBody r (IO ())
   where
     apply _ x = do
                    x # draw
@@ -325,12 +363,12 @@ testExist =
        -- set up list of shapes.
        s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
        s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
-       let scribble = [ WrapShape s1
-                      , WrapShape s2 ]
+       let scribble = [ HideShape s1
+                      , HideShape s2 ]
        
        -- iterate through the list
        -- and handle shapes polymorphically
-       mapM_ ( \(WrapShape shape) -> do
+       mapM_ ( \(HideShape shape) -> do
                   shape # draw
                   (shape # rMoveTo) 100 100
                   shape # draw )
@@ -343,10 +381,10 @@ testExist =
 
 
 -- The well-quantified existential wrapper
-data WrapShape =
+data OpaqueShape =
  forall x. ( HasField (Proxy Draw) x (IO ())
            , HasField (Proxy RMoveTo) x (Int -> Int -> IO ())
-           ) => WrapShape x
+           ) => HideShape x
 
 
 {-----------------------------------------------------------------------------}

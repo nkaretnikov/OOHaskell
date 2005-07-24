@@ -55,10 +55,10 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
     object
       val mutable x = 0
       method getX = x
-      method move d = x <- x + d
+      method moveX d = x <- x + d
     end;;
  class point :
-   object val mutable x : int method getX : int method move : int ->unit end
+   object val mutable x : int method getX : int method moveX : int ->unit end
 
 -}
 
@@ -67,7 +67,7 @@ testfoo  = foo (field1 .=. True .*. emptyRecord)
 
 data MutableX deriving Typeable; mutableX = proxy::Proxy MutableX
 data GetX  deriving Typeable;    getX     = proxy::Proxy GetX
-data Move  deriving Typeable;    move     = proxy::Proxy Move
+data MoveX  deriving Typeable;    moveX     = proxy::Proxy MoveX
 
 -- Note, here the field 'x' here is intentionally public -- just as in the
 -- Ocaml code above
@@ -78,7 +78,7 @@ point =
       returnIO
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. move     .=. (\d -> modifyIORef x (+d))
+       .*. moveX     .=. (\d -> modifyIORef x (+d))
        .*. emptyRecord
 
 
@@ -90,14 +90,14 @@ point =
 
  Note that the type of p is point. This is an abbreviation
  automatically defined by the class definition above. It stands for the
- object type <getX : int; move : int -> unit>, listing the methods of
+ object type <getX : int; moveX : int -> unit>, listing the methods of
  class point along with their types.
  We now invoke some methods to p:
 
  #p#getX;;
  - : int = 0
 
- #p#move 3;;
+ #p#moveX 3;;
  - : unit = ()
 
  #p#getX;;
@@ -113,7 +113,7 @@ myFirstOOP =
   do
      p <- point -- no need for new!
      p # getX >>= Prelude.print
-     p # move $ 3
+     p # moveX $ 3
      p # getX >>= Prelude.print
 
 -- The field mutableX is public and can be manipulated directly.
@@ -124,7 +124,6 @@ mySecondOOP =
      writeIORef (p # mutableX) 42
      p # getX >>= Prelude.print
 
-    
 
 {- Ocaml Tutorial:
 
@@ -139,10 +138,10 @@ class incrementing_point =
    object
      val mutable x = incr x0; !x0
      method getX  = x
-     method move d = x <- x + d
+     method moveX d = x <- x + d
    end;;
 class incrementing_point :
-  object val mutable x : int method getX : int method move : int -> unit end
+  object val mutable x : int method getX : int method moveX : int -> unit end
  
 new incrementing_point#getX;;
 - : int = 1
@@ -165,7 +164,7 @@ incrementing_point =
            returnIO
              $  mutableX .=. x
             .*. getX     .=. readIORef x
-            .*. move     .=. (\d -> modifyIORef x ((+) d))
+            .*. moveX     .=. (\d -> modifyIORef x ((+) d))
             .*. emptyRecord
        )
 
@@ -192,7 +191,7 @@ class para_point x_init =
      val mutable x    = x_init
      method getX      = x
      method getOffset = x - x_init
-     method move d    = x <- x + d
+     method moveX d    = x <- x + d
    end;;
 
 -}
@@ -210,7 +209,7 @@ para_point x_init
           $  mutableX  .=. x
          .*. getX      .=. readIORef x
          .*. getOffset .=. queryIORef x (\v -> v - x_init)
-         .*. move      .=. (\d -> modifyIORef x ((+) d))
+         .*. moveX      .=. (\d -> modifyIORef x ((+) d))
          .*. emptyRecord
 
 
@@ -221,10 +220,21 @@ testPara =
    do
       p <- para_point 1
       p # getX >>= Prelude.print
-      p # move $ 2
+      p # moveX $ 2
       p # getX >>= Prelude.print
       p # getOffset >>= Prelude.print
 
+
+  
+-- We test the polymorphism of para_point
+myPolyOOP =
+   do
+      p  <- para_point (1::Int)
+      p' <- para_point (1::Double)
+      p  # moveX $ 2
+      p' # moveX $ 2.5
+      p  # getX >>= Prelude.print
+      p' # getX >>= Prelude.print
 
 
 {- Ocaml Tutorial:
@@ -239,7 +249,7 @@ class adjusted_point x_init =
      val mutable x    = origin
      method getX      = x
      method getOffset = x - origin
-     method move d    = x <- x + d
+     method moveX d    = x <- x + d
    end;;
 
 This ability provides class constructors as can be found in other languages.
@@ -256,14 +266,14 @@ adjusted_point x_init
         returnIO $  mutableX  .=. x
                 .*. getX      .=. readIORef x
                 .*. getOffset .=. queryIORef x (\v -> v - origin)
-                .*. move      .=. (\d -> modifyIORef x ((+) d))
+                .*. moveX      .=. (\d -> modifyIORef x ((+) d))
                 .*. emptyRecord
 
 testConstr =
    do
       p <- adjusted_point 11
       p # getX >>= Prelude.print
-      p # move $ 2
+      p # moveX $ 2
       p # getX >>= Prelude.print
       p # getOffset >>= Prelude.print
 

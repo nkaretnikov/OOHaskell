@@ -326,7 +326,7 @@ testVirtual
         p  <- mfix (concrete_point 7)
         --
         -- Note, if the latter is uncommented
-        --   p' <- mfix (abstract_point 7)
+        -- p' <- mfix (abstract_point 7)
         -- we see an error that means "field getX missing"
         -- which reads as follows:
         -- (HasField (Proxy GetX) HNil (IO a))
