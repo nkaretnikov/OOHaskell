@@ -29,7 +29,7 @@ m # field = (m .!. field)
 
 data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
-data Move;     move     = proxy::Proxy Move
+data MoveX;     moveX     = proxy::Proxy MoveX
 data Print;    print    = proxy::Proxy Print
 
 
@@ -44,14 +44,14 @@ class printable_point x_init =
    object (s)
      val mutable x = x_init
      method getX = x
-     method move d = x <- x + d
+     method moveX d = x <- x + d
      method print = print_int s#getX
    end;;
 
 let p = new printable_point 7;;
 val p : printable_point = <obj>
 
-p#move 2;;
+p#moveX 2;;
 - : unit = ()
 
 p#print;;
@@ -72,7 +72,7 @@ printable_point x_init s =
       returnIO
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. move     .=. (\d -> modifyIORef x ((+) d))
+       .*. moveX     .=. (\d -> modifyIORef x (+d))
 --
 -- To be revealed later
 --     .*. print    .=. print_getX s
@@ -91,16 +91,21 @@ print_getX self = ((self # getX ) >>= Prelude.print)
 mySelfishOOP =
    do
       p <- mfix (printable_point 7)
-      p # move $ 2
+      p # moveX $ 2
       p # print
+
+
+concrete_printable_point x_init 
+  = concrete $ printable_point x_init
+
 
 -- We test the polymorphism of printable_point
 myPolyOOP =
    do
       p  <- mfix (printable_point (1::Int))
       p' <- mfix (printable_point (1::Double))
-      p  # move $ 2
-      p' # move $ 2.5
+      p  # moveX $ 2
+      p' # moveX $ 2.5
       p  # print
       p' # print
 
@@ -108,7 +113,7 @@ myPolyOOP =
 myFirstClassOOP point_class =
    do
       p <- mfix (point_class 7)
-      p # move $ 35
+      p # moveX $ 35
       p # print
 
 -- We notice something that was not available in Ocaml. In Ocaml's example,
@@ -119,10 +124,10 @@ myFirstClassOOP point_class =
 testPointInt point_class =
     do
       p <- mfix (point_class 7)
-      p # move $ (2::Int)
+      p # moveX $ (2::Int)
       -- Uncomment the following to see the type error. We do statically
       -- track the type of items in our collection.
-      -- p # move $ (2.0::Double)
+      -- p # moveX $ (2.0::Double)
       p # print
 
 -- Note something else: our class is first-class.
@@ -130,7 +135,7 @@ testPointInt point_class =
 testPointDouble point_class =
     do
       p <- mfix (point_class 11.0)
-      p # move $ 3.0
+      p # moveX $ 3.0
       p # print
 
 testPolyPoints = 
@@ -152,7 +157,7 @@ class printable_point x_init =
    object (self)
      val mutable x = origin
      method getX = x
-     method move d = x <- x + d
+     method moveX d = x <- x + d
      method print = print_int self#getX
      initializer print_string "new point at "; self#print; print_newline()
    end;;
@@ -274,14 +279,14 @@ class virtual abstract_point x_init =
      val mutable x = x_init
      method virtual getX : int
      method print = print_int self#getX
-     method virtual move : int -> unit
+     method virtual moveX : int -> unit
    end;;
 
 class concrete_point x_init =
    object
      inherit abstract_point x_init
      method getX = x
-     method move d = x <- x + d
+     method moveX d = x <- x + d
    end;;
 
 -}
@@ -294,7 +299,7 @@ class concrete_point x_init =
 abstract_point (x_init::a) self 
   | const False (constrain self ::
                  Proxy (  (Proxy GetX, IO a)
-                      :*: (Proxy Move, a -> IO ())
+                      :*: (Proxy MoveX, a -> IO ())
                       :*: HNil ))
   = undefined
 
@@ -313,7 +318,7 @@ concrete_point x_init self
         returnIO
         -- add the missing (pure virtual) methods
           $  getX  .=. readIORef (self # mutableX)
-         .*. move .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+         .*. moveX .=. (\d -> modifyIORef (self # mutableX) (+d))
          .*. p
 
 testVirtual
@@ -326,7 +331,7 @@ testVirtual
         -- which reads as follows:
         -- (HasField (Proxy GetX) HNil (IO a))
         p # getX >>= Prelude.print
-        p # move $ 2
+        p # moveX $ 2
         p # getX >>= Prelude.print
         p # print
 
@@ -339,7 +344,7 @@ abstract_point' x_init self
       returnIO $
 	   mutableX  .=. x
        .*. getX      .=. (proxy::Proxy (IO Int))
-       .*. move      .=. (proxy::Proxy (Int -> IO ()))
+       .*. moveX      .=. (proxy::Proxy (Int -> IO ()))
        .*. print     .=. print_getX self -- now we reuse this function
        .*. emptyRecord
 
@@ -355,7 +360,7 @@ concrete_point' x_init self
         returnIO
         -- use disciplined record update
            $  getX    .=. readIORef (self # mutableX)
-          .^. move   .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+          .^. moveX   .=. (\d -> modifyIORef (self # mutableX) (+d))
           .^. myLabel .=. ()                -- This line could be activated.
 --        .^. myLabel .=. (proxy::Proxy ()) -- A proxy that disables mnew.
           .*. p
@@ -369,7 +374,7 @@ testVirtual'
    = do
         p <- mnew (concrete_point' 7)
         p # getX >>= Prelude.print
-        p # move $ 2
+        p # moveX $ 2
         p # getX >>= Prelude.print
         p # print
 
@@ -385,8 +390,8 @@ class restricted_point x_init =
    object (self)
      val mutable x = x_init
      method getX = x
-     method private move d = x <- x + d
-     method bump = self#move 1
+     method private moveX d = x <- x + d
+     method bump = self#moveX 1
    end;;
 
 class restricted_point :
@@ -395,15 +400,15 @@ class restricted_point :
     val mutable x : int
     method bump : unit
     method getX : int
-    method private move : int -> unit
+    method private moveX : int -> unit
   end
  
 let p = new restricted_point 0;;
 val p : restricted_point = <obj>
  
-p#move 10;;
+p#moveX 10;;
 This expression has type restricted_point
-It has no method move
+It has no method moveX
  
 p#bump;;
 - : unit = ()
@@ -421,11 +426,11 @@ data BumpX; bumpX = proxy::Proxy BumpX
 restricted_point x_init self
   = do
       x <- newIORef x_init
-      let move = (\d -> modifyIORef x ((+) d))
+      let moveX = (\d -> modifyIORef x (+d))
       returnIO $
 	   mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. bumpX    .=. move 2
+       .*. bumpX    .=. moveX 2
        .*. emptyRecord
 
 testRestricted
@@ -438,23 +443,23 @@ testRestricted
 
 -- Unlike the OCaml code, we can also remove a method from the interface.
 -- This allows us to make methods private for existing objects.
--- We first add the bump method that uses the private method move.
+-- We first add the bump method that uses the private method moveX.
 
 bumping_point x_init self
    = do
         p <- printable_point x_init self
         returnIO
-          $  bumpX .=. (self # move $ 2)
+          $  bumpX .=. (self # moveX $ 2)
          .*. p
 
 testRestricted'
    = do
         p  <- mfix (bumping_point 7)
-        let p' = p .-. move
+        let p' = p .-. moveX
         p' # print
         p' # bumpX
         p' # print
-        -- Attempting access to move would result in a type error.
+        -- Attempting access to moveX would result in a type error.
 
 
 
@@ -526,7 +531,7 @@ class printable_colored_point y c =
 
 -- The following method will be shared across all point objects.
 move_method self
-   = move .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+   = moveX .=. (\d -> modifyIORef (self # mutableX) (+d))
 
 
 -- The concrete classes derived from the abstract point class.
@@ -570,12 +575,12 @@ heavy_point x_init color self =
                       putStr "super2: "; (super2 # print)
                       putStr "super3: "; (super3 # print)
      let mymove  = ( \d -> do
-                              super1 # move $ d
-                              super2 # move $ d
-                              super3 # move $ d )
+                              super1 # moveX $ d
+                              super2 # moveX $ d
+                              super3 # moveX $ d )
      return 
        $    print  .=. myprint
-      .*.   move   .=. mymove
+      .*.   moveX   .=. mymove
       .*.   emptyRecord
       .<++. super1
       .<++. super2
@@ -586,7 +591,7 @@ myDiamondOOP =
   do 
      p <- mfix (heavy_point 42 "blue")
      p # print -- All points still agree!
-     p # move $ 2
+     p # moveX $ 2
      p # print -- The third point lacks behind!
 
 -- Note, try

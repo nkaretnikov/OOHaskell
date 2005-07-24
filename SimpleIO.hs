@@ -78,7 +78,7 @@ point =
       returnIO
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. move     .=. (\d -> modifyIORef x ((+) d))
+       .*. move     .=. (\d -> modifyIORef x (+d))
        .*. emptyRecord
 
 

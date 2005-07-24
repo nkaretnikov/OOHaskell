@@ -56,3 +56,8 @@ import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef,unsafeI
 
 infixr 2 .*.
 (l,v) .*. (Record r) = mkRecord (HCons (l,v) r)
+
+
+concrete generator self = generator self
+ where
+  _ = mfix generator
