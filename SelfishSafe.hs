@@ -40,14 +40,15 @@ printable_point x_init s =
       -- s # print 
       srret s (\s->
 	   seq s     -- this is safe and OK
-	   -- $ seq (s # mutableX) -- this loop: not enough laziness in lookup?
+	   -- $ seq (s # mutableX) -- this loops:not enough laziness in lookup?
+	       -- but only if preceded with seq s
            mutableX .=. x
        .*. getX     .=. readIORef x
        .*. move     .=. (\d -> modifyIORef x ((+) d))
        .*. print    .=. ((s # getX ) >>= Prelude.print)
        .*. emptyRecord)
 
-test1 =
+test_pp =
    do
       p <- smrfix (printable_point 7)
       p # move $ 2
@@ -104,6 +105,7 @@ testGeneric
 -- That made abstract_point uninstantiatable!!!
 
 -- This is an optional part in case we want to fix types of virtuals.
+{-
 
 abstract_point (x_init::a) (self :: NotConstructed r)
   | const False (constrain (undefined::r) ::
@@ -111,7 +113,7 @@ abstract_point (x_init::a) (self :: NotConstructed r)
                       :*: (Proxy Move, a -> IO ())
                       :*: HNil ))
   = undefined
-{-
+-}
 abstract_point x_init self =
    do
       x <- newIORef x_init
@@ -124,7 +126,7 @@ abstract_point x_init self =
 concrete_point x_init self
    = do
         p <- abstract_point x_init self -- inherit ...
-        srret p $ \p ->
+        srret (p,self) $ \ (p,self) ->
         -- add the missing (pure virtual) methods
              getX  .=. readIORef (self # mutableX)
          .*. move .=. (\d -> modifyIORef (self # mutableX) ((+) d))
@@ -135,7 +137,7 @@ testVirtual
         p  <- smrfix (concrete_point 7)
         --
         -- Note, if the latter is uncommented
-        --   p' <- mfix (abstract_point 7)
+        --   p' <- smrfix (abstract_point 7)
         -- we see an error that means "field getX missing"
         -- which reads as follows:
         -- (HasField (Proxy GetX) HNil (IO a))
@@ -143,7 +145,6 @@ testVirtual
         p # move $ 2
         p # getX >>= Prelude.print
         p # print
-
 
 -- This abstract point class mentions the type of the virtual methods.
 
@@ -166,7 +167,7 @@ data MyLabel; myLabel = proxy::Proxy MyLabel
 concrete_point' x_init self
    = do
         p <- abstract_point' x_init self -- inherit ...
-        srret p $ \p ->
+        srret (p,self) $ \(p,self) ->
         -- use disciplined record update
               getX    .=. readIORef (self # mutableX)
           .^. move   .=. (\d -> modifyIORef (self # mutableX) ((+) d))
@@ -174,7 +175,6 @@ concrete_point' x_init self
 --        .^. myLabel .=. (proxy::Proxy ()) -- A proxy that disables mnew.
           .*. p
 
-{-
 -- We introduce a constrained new method to refuse proxy fields in records.
 mnew (f::NotConstructed a -> m (NotConstructed a)) = smrfix f
  where
@@ -188,25 +188,17 @@ testVirtual'
         p # getX >>= Prelude.print
         p # print
 
--}
 
 main =
   do 
-     putStrLn "mySelfishOOP"     ; mySelfishOOP
-     putStrLn "myPolyOOP"        ; myPolyOOP
-     putStrLn "myFirstClassOOP"  ; myFirstClassOOP printable_point
-     putStrLn "myFirstClassOOP"  ; myFirstClassOOP $ flip colored_point' "red"
+     putStrLn "Simple Printable Pt"     ; test_pp
      putStrLn "myColoredOOP"     ; myColoredOOP
      putStrLn "myOverridingOOP"  ; myOverridingOOP
      putStrLn "testGeneric"      ; testGeneric
      putStrLn "testVirtual"      ; testVirtual
      putStrLn "testVirtual'"     ; testVirtual'
-     putStrLn "testRestricted"   ; testRestricted
-     putStrLn "testRestricted'"  ; testRestricted'
-     putStrLn "myDiamondOOP"     ; myDiamondOOP
 
 
 -- :t colored_point
 -- :t mfix $ colored_point (1::Int) "red"
 
--}
