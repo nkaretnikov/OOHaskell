@@ -18,6 +18,8 @@ OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 module SelfReturn where
 
 import OOHaskell
+import qualified Prelude (print)
+import Prelude hiding (print)
 
 infixr 9 #
 m # field = (m .!. field) 
@@ -25,15 +27,15 @@ m # field = (m .!. field)
 
 data FieldX;   fieldX   = proxy::Proxy FieldX
 data GetX;     getX     = proxy::Proxy GetX
-data MoveTo;   moveTo   = proxy::Proxy MoveTo
-data Print;    printIt  = proxy::Proxy Print
-data ID;       myself   = proxy::Proxy ID
+data MoveX;    moveX    = proxy::Proxy MoveX
+data Print;    print    = proxy::Proxy Print
+data Me;       me       = proxy::Proxy Me
 
 -- Note, the interface is polymorphic in the type of the value, a
 type PPInterface a
- = Record (  (Proxy GetX    , IO a)
-         :*: (Proxy MoveTo  , a -> IO ())
-         :*: (Proxy Print    , IO ())
+ = Record (  (Proxy GetX   , IO a)
+         :*: (Proxy MoveX  , a -> IO ())
+         :*: (Proxy Print  , IO ())
          :*: HNil )
 
 class_printable_point (x_init::a) self
@@ -42,20 +44,20 @@ class_printable_point (x_init::a) self
       returnIO $
 	   fieldX .=. x
        .*. getX   .=. readIORef x
-       .*. moveTo    .=. (\d -> modifyIORef x (+ d))
-       .*. printIt   .=. ( (self # getX ) >>= print )
-       .*. myself    .=. (narrow self :: PPInterface a)
+       .*. moveX  .=. (\d -> modifyIORef x (+d))
+       .*. print  .=. ( (self # getX ) >>= Prelude.print )
+       .*. me     .=. (narrow self :: PPInterface a)
        .*. emptyRecord
 
 testp1 = do
-	  print "testp1"
+	  Prelude.print "testp1"
 	  -- Note that 'mfix' plays the role of 'new' in the OCaml code...
 	  p <- mfix (class_printable_point 7)
-	  p # getX >>= print
-	  p # moveTo $ 2
-	  p # getX >>= print
-	  p # printIt -- Note, the latter prints the state of the mutated obj!
-	  print "OK"
+	  p # getX >>= Prelude.print
+	  p # moveX $ 2
+	  p # getX >>= Prelude.print
+	  p # print -- Note, the latter prints the state of the mutated obj!
+	  Prelude.print "OK"
 
 
 
@@ -64,32 +66,34 @@ data Color;  colorP   = proxy::Proxy Color
 class_colored_point x_init color self
   = do
       p <- class_printable_point x_init self
-      let super_print = p .!. printIt
+      let super_print = p .!. print
       return $ 
 	     colorP .=. (returnIO color) 
-	 .*. printIt .=. do {print "Color point"; print color; super_print}
-	 .*. (p .-. printIt)
+	 .*. print  .=. do Prelude.print "Color point"
+                           Prelude.print color
+                           super_print
+	 .*. (p .-. print)
 
 testp2 = do
-	  print "testp2"
+	  Prelude.print "testp2"
 	  -- Note that 'mfix' plays the role of 'new' in the OCaml code...
 	  p <- mfix (class_colored_point 5 "red")
-	  p # printIt
---	  do{ x <- p # getX; c <- p # colorP; print (x,c) }
-	  print "OK"
+	  p # print
+--	  do{ x <- p # getX; c <- p # colorP; Prelude.print (x,c) }
+	  Prelude.print "OK"
 
 testp3 = do
-	  print "testp3"
+	  Prelude.print "testp3"
 	  -- Note that 'mfix' plays the role of 'new' in the OCaml code...
 	  pp <- mfix (class_printable_point 7)
 	  pc <- mfix (class_colored_point 5 "red")
-	  pp # printIt
-	  pc # printIt
-	  let pp1 = (pc # myself)
+	  pp # print
+	  pc # print
+	  let pp1 = (pc # me)
 	  -- Note that although pp is of a type Un-colored point,
 	  -- it prints that it is a colored point nevertheless
-	  pp1 # printIt
-	  print "OK"
+	  pp1 # print
+	  Prelude.print "OK"
 
 
 main = do testp1; testp2; testp3

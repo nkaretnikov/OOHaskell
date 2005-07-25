@@ -38,7 +38,7 @@ import CommonMain hiding ( HDeleteMany
                          , TypeCast
                          , typeCast
                          )
-import GhcSyntax hiding (( .*. ))
+import GhcSyntax hiding (( .*. ), ( :=: ))
 import GhcRecord
 import GhcExperiments
 import TypeEqBoolGeneric
@@ -57,6 +57,8 @@ import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef,unsafeI
 infixr 2 .*.
 (l,v) .*. (Record r) = mkRecord (HCons (l,v) r)
 
+infixr 4 :=:
+type l :=: v = (Proxy l,v)
 
 concrete generator self = generator self
  where

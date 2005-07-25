@@ -10,8 +10,6 @@ OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 -- http://www.angelfire.com/tx4/cus/shapes/
 -- We shall try to emulate the `classical' C++ implementation
 -- http://www.angelfire.com/tx4/cus/shapes/cpp.html
--- Please compare it with the Haskell solution in the shapes suite.
--- http://www.angelfire.com/tx4/cus/shapes/haskell.html
 
 -}
 
@@ -161,15 +159,14 @@ circle x y radius self
 -- This interface is used in Encoding 1 below.  When we want to make a
 -- list of abstract Shapes, then we cast objects to this interface.
 
-type Shape a
- = Record (  (Proxy GetX    , IO a)
-         :*: (Proxy GetY    , IO a)
-         :*: (Proxy SetX    , a -> IO ())
-         :*: (Proxy SetY    , a -> IO ())
-         :*: (Proxy MoveTo  , a -> a -> IO ())
-         :*: (Proxy RMoveTo , a -> a -> IO ())
-         :*: (Proxy Draw    , IO ())
-         :*: HNil )
+type Shape a = Record (  GetX    :=: IO a
+                     :*: GetY    :=: IO a
+                     :*: SetX    :=: (a -> IO ())
+                     :*: SetY    :=: (a -> IO ())
+                     :*: MoveTo  :=: (a -> a -> IO ())
+                     :*: RMoveTo :=: (a -> a -> IO ())
+                     :*: Draw    :=: IO ()
+                     :*: HNil )
 
 
 -- In fact this interface would be sufficent
@@ -216,78 +213,17 @@ myShapesOOP =
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
 
---
--- Experimental code; don't mind.
--- Should go elsewhere eventually.
--- 
-
-class UpCastTo f t1 t2 | t1 -> t2
- where
-  upCastTo :: f -> t1 -> t2
-
-instance UpCastTo f ty1 ty2 => UpCastTo f (tx -> ty1) ty2
- where
-  upCastTo f _ = upCastTo f (undefined::ty1) 
-
-instance Narrow f t => UpCastTo (Record f) (Record t) (Record t)
- where
-  upCastTo f _ = narrow f
-
-
-class LubNarrow a b c | a b -> c
- where
-  lubNarrow :: a -> b -> (c,c)
-
-instance ( HZip la va a
-         , HZip lb vb b
-         , HTIntersect la lb lc
-         , H2ProjectByLabels lc a c aout
-         , H2ProjectByLabels lc b c bout
-         , HRLabelSet c
-         )
-      => LubNarrow (Record a) (Record b) (Record c)
- where
-  lubNarrow ra@(Record a) rb@(Record b) =
-     ( hProjectByLabels lc ra
-     , hProjectByLabels lc rb
-     )
-   where
-    lc = hTIntersect la lb
-    (la,_) = hUnzip a
-    (lb,_) = hUnzip b
-
-class LubCast l e | l -> e
- where
-  lubCast :: l -> [e]
-
-instance ( LubNarrow h h' e
-         )
-      => LubCast (HCons h (HCons h' HNil)) e
- where
-  lubCast (HCons h (HCons h' _)) = [fst ee, snd ee]
-   where
-    ee = lubNarrow h h'
-
-instance ( LubCast (HCons h (HCons h'' t)) e'
-         , LubCast (HCons h' (HCons h'' t)) e''
-         , LubNarrow e' e'' e
-         , LubCast (HCons e (HCons h'' t)) e
-         )
-      => LubCast (HCons h (HCons h' (HCons h'' t))) e
- where
-  lubCast (HCons h (HCons h' t)) = fst e : ( snd e : tail r )
-   where
-    e' = lubCast (HCons h t)
-    e'' = lubCast (HCons h' t)
-    e = lubNarrow (head e') (head e'')
-    r = lubCast (HCons (fst e) t)
+-- Encoding 2
+-- We first build a heterogeneous list of shapes.
+-- Then we map over this list to narrow all shapes to the LUB type.
+-- Thereby we obtain a normal homogeneous list.
 
 yaShapesOOP =
   do
        -- set up array of shapes
        s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
        s2 <- mfix (circle (15::Int) 25 8)
-       let scribble = lubCast (HCons s1 (HCons s2 HNil))
+       let scribble = hLubNarrow (HCons s1 (HCons s2 HNil))
        
        -- iterate through the array
        -- and handle shapes polymorphically
@@ -309,7 +245,7 @@ yaShapesOOP =
 {-----------------------------------------------------------------------------}
 
 
--- Encoding 2
+-- Encoding 3
 -- We build a heterogeneous list of shapes.
 -- We use a heterogeneous map over the list.
 -- The polymorphic function of the map is an Apply instance.
@@ -352,7 +288,7 @@ instance ( HasField (Proxy Draw) r (IO ())
 {-----------------------------------------------------------------------------}
 
 
--- Encoding 3
+-- Encoding 4
 -- This time we combine the use of existential quantification
 -- with OOHaskell objects. That is we have quantify the methods
 -- that are going to be invoked for the shape objects.
