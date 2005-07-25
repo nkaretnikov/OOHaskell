@@ -58,6 +58,8 @@ circle x y r self
     = do 
          rRef <- newIORef r
          return ( \self -> 
+		  seq self  -- safe
+		  $ seq (getX self) -- safe
             CircleDelta
                 { getRadius' = readIORef rRef
                 , setRadius' = \r' ->  writeIORef rRef r'
