@@ -43,9 +43,9 @@ data Draw;     draw     = proxy::Proxy Draw
 -- We need this order unless we dare to see an overlapping pattern warning.
 
 shape x_init y_init self 
-  | const False (constrain self ::
-                 Proxy (  (Proxy Draw, IO ())
-                      :*: HNil ))
+  | const False ( narrow self ::
+                    Record (  Draw :=: IO ()
+                          :*: HNil ) )
   = undefined
 
 -- This is the actual definition

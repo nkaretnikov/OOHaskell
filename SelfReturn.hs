@@ -4,14 +4,14 @@
 
 {-
 
-OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+OOHaskell (C) 2004--2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
 -- A method that returns Self
 
--- We cannot return just polymorphic Self
--- But we can return Self that is cast to the approporiate interface
+-- We cannot return just polymorphic Self,
+-- but we can return Self that is cast to the approporiate interface.
 -- This is the same situation as in C++/Java
--- (where the return type of a method must be declared anyway)
+-- (where the return type of a method must be declared anyway).
 
 -}
 
@@ -25,34 +25,47 @@ infixr 9 #
 m # field = (m .!. field) 
 
 
-data FieldX;   fieldX   = proxy::Proxy FieldX
+data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
 data MoveX;    moveX    = proxy::Proxy MoveX
 data Print;    print    = proxy::Proxy Print
 data Me;       me       = proxy::Proxy Me
 
--- Note, the interface is polymorphic in the type of the value, a
-type PPInterface a
- = Record (  (Proxy GetX   , IO a)
-         :*: (Proxy MoveX  , a -> IO ())
-         :*: (Proxy Print  , IO ())
-         :*: HNil )
 
-class_printable_point (x_init::a) self
-  = do
+-- Note, the interface is polymorphic in the type of the value, a
+
+type PPInterface a
+   = Record (  GetX  :=: IO a
+           :*: MoveX :=: (a -> IO ())
+           :*: Print :=: IO ()
+           :*: HNil )
+
+
+-- The base class for this experiment
+
+printable_point x_init s =
+   do
       x <- newIORef x_init
-      returnIO $
-	   fieldX .=. x
-       .*. getX   .=. readIORef x
-       .*. moveX  .=. (\d -> modifyIORef x (+d))
-       .*. print  .=. ( (self # getX ) >>= Prelude.print )
-       .*. me     .=. (narrow self :: PPInterface a)
+      returnIO
+        $  mutableX  .=. x
+       .*. getX      .=. readIORef x
+       .*. moveX     .=. (\d -> modifyIORef x (+d))
+       .*. print     .=. ((s # getX ) >>= Prelude.print)
        .*. emptyRecord
+
+
+self_returning_point (x_init::a) self =
+   do
+      super <- printable_point x_init self
+      returnIO
+          -- Returning self directly is caught by occurs check!
+          -- $  me .=. self
+          $  me .=. (narrow self :: PPInterface a)
+         .*. super
 
 testp1 = do
 	  Prelude.print "testp1"
-	  -- Note that 'mfix' plays the role of 'new' in the OCaml code...
-	  p <- mfix (class_printable_point 7)
+	  p <- mfix (self_returning_point 7)
 	  p # getX >>= Prelude.print
 	  p # moveX $ 2
 	  p # getX >>= Prelude.print
@@ -63,9 +76,9 @@ testp1 = do
 
 data Color;  colorP   = proxy::Proxy Color
 
-class_colored_point x_init color self
+self_returning_point' x_init color self
   = do
-      p <- class_printable_point x_init self
+      p <- self_returning_point x_init self
       let super_print = p .!. print
       return $ 
 	     colorP .=. (returnIO color) 
@@ -76,17 +89,14 @@ class_colored_point x_init color self
 
 testp2 = do
 	  Prelude.print "testp2"
-	  -- Note that 'mfix' plays the role of 'new' in the OCaml code...
-	  p <- mfix (class_colored_point 5 "red")
+	  p <- mfix (self_returning_point' 5 "red")
 	  p # print
---	  do{ x <- p # getX; c <- p # colorP; Prelude.print (x,c) }
 	  Prelude.print "OK"
 
 testp3 = do
 	  Prelude.print "testp3"
-	  -- Note that 'mfix' plays the role of 'new' in the OCaml code...
-	  pp <- mfix (class_printable_point 7)
-	  pc <- mfix (class_colored_point 5 "red")
+	  pp <- mfix (self_returning_point 7)
+	  pc <- mfix (self_returning_point' 5 "red")
 	  pp # print
 	  pc # print
 	  let pp1 = (pc # me)

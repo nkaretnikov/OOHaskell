@@ -197,8 +197,10 @@ data GetColor; getColor = proxy::Proxy GetColor
 -- Inheritance is simple: just adding methods ...
 colored_point x_init (color::String) self =
    do
-        p <- printable_point x_init self
-        returnIO $ getColor .=. (returnIO color) .*. p
+        super <- printable_point x_init self
+        returnIO
+            $  getColor .=. (returnIO color)
+           .*. super
 
 
 myColoredOOP =
@@ -212,13 +214,13 @@ myColoredOOP =
 -- We derive a better class of colored points, which prints more accurately.
 -- To this end, we access the overriden method akin to the OCaml super.
 
-colored_point' x_init color self =
+colored_point' x_init (color::String) self =
    do
-      p <- colored_point x_init color self
+      super <- colored_point x_init color self
       return $  print .=. (
-              do putStr "so far - "; p # print
-                 putStr "color  - "; Prelude.print color )
-            .<. p
+                  do  putStr "so far - "; super # print
+                      putStr "color  - "; Prelude.print color )
+            .<. super
 
 myOverridingOOP =
    do
@@ -276,16 +278,16 @@ methods as other methods.)
 
 class virtual abstract_point x_init =
    object (self)
-     val mutable x = x_init
-     method virtual getX : int
+     val mutable varX = x_init
      method print = print_int self#getX
+     method virtual getX : int
      method virtual moveX : int -> unit
    end;;
 
 class concrete_point x_init =
    object
      inherit abstract_point x_init
-     method getX = x
+     method getX = varX
      method moveX d = x <- x + d
    end;;
 
@@ -297,19 +299,25 @@ class concrete_point x_init =
 -- This is an optional part in case we want to fix types of virtuals.
 
 abstract_point (x_init::a) self 
-  | const False (constrain self ::
-                 Proxy (  (Proxy GetX, IO a)
-                      :*: (Proxy MoveX, a -> IO ())
-                      :*: HNil ))
+  | const False (
+      (narrow self) :: Record (  GetX  :=: IO a
+                             :*: MoveX :=: (a -> IO ())
+                             :*: HNil ) )
   = undefined
 
-abstract_point x_init self =
+abstract_point (x_init::a) self =
    do
-      x <- newIORef x_init
+      xRef <- newIORef x_init
       returnIO $
-           mutableX  .=. x
+           mutableX  .=. xRef
        .*. print     .=. (self # getX >>= Prelude.print )
        .*. emptyRecord
+
+ -- This is an optional part in case we want to fix types of virtuals.
+ where
+  _ = narrow self :: Record (  GetX  :=: IO a
+                           :*: MoveX :=: (a -> IO ())
+                           :*: HNil )
 
 
 concrete_point x_init self
