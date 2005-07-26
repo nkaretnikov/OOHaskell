@@ -81,8 +81,14 @@ myColoredOOP =
 colored_point' x_init color self =
    do
       p <- colored_point x_init color self
-      srret p $ \p -> print .=. (
-              do putStr "so far - "; p # print
+      srret p $ \p -> 
+	  -- Here, it's OK to access the method print of p,
+	  -- even if p isn't constructed yet. Courtesy of non-strict
+	  -- evaluation, old_print will be evaluated only when the construction
+	  -- finishes.
+	  let old_print = p # print in
+	  print .=. (
+              do putStr "so far - "; old_print
                  putStr "color  - "; Prelude.print color )
             .<. p
 

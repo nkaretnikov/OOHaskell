@@ -17,6 +17,7 @@ OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 module Shapes where
 
 import OOHaskell
+import Record
 
 infixr 9 #
 m # field = (m .!. field) 
@@ -134,6 +135,28 @@ rectangle x y width height self
                       ls "\n"
        .*. super
 
+-- Square: inherits from Shape
+-- Again, it is polymorphic in the types of its fields
+-- Like Rectange, in has getWidth and setWidth. But it doesn't
+-- have getHeight and setHeight methods. This is a bit contrived,
+-- but important for the point we make in Encoding 5 below.
+
+square x y width self
+  = do
+      super <- shape x y self
+      w <- newIORef width
+      returnIO $
+           getWidth  .=. readIORef w
+       .*. setWidth  .=. writeIORef w
+       .*. draw      .=. 
+           do
+              putStr  "Drawing a Square at:(" <<
+                      self # getX << ls "," << self # getY <<
+                      ls "), side " << self # getWidth <<
+                      ls "\n"
+       .*. super
+
+
 -- Circle: inherits from Shape
 -- Again, it is polymorphic in the types of its fields
 
@@ -176,7 +199,6 @@ type Shape' a
          :*: HNil )
 
 
-
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
@@ -217,6 +239,7 @@ myShapesOOP =
 -- We first build a heterogeneous list of shapes.
 -- Then we map over this list to narrow all shapes to the LUB type.
 -- Thereby we obtain a normal homogeneous list.
+-- BTW, hLubNarrow could just as well be a multi-variate function
 
 yaShapesOOP =
   do
@@ -321,6 +344,102 @@ data OpaqueShape =
  forall x. ( HasField (Proxy Draw) x (IO ())
            , HasField (Proxy RMoveTo) x (Int -> Int -> IO ())
            ) => HideShape x
+
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+
+-- Encoding 5
+-- We build a homogeneous list of shapes.
+-- We use coercion to an interface to harmonise the different shapes.
+-- This is similar to encoding 2, but use a union-intersection type.
+-- From it, we can downcast -- safely (we can project only what we have
+-- injected)
+
+stynamicDowncast =
+  do
+       -- set up array of shapes
+       -- Need full instantiation for the downcasts to work...
+       -- Actually, I just need a better comparsion function, but I'm
+       -- in a hurry
+       s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
+       s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
+       s3 <- mfix (square (35::Int) (45::Int) (8::Int))
+       let scribble = union'inter (HCons s1 (HCons s2 (HCons s3 HNil)))
+       
+       -- iterate through the array
+       -- and handle shapes polymorphically
+       mapM_ (\shape -> do
+                           shape # draw
+                           (shape # rMoveTo) 100 100
+                           shape # draw)
+             scribble
+
+       -- call a rectangle specific function
+       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
+       arec # setWidth $ 30
+--       arec # setRadius $ 40
+       arec # draw
+
+       -- iterate throw the array and downcasts
+       mapM_ (\shape -> maybe (putStrLn "None")
+	                      (\circ -> do circ # setRadius $ 10;
+			                   circ # draw)
+	                      ((downcast shape) `asTypeOf` (Just s2)))
+             scribble
+
+
+newtype UnionIntersection u = UnionIntersection u
+unUI (UnionIntersection x) = x
+
+class UI l r | l -> r where
+    union'inter :: l -> [UnionIntersection r]
+
+-- Actually, I should take care of duplicates and avoid
+-- excessive injections. But it is already almost 2am...
+
+instance UI (HCons obj HNil) (Either obj obj) where 
+    union'inter (HCons obj HNil) = [UnionIntersection (Left obj)]
+
+instance UI (HCons o2 t) r => 
+    UI (HCons o1 (HCons o2 t)) (Either o1 r) where
+    union'inter (HCons o t) = let ut = union'inter t
+			      in UnionIntersection (Left o) : 
+				 map (UnionIntersection . Right . unUI) ut
+
+-- This essentially computes the intersection
+
+instance (HasField l a v, HasField l b v) 
+    => HasField l (Either a b) v 
+ where
+  hLookupByLabel l (Left a) =  hLookupByLabel l a
+  hLookupByLabel l (Right b) =  hLookupByLabel l b
+
+instance (HasField l u v)
+    => HasField l (UnionIntersection u) v
+ where
+  hLookupByLabel l (UnionIntersection a) =  hLookupByLabel l a
+
+
+class DownCast f t where
+    downcast :: UnionIntersection f -> Maybe t
+
+instance (TypeEq a t bf, Downcast' bf (Either a b) t) 
+    => DownCast (Either a b) t where
+    downcast (UnionIntersection u) = downcast' (undefined::bf) u
+
+class Downcast' bf f t where
+    downcast' :: bf -> f -> Maybe t
+
+instance Downcast' HTrue (Either a b) a where
+    downcast' _ (Left x) = Just x
+    downcast' _ _ = Nothing
+
+instance DownCast (Either c d) t
+    => Downcast' HFalse (Either a (Either c d)) t where
+    downcast' _ (Left x) = Nothing
+    downcast' _ (Right x) = downcast (UnionIntersection x)
+
 
 
 {-----------------------------------------------------------------------------}
