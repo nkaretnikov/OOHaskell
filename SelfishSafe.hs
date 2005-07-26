@@ -18,6 +18,7 @@ import OOHaskell
 import qualified Prelude (print)
 import Prelude hiding (print)
 import SMRFix
+import Debug.Trace
 
 infixr 9 #
 m # field = (m .!. field)
@@ -39,9 +40,10 @@ printable_point x_init s =
       -- Alas, the error is reported at the place of smfix rather than here...
       -- s # print 
       srret s (\s->
-	   seq s     -- this is safe and OK
-	   -- $ seq (s # mutableX) -- this loops:not enough laziness in lookup?
-	       -- but only if preceded with seq s
+	   --trace "in srret" $
+	   -- seq (trace "in srret, seq" 1) $
+	   -- s `seq`
+	   -- seq (trace "in srret, seq 2" 1) $
            mutableX .=. x
        .*. getX     .=. readIORef x
        .*. move     .=. (\d -> modifyIORef x ((+) d))

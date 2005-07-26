@@ -1,7 +1,7 @@
 {-# OPTIONS -fglasgow-exts #-}
 
 -- Safe MFix to prevent staging errors
-
+-- NotConstructed *data* cosntructor is not exported 
 module SMRFix (NotConstructed, smrfix, srret) where
 
 import Control.Monad.Fix
