@@ -73,8 +73,10 @@ test: HList
 	diff -b Shapes.out Shapes.ref
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
 	diff -b SelfReturn.out SelfReturn.ref
+	${ghci}	-v0 DownCast.hs < Main.in > DownCast.out
+	diff -b DownCast.out DownCast.ref
 	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
-	diff -b SelfReturn.out SelfReturn.ref
+	diff -b CovariantReturn.out CovariantReturn.ref
 	${ghci}	-v0 RecList.hs < Main.in > RecList.out
 	diff -b RecList.out RecList.ref
 	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
