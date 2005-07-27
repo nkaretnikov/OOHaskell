@@ -55,7 +55,7 @@ type Sub1  = Record ( Label1 :=: Bool :*: Label2 :=: Int   :*: HNil )
 type Sub2  = Record ( Label1 :=: Bool :*: Label3 :=: Float :*: HNil )
 
 
--- Some records which "annotate" with their type
+-- Some records which are "annotated" with their type
 
 super = narrow (label1 .=. True .*. emptyRecord) :: Super
 sub1  = narrow (label2 .=. 1 .*. super)          :: Sub1
