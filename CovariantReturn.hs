@@ -15,36 +15,96 @@ OOHaskell (C) 2004, 2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 module CovariantReturn where
 
 import OOHaskell
+import qualified Prelude (print)
+import Prelude hiding (print)
 import TypeCastGeneric2
 
 infixr 9 #
 m # field = (m .!. field) 
 
-data GetWidth; getWidth               = proxy::Proxy GetWidth
-data GetHeight; getHeight             = proxy::Proxy GetHeight
-data GetDepth; getDepth               = proxy::Proxy GetDepth
-data GetSide; getSide                 = proxy::Proxy GetSide
-data GetCrossSection; getCrossSection = proxy::Proxy GetCrossSection
 
-class_rectangle width height self
-  = do
-      returnIO $
-           getWidth    .=. returnIO width
-       .*. getHeight   .=. returnIO height
+-- We use the example of 1D points and color points we have seen
+-- earlier (see Selfish.hs)
+data MutableX; mutableX = proxy::Proxy MutableX
+data GetX;     getX     = proxy::Proxy GetX
+data MoveX;     moveX     = proxy::Proxy MoveX
+data Print;    print    = proxy::Proxy Print
+
+printable_point x_init s =
+   do
+      x <- newIORef x_init
+      returnIO
+        $  mutableX .=. x
+       .*. getX     .=. readIORef x
+       .*. moveX     .=. (\d -> modifyIORef x (+d))
+       .*. print    .=. ((s # getX ) >>= Prelude.print)
        .*. emptyRecord
 
-class_square width self
-  = do
-      super <- class_rectangle width width self
-      returnIO $
-           -- I know this is silly when we already have getWidth, but 
-           -- please humour me
-           -- I needed to add SOME method to make the type of class_square 
-           -- different to the
-           -- type of class_rectangle, for the purposes of this demonstration
-           getSide     .=. returnIO width
-       .*. super
+-- and extend it to a colored point
+data GetColor; getColor = proxy::Proxy GetColor
 
+-- Inheritance is simple: just adding methods ...
+colored_point x_init (color::String) self =
+   do
+        super <- printable_point x_init self
+        return 
+            $  getColor .=. (returnIO color)
+	   .*.  (print .=. (
+                  do  putStr "Point at - "; super # print
+                      putStr "color  - "; Prelude.print color )
+                 .<. super)
+
+-- Now we define a vector, specified by two points
+
+data GetP1; getP1               = proxy::Proxy GetP1
+data GetP2; getP2               = proxy::Proxy GetP2
+
+-- Note that vector is a polymorphic class! It is equivalent to a C++
+-- template 
+-- template class Vector<PointT> { PointT p1,p2; ...};
+-- In Haskell, we don't need to do anything special for declaring such
+-- a polymorphic class
+
+vector (p1::p) (p2::p) self =
+   do
+      returnIO $
+           getP1    .=. returnIO p1
+       .*. getP2    .=. returnIO p2
+       .*. print    .=. do self # getP1 >>= ( # print )
+			   self # getP2 >>= ( # print )
+       .*. emptyRecord
+
+
+
+norm v =
+    do
+    p1 <- v # getP1
+    p2 <- v # getP2
+    x1 <- p1 # getX
+    x2 <- p2 # getX
+    return (abs (x1 - x2))
+
+
+test1 = do
+	p1  <- mfix (printable_point 0)
+	p2  <- mfix (printable_point 5)
+	cp1 <- mfix (colored_point 10 "red")
+	cp2 <- mfix (colored_point 25 "red")
+	v1  <- mfix (vector p1 p2)
+	-- Note that cv1 is in depth subtyping to v1!
+	cv1 <- mfix (vector cp1 cp2)
+	v1 # print
+	cv1 # print
+	putStrLn "Length of v1"
+        norm v1 >>= Prelude.print
+	-- Now, pass a cv1 to a function that expects a just a vector
+	-- This shows that cv1 is substitutable for a cv
+	putStrLn "Length of colored cv1"
+        norm cv1 >>= Prelude.print
+	putStrLn "OK"
+
+{-   Some old stuff
+ 
 -- Note: the getWidth field could be associated with width itself
 -- rather than with IO width. However, the getCrossSection field is definitely
 -- associated with an IO action: creation of an object of a class
@@ -89,23 +149,34 @@ test1 = do
 	putStrLn "Volume of cube"
         handle_cuboid cube >>= print
 	print "OK"
+-}
 
--- Now, test narrowing a cube to a cuboid
--- Not only cube is substitutable to a cuboid: a cube
--- can be safely coerced to a cuboid
+-- Now, to place vectors and colored vectors into the same homogeneous
+-- list, we need deep'narrow rather than simple narrow as before
 
 test2 = do
-	(cuboid::cuboid) <- mfix (class_cuboid (10::Int) (20::Int) (30::Int))
-	cube   <- mfix (class_cube (40::Int))
-	let --cuboids:: [cuboid]
-            cuboids = [cuboid, deep'narrow cube]
-            -- The following would raise a type error:
-            -- there is no way a cuboid can be narrowed to a cube!
-            --cuboids = [cube, deep'narrow cuboid]
-	putStrLn "Volumes of cuboids"
-        mapM_ (\cb -> handle_cuboid cb >>= print) cuboids
-	print "OK"
-
+	p1  <- mfix (printable_point 0)
+	p2  <- mfix (printable_point 5)
+	cp1 <- mfix (colored_point (10::Int) "red")
+	cp2 <- mfix (colored_point 25 "red")
+	v1  <- mfix (vector p1 p2)
+	-- Note that cv1 is in depth subtyping to v1!
+	cv1 <- mfix (vector cp1 cp2)
+	let vectors = [deep'narrow v1, deep'narrow cv1]
+		      `asTypeOf` [v1]
+        -- The following would raise a type error:
+	-- with a clear message
+	-- let vectors = [v1, cv1]
+	-- The following also raises an error, with a message
+	-- that essentially says that GetColor method is missing:
+	-- Indeed, v1 cannot be coerced to cv1!
+	-- let vectors = [deep'narrow v1, deep'narrow cv1]
+	--	      `asTypeOf` [cv1]
+	putStrLn "Vectors"
+        mapM_ (\v -> do
+	               v # print
+	               putStr "Length is "; norm v >>= Prelude.print)
+	      vectors
 
 
 data ItsRecord
