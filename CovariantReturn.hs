@@ -27,7 +27,7 @@ m # field = (m .!. field)
 -- earlier (see Selfish.hs)
 data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
-data MoveX;     moveX     = proxy::Proxy MoveX
+data MoveX;    moveX     = proxy::Proxy MoveX
 data Print;    print    = proxy::Proxy Print
 
 printable_point x_init s =
@@ -66,10 +66,10 @@ data GetP2; getP2               = proxy::Proxy GetP2
 -- a polymorphic class
 
 vector (p1::p) (p2::p) self =
-   do
+   do p1r <- newIORef p1; p2r <- newIORef p2
       returnIO $
-           getP1    .=. returnIO p1
-       .*. getP2    .=. returnIO p2
+           getP1    .=. readIORef p1r
+       .*. getP2    .=. readIORef p2r
        .*. print    .=. do self # getP1 >>= ( # print )
 			   self # getP2 >>= ( # print )
        .*. emptyRecord
@@ -78,10 +78,8 @@ vector (p1::p) (p2::p) self =
 
 norm v =
     do
-    p1 <- v # getP1
-    p2 <- v # getP2
-    x1 <- p1 # getX
-    x2 <- p2 # getX
+    p1 <- v # getP1; p2 <- v  # getP2
+    x1 <- p1 # getX; x2 <- p2 # getX
     return (abs (x1 - x2))
 
 
@@ -90,17 +88,17 @@ test1 = do
 	p2  <- mfix (printable_point 5)
 	cp1 <- mfix (colored_point 10 "red")
 	cp2 <- mfix (colored_point 25 "red")
-	v1  <- mfix (vector p1 p2)
-	-- Note that cv1 is in depth subtyping to v1!
-	cv1 <- mfix (vector cp1 cp2)
-	v1 # print
-	cv1 # print
-	putStrLn "Length of v1"
-        norm v1 >>= Prelude.print
-	-- Now, pass a cv1 to a function that expects a just a vector
-	-- This shows that cv1 is substitutable for a cv
-	putStrLn "Length of colored cv1"
-        norm cv1 >>= Prelude.print
+	v  <- mfix (vector p1 p2)
+	-- Note that cv is in depth subtyping to v!
+	cv <- mfix (vector cp1 cp2)
+	v # print
+	cv # print
+	putStrLn "Length of v"
+        norm v >>= Prelude.print
+	-- Now, pass a cv to a function that expects a just a vector
+	-- This shows that cv is substitutable for v
+	putStrLn "Length of colored cv"
+        norm cv >>= Prelude.print
 	putStrLn "OK"
 
 {-   Some old stuff
@@ -159,24 +157,125 @@ test2 = do
 	p2  <- mfix (printable_point 5)
 	cp1 <- mfix (colored_point (10::Int) "red")
 	cp2 <- mfix (colored_point 25 "red")
-	v1  <- mfix (vector p1 p2)
-	-- Note that cv1 is in depth subtyping to v1!
-	cv1 <- mfix (vector cp1 cp2)
-	let vectors = [deep'narrow v1, deep'narrow cv1]
-		      `asTypeOf` [v1]
+	v  <- mfix (vector p1 p2)
+	-- Note that cv is in depth subtyping to v!
+	cv <- mfix (vector cp1 cp2)
+	let vectors = [deep'narrow v, deep'narrow cv]
+		      `asTypeOf` [v]
         -- The following would raise a type error:
 	-- with a clear message
-	-- let vectors = [v1, cv1]
+	-- let vectors = [v, cv]
 	-- The following also raises an error, with a message
 	-- that essentially says that GetColor method is missing:
-	-- Indeed, v1 cannot be coerced to cv1!
-	-- let vectors = [deep'narrow v1, deep'narrow cv1]
-	--	      `asTypeOf` [cv1]
+	-- Indeed, v cannot be coerced to cv!
+	-- let vectors = [deep'narrow v, deep'narrow cv]
+	--	      `asTypeOf` [cv]
 	putStrLn "Vectors"
         mapM_ (\v -> do
 	               v # print
 	               putStr "Length is "; norm v >>= Prelude.print)
 	      vectors
+
+
+
+-- We extend a vector template, with a contra-variant method
+
+data MoveO; moveO               = proxy::Proxy MoveO
+
+vector1 (p1::p) (p2::p) self =
+   do super <- vector p1 p2 self
+      returnIO $
+           moveO    .=. (\p -> do p1 <- self # getP1
+			          xold <- p1 # getX
+			          xnew <- p # getX
+			          p1 # moveX $ (xnew-xold))
+       .*. super
+
+move_origin_to_0 varg = 
+    do
+    zero <- mfix (printable_point 0)
+    varg # moveO $ zero
+
+
+test3 = do
+	p1  <- mfix (printable_point 1)
+	p2  <- mfix (printable_point 5)
+	cp1 <- mfix (colored_point (10::Int) "red")
+	cp2 <- mfix (colored_point 25 "red")
+	v1  <- mfix (vector1 p1 p2)
+	-- Note that cv1 is in depth subtyping to v1!
+	cv1 <- mfix (vector1 cp1 cp2)
+	v1 # print
+	cv1 # print
+	putStrLn "Moving the origin to 0"
+	move_origin_to_0 v1
+	move_origin_to_0 cv1
+	v1 # print
+	cv1 # print
+
+-- We create a vector template, with a co-variant method
+
+data SetO; setO               = proxy::Proxy SetO
+
+vector2 (p1::p) (p2::p) self =
+   do p1r <- newIORef p1; p2r <- newIORef p2
+      returnIO $
+           getP1    .=. readIORef p1r
+       .*. getP2    .=. readIORef p2r
+       .*. setO     .=. writeIORef p1r
+       .*. print    .=. do self # getP1 >>= ( # print )
+			   self # getP2 >>= ( # print )
+       .*. emptyRecord
+
+
+set_origin_to_0 varg = 
+    do
+    zero <- mfix (printable_point 0)
+    varg # setO $ zero
+
+
+test4 = do
+	p1  <- mfix (printable_point 1)
+	p2  <- mfix (printable_point 5)
+	cp1 <- mfix (colored_point (10::Int) "red")
+	cp2 <- mfix (colored_point 25 "red")
+	v2  <- mfix (vector2 p1 p2)
+	-- Note that cv1 is in depth subtyping to v1!
+	cv2 <- mfix (vector2 cp1 cp2)
+	v2 # print
+	cv2 # print
+	putStrLn "Setting the origin to 0"
+	set_origin_to_0 v2
+	-- the following gives a type error!
+	-- Unsafe use of co-variance
+	-- set_origin_to_0 cv2
+	v2 # print
+	cv2 # print
+
+        -- although cv2 is not a subtype of v2, fully, we can still
+	-- substitute cv2 for v2 when it is safe
+	putStrLn "Length of v2"
+        norm v2 >>= Prelude.print
+	-- Now, pass a cv to a function that expects a just a vector
+	-- This shows that vv is substitutable for a v
+	putStrLn "Length of colored cv2"
+        norm cv2 >>= Prelude.print
+
+        -- the following is a type error: can't subtype
+	-- let vectors = [deep'narrow v2, deep'narrow cv2]
+	--	      `asTypeOf` [v2]
+
+        -- so, we need to cast away that offending setO method
+        simplev <- mfix (vector p1 p2)
+	let vectors = [deep'narrow v2, deep'narrow cv2]
+		      `asTypeOf` [simplev]
+
+	putStrLn "Vectors"
+        mapM_ (\v -> do
+	               v # print
+	               putStr "Length is "; norm v >>= Prelude.print)
+	      vectors
+
 
 
 data ItsRecord
@@ -227,3 +326,5 @@ instance DeepNarrow a b => DeepNarrow' ItsIO (IO a) (IO b) where
 main = do
 	  test1
 	  test2
+	  test3
+	  test4

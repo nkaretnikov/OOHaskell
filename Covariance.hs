@@ -47,9 +47,9 @@ is a plant. Cows eat grass but not other plants.
 -- class and field labels
 data CLPlant;   cl_plant   = proxy::Proxy CLPlant
 data CLGrass;   cl_grass   = proxy::Proxy CLGrass
-data Print;    printIt  = proxy::Proxy Print
-data Eat;      eat  = proxy::Proxy Eat
-data Diet;     diet  = proxy::Proxy Diet
+data Print;     printIt    = proxy::Proxy Print
+data Eat;       eat        = proxy::Proxy Eat
+data Diet;      diet       = proxy::Proxy Diet
 
 {-
 -- Note, the interface is polymorphic in the type of the value, a
@@ -86,6 +86,7 @@ type IPHerbFixed
          :*: (Proxy Print    , IO ())
          :*: HNil )
 
+-- this is just a compile-time function
 assert_class cl label = const (return ()) (cl # label)
 
 class_herbivore self 
@@ -109,7 +110,7 @@ test1 = do
 	herb  <- mfix class_herbivore
 	herb # eat $ plant
 	-- Alas, the explicit narrow seems to be needed here
-	-- monomorphic restriction on herb...
+	-- herb is not polymorphic, due to lambda-binding
 	herb # eat $ narrow grass
 	print "OK"
 
