@@ -178,6 +178,7 @@ circle x y radius self
                       ls "\n"
        .*. super
 
+{--
 
 -- This interface is used in Encoding 1 below.  When we want to make a
 -- list of abstract Shapes, then we cast objects to this interface.
@@ -381,7 +382,7 @@ stynamicDowncast =
 --       arec # setRadius $ 40
        arec # draw
 
-       -- iterate throw the array and downcasts
+       -- iterate through the array and downcast
        mapM_ (\shape -> maybe (putStrLn "None")
 	                      (\circ -> do circ # setRadius $ 10;
 			                   circ # draw)
@@ -441,16 +442,137 @@ instance DownCast (Either c d) t
     downcast' _ (Right x) = downcast (UnionIntersection x)
 
 
+--}
+
+
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+{-----------------------------------------------------------------------------}
+
+-- Encoding 5'
+-- We build a homogeneous list of shapes.
+-- This is similar to encoding 5, only with a different universe
+-- and different injection/projection
+-- (HCons a (HCons b HNil)) --> [(HCons (Maybe a) (HCons (Maybe b) HNil))]
+-- Encoding 5 is more efficient, yet the iso-morphism in encoding 5'
+-- seems a bit more elegant
+
+stynamicHDowncast =
+  do
+       -- set up array of shapes
+       -- Need full instantiation for the downcasts to work...
+       -- Actually, I just need a better comparsion function, but I'm
+       -- in a hurry
+       s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
+       s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
+       s3 <- mfix (square (35::Int) (45::Int) (8::Int))
+       let scribble = hunion'inter (HCons s1 (HCons s2 (HCons s3 HNil)))
+       
+       -- iterate through the array
+       -- and handle shapes polymorphically
+       mapM_ (\shape -> do
+                           shape # draw
+                           (shape # rMoveTo) 100 100
+                           shape # draw)
+             scribble
+
+       putStrLn "DownCast to Circle"
+       -- iterate through the array and downcast
+       mapM_ (\shape -> maybe (putStrLn "Not a circle")
+	                      (\circ -> do circ # setRadius $ 10;
+			                   circ # draw)
+	                      ((hdowncast shape) `asTypeOf` (Just s2)))
+             scribble
+
+       putStrLn "DownCast to Square"
+       -- iterate through the array and downcast
+       mapM_ (\shape -> maybe (putStrLn "Not a square")
+	                      (\sq -> do sq # setWidth $ 10;
+			                 sq # draw)
+	                      ((hdowncast shape) `asTypeOf` (Just s3)))
+             scribble
+
+
+newtype HUnionIntersection u = HUnionIntersection u
+unHUI (HUnionIntersection x) = x
+
+class HUI l r | l -> r where
+    hunion'inter :: l -> [HUnionIntersection r]
+
+instance HUI (HCons obj HNil) (HCons (Maybe obj) HNil) where 
+    hunion'inter (HCons obj HNil) = 
+	[HUnionIntersection (HCons (Just obj) HNil)]
+
+instance HUI (HCons o2 t) r => 
+    HUI (HCons o1 (HCons o2 t)) (HCons (Maybe o1) r) where
+    hunion'inter (HCons o t) = 
+	let ut = hunion'inter t
+	in HUnionIntersection (HCons (Just o) undefined) :
+	   map (HUnionIntersection . (HCons Nothing) . unHUI) ut
+
+-- This essentially computes the intersection. Only width sub-typing
+-- at present
+
+instance HasField l a v => 
+    HasField l (HUnionIntersection (HCons (Maybe a) HNil)) v 
+ where
+  hLookupByLabel l (HUnionIntersection (HCons (Just a) _)) 
+      =  hLookupByLabel l a
+
+instance (HasField l a v, 
+	  HasField l (HUnionIntersection (HCons b r)) v)
+    => HasField l (HUnionIntersection (HCons (Maybe a) (HCons b r))) v 
+ where
+  hLookupByLabel l (HUnionIntersection (HCons a r)) 
+      =  maybe (hLookupByLabel l (HUnionIntersection r))
+	       (hLookupByLabel l) a
+
+class HDownCast f t where
+    hdowncast :: HUnionIntersection f -> Maybe t
+
+-- Here, TypeEq can be replaced with the subsumption predicate
+-- that returns HBool bf if the record a contains all the fields of t
+-- Another design choice: we may assume that the label name determines
+-- the type of the corresponding method. That forces the width subtyping
+-- and consistent use of names, at least within one HUnionIntersection
+-- hierarchy. In that case, we can process even records with polymorphic
+-- fields.
+instance (TypeEq a t bf, HDowncast' bf (HCons (Maybe a) r) t)
+    => HDownCast (HCons (Maybe a) r) t where
+    hdowncast = hdowncast' (undefined::bf)
+
+class HDowncast' bf f t where
+    hdowncast' :: bf -> HUnionIntersection f -> Maybe t
+
+instance HDowncast' HTrue (HCons (Maybe a) r) a where
+    hdowncast' _ (HUnionIntersection (HCons ma _)) = ma
+
+instance HDownCast (HCons b r) t
+    => HDowncast' HFalse (HCons (Maybe a) (HCons b r)) t
+    where
+    hdowncast' _ (HUnionIntersection (HCons ma r)) = 
+	maybe (hdowncast (HUnionIntersection r)) (const Nothing) ma
+
+-- We can comment out the latter instance. In that case, the downcast
+-- is truly stynamic: it will statically fail if it is clear statically
+-- that the downcast will fail
+instance HDowncast' HFalse (HCons a HNil) t
+    where
+    hdowncast' _ _ = Nothing
 
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
 
 
+{--
 main = do 
           putStrLn "testCoerce"; myShapesOOP
           putStrLn "testLub"; yaShapesOOP
           putStrLn "testHList";  testHList
           putStrLn "testExist";  testExist
+          putStrLn "stynamicDowncast";  testExist
 
 -- :t mfix $ rectangle (1::Int) (2::Int) (3::Int) (4::Int)
+
+--}
