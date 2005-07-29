@@ -466,7 +466,9 @@ stynamicHDowncast =
        s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
        s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
        s3 <- mfix (square (35::Int) (45::Int) (8::Int))
-       let scribble = hunion'inter (HCons s1 (HCons s2 (HCons s3 HNil)))
+       -- could have used vararg function
+       let scribble = hunion'inter (HCons s2 
+				    (HCons s1 (HCons s2 (HCons s3 HNil))))
        
        -- iterate through the array
        -- and handle shapes polymorphically
@@ -527,8 +529,13 @@ instance (HasField l a v,
       =  maybe (hLookupByLabel l (HUnionIntersection r))
 	       (hLookupByLabel l) a
 
-class HDownCast f t where
-    hdowncast :: HUnionIntersection f -> Maybe t
+hdowncast f = hdowncast1 (undefined::HFalse) f
+
+-- The seen flag (which is an HBool) is for a reason that a type
+-- may not be a unique index in the HList (the list may have duplicates)
+-- So, we keep track if we have already seen the type
+class HDownCast seen f t where
+    hdowncast1 :: seen -> HUnionIntersection f -> Maybe t
 
 -- Here, TypeEq can be replaced with the subsumption predicate
 -- that returns HBool bf if the record a contains all the fields of t
@@ -537,29 +544,38 @@ class HDownCast f t where
 -- and consistent use of names, at least within one HUnionIntersection
 -- hierarchy. In that case, we can process even records with polymorphic
 -- fields.
-instance (TypeEq a t bf, HDowncast' bf (HCons (Maybe a) r) t)
-    => HDownCast (HCons (Maybe a) r) t where
-    hdowncast = hdowncast' (undefined::bf)
+instance (TypeEq a t bf, HDowncast' bf seen (HCons (Maybe a) r) t)
+    => HDownCast seen (HCons (Maybe a) r) t where
+    hdowncast1 = hdowncast1' (undefined::bf)
 
-class HDowncast' bf f t where
-    hdowncast' :: bf -> HUnionIntersection f -> Maybe t
+class HDowncast' bf seen f t where
+    hdowncast1' :: bf -> seen -> HUnionIntersection f -> Maybe t
 
-instance HDowncast' HTrue (HCons (Maybe a) r) a where
-    hdowncast' _ (HUnionIntersection (HCons ma _)) = ma
+instance HDowncast' HTrue seen (HCons (Maybe a) HNil) a where
+    hdowncast1' _ _ (HUnionIntersection (HCons ma _)) = ma
 
-instance HDownCast (HCons b r) t
-    => HDowncast' HFalse (HCons (Maybe a) (HCons b r)) t
+instance HDownCast HTrue (HCons b r) a
+    => HDowncast' HTrue seen (HCons (Maybe a) (HCons b r)) a where
+    hdowncast1' _ _ (HUnionIntersection (HCons ma r)) = 
+	maybe (hdowncast1 (undefined::HTrue) (HUnionIntersection r)) Just ma 
+
+instance HDownCast seen (HCons b r) t
+    => HDowncast' HFalse seen (HCons (Maybe a) (HCons b r)) t
     where
-    hdowncast' _ (HUnionIntersection (HCons ma r)) = 
-	maybe (hdowncast (HUnionIntersection r)) (const Nothing) ma
+    hdowncast1' _ seen (HUnionIntersection (HCons ma r)) = 
+	maybe (hdowncast1 seen (HUnionIntersection r)) (const Nothing) ma
 
+instance HDowncast' HFalse HTrue (HCons a HNil) t
+    where
+    hdowncast1' _ _ _ = Nothing
+{-
 -- We can comment out the latter instance. In that case, the downcast
 -- is truly stynamic: it will statically fail if it is clear statically
 -- that the downcast will fail
-instance HDowncast' HFalse (HCons a HNil) t
+instance HDowncast' HFalse HFalse (HCons a HNil) t
     where
-    hdowncast' _ _ = Nothing
-
+    hdowncast1' _ _ _ = Nothing
+-}
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
 {-----------------------------------------------------------------------------}
