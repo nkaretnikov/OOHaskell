@@ -104,7 +104,7 @@ test: HList
 	diff -b Shapes.out Shapes.ref
 	${ghci}	-v0 ShapesExists.hs < Main.in > Shapes.out
 	diff -b Shapes.out Shapes.ref
-	${ghci}	-v0 ShapesIntersect.hs < Main.in > Shapes.out
+	${ghci}	-v0 ShapesEither.hs < Main.in > Shapes.out
 	diff -b Shapes.out ShapesDown.ref
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
 	diff -b SelfReturn.out SelfReturn.ref
