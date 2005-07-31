@@ -34,7 +34,6 @@ module OOHaskell (
 
 import CommonMain hiding ( HDeleteMany
                          , hDeleteMany
-                         , hLookupByLabel
                          , TypeCast
                          , typeCast
                          )

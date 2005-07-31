@@ -1,6 +1,9 @@
-ghci = ghci -i./HList
-#GHC > 6.2 does not work because of API changes for Typeable/Data.
-#ghci = /home/ralf/cvs/software/ghc-fptools/ghc/compiler/stage2/ghc-inplace --interactive -i./HList
+ghci = ghci \
+		-fglasgow-exts \
+		-fallow-overlapping-instances \
+		-fallow-undecidable-instances \
+		-i./HList
+
 hs =	OOHaskell.hs	   \
 	SimpleIO.hs	   \
 	SimpleST.hs	   \
@@ -18,16 +21,36 @@ hs =	OOHaskell.hs	   \
 #
 # By default build source distribution
 #
+
 all: index.html OOHaskell.zip
 
 ##############################################################################
 #
 # Use this for starting a ghci session
 #
+
 %.ghci: HList
 	${ghci}	$*.hs
 
+
 ##############################################################################
+#
+# Precompilation
+#
+
+OOHaskell.o: OOHaskell.hs HList/*.hs Makefile
+	rm -f HList/*.o
+	ghc  \
+		-fglasgow-exts \
+		-fallow-overlapping-instances \
+		-fallow-undecidable-instances \
+		--make \
+		-i./HList \
+		OOHaskell.hs
+
+
+##############################################################################
+
 
 index.html: pre.html README post.html
 	cat pre.html README post.html > index.html
@@ -60,6 +83,10 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 #
 # Run test cases
 #
+
+# Compiled testing crashes.
+# test: HList OOHaskell.o
+
 test: HList
 	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
 	diff -b SimpleIO.out SimpleIO.ref
@@ -69,8 +96,16 @@ test: HList
 	diff -b CircBuffer.out CircBuffer.ref
 	${ghci}	-v0 Selfish.hs < Main.in > Selfish.out
 	diff -b Selfish.out Selfish.ref
-	${ghci}	-v0 Shapes.hs < Main.in > Shapes.out
+	${ghci}	-v0 ShapesNarrow.hs < Main.in > Shapes.out
 	diff -b Shapes.out Shapes.ref
+	${ghci}	-v0 ShapesLub.hs < Main.in > Shapes.out
+	diff -b Shapes.out Shapes.ref
+	${ghci}	-v0 ShapesHList.hs < Main.in > Shapes.out
+	diff -b Shapes.out Shapes.ref
+	${ghci}	-v0 ShapesExists.hs < Main.in > Shapes.out
+	diff -b Shapes.out Shapes.ref
+	${ghci}	-v0 ShapesIntersect.hs < Main.in > Shapes.out
+	diff -b Shapes.out ShapesDown.ref
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
 	diff -b SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 DownCast.hs < Main.in > DownCast.out
@@ -99,6 +134,7 @@ test: HList
 #
 # Remind the user of the need to link to HList library
 #
+
 HList:
 	@echo
 	@echo "*****************************************"
@@ -106,20 +142,12 @@ HList:
 	@echo "*****************************************"
 	@echo
 
-##############################################################################
-#
-# Start a ghci session for the shapes benchmark
-#
-shapes:
-	${ghci} \
-		-fallow-overlapping-instances \
-		-fallow-undecidable-instances \
-		-i./HList Shapes.hs
 
 ##############################################################################
 #
 # Start a ghci session for selfish examples
 #
+
 self:
 	${ghci} \
 		-fallow-overlapping-instances \
@@ -130,9 +158,13 @@ self:
 #
 # Clean up file system
 #
+
 clean:
 	rm -f *~
 	rm -f *.out
+	rm -f *.o
+	rm -f *.hi
+	(cd HList; make clean)
 	rm -f index.html OOHaskell.zip
 	(cd Weirich; make clean)
 	(cd Rathman; make clean)
@@ -143,3 +175,5 @@ clean:
 	(cd Shapes5; make clean)
 	(cd Shapes6; make clean)
 	(cd interpreter; make clean)
+
+##############################################################################
