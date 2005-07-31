@@ -7,17 +7,17 @@
 -- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
-A variation on the shapes example. We encoded subtyping through
-particular intersection types.  That is, we use a TIC (i.e., a union
-or variant type with unqiue summands) whose OO interface is the
-intersection of the summand types. For short, we call these types
-union-intersection types: UI types. The strong aspect of this encoding
-is that down-casts remain possible *and* no nominal casts are required
-from the programmer. Downcasts are completely type-safe; we can only
-attempt to cast to types that are part of the union. In order to make
-all this work, we need to define several new type-level functions. The
-idea is that these new functions will eventually be moved to the the
-HList or the OOHaskell libraries.
+A variation on the shapes example. We encode subtyping through
+particular intersection types.  That is, we (encode as if we) use a
+TIC (i.e., a union or variant type with unqiue summands) whose OO
+interface is the intersection of the summand types. We use the term
+"union intersection types" (UI types) to denote these types. The
+strong aspect of this encoding is that down-casts remain possible and
+no nominal up-casts are required from the programmer. Down-casts are
+completely type-safe; we can only attempt to cast to types that are
+part of the union. In order to make all this work, we need to define
+several new type-level functions. These new functions may be
+eventually moved to the HList or the OOHaskell libraries.
 
 -}
 
@@ -25,23 +25,31 @@ module ShapesIntersect where
 
 import OOHaskell
 import Shapes
+import TypeCastGeneric2
 
 
 -- The polymorphic scribble loop.
 
 main =
   do
-       -- set up array of shapes
+       --
+       -- Set up array of shapes.
        -- We need full instantiation for the downcasts to work.
        -- ... or a better comparsion function. (Omitted.)
        --
        s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
        s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
        s3 <- mfix (square (35::Int) (45::Int) (8::Int))
-       let scribble = union'inter (HCons s1 (HCons s2 (HCons s3 HNil)))
-       
-       -- iterate through the array
-       -- and handle shapes polymorphically
+
+       -- We could have used a vararg function.
+       let scribble = union'inter (HCons s2 
+			          (HCons s1
+                                  (HCons s2
+                                  (HCons s3
+                                   HNil))))
+
+       -- Iterate through the array
+       -- and handle shapes polymorphically.
        mapM_ (\shape -> do
                            shape # draw
                            (shape # rMoveTo) 100 100
@@ -54,23 +62,24 @@ main =
 --       arec # setRadius $ 40
        arec # draw
 
-       -- iterate through the array and downcast
-       mapM_ (\shape -> maybe (putStrLn "None")
+       -- iterate through the array and downcast to cirlce
+       mapM_ (\shape -> maybe (putStrLn "Not a circle.")
 	                      (\circ -> do circ # setRadius $ 10;
 			                   circ # draw)
-	                      ((downcast shape) `asTypeOf` (Just s2)))
+	                      ((downCast shape) `asTypeOf` (Just s2)))
              scribble
 
 
 -- Construct normal list from HList
 
-class UI l r | l -> r where
+class UI l r | l -> r
+  where
     union'inter :: l -> [r]
 
 
 --
 -- The following encoding does not care about type doubles.
--- Hence, the depth of the sum resembles the number of list elements.
+-- Hence, the depth of the sum equals the number of list elements.
 -- This could be clearly optimised, if necessary.
 --
 
@@ -94,31 +103,57 @@ instance UI (HCons e2 t) r =>
 instance (HasField l a v, HasField l b v) 
        => HasField l (Either a b) v 
  where
-  hLookupByLabel l (Left a) =  hLookupByLabel l a
+  hLookupByLabel l (Left a)  =  hLookupByLabel l a
   hLookupByLabel l (Right b) =  hLookupByLabel l b
 
 
 -- Down-cast a value of an UI type to a summand type
 
-class DownCast f t where
-    downcast :: f -> Maybe t
-
-instance (TypeEq a t bf, Downcast' bf (Either a b) t) 
-    => DownCast (Either a b) t
+class DownCast f t
   where
-    downcast u = downcast' (undefined::bf) u
+    downCast :: f -> Maybe t
 
-class Downcast' bf f t
+instance (DownCastEither bf a b t, TypeEq a t bf) 
+      =>  DownCast (Either a b) t
   where
-    downcast' :: bf -> f -> Maybe t
+    downCast = downCastEither (undefined::bf)
 
-instance Downcast' HTrue (Either a b) a
+instance (DownCastOne bf a t, TypeEq a t bf)
+      =>  DownCast a t
   where
-    downcast' _ (Left x) = Just x
-    downcast' _ _ = Nothing
+    downCast = downCastOne (undefined::bf)
 
-instance DownCast (Either c d) t
-      => Downcast' HFalse (Either a (Either c d)) t
+
+-- Downcast a type, as is.
+
+class DownCastOne bf a t
   where
-    downcast' _ (Left x) = Nothing
-    downcast' _ (Right x) = downcast x
+    downCastOne :: bf -> a -> Maybe t
+
+instance TypeCast a t
+      => DownCastOne HTrue a t
+  where
+    downCastOne _ = Just . typeCast
+
+instance DownCastOne HFalse a t
+  where
+    downCastOne _ = const Nothing
+
+
+-- Downcast a sum-typed value
+
+class DownCastEither bf a b t
+  where
+    downCastEither :: bf -> Either a b -> Maybe t
+
+instance (DownCast b t, TypeCast a t)
+      =>  DownCastEither HTrue a b t
+  where
+    downCastEither _ (Left x)   = Just (typeCast x)
+    downCastEither _ (Right x') = downCast x'
+
+instance DownCast b t
+      => DownCastEither HFalse a b t
+  where
+    downCastEither _ (Left x)   = Nothing
+    downCastEither _ (Right x') = downCast x'
