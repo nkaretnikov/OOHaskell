@@ -36,6 +36,9 @@ all: index.html OOHaskell.zip
 ##############################################################################
 #
 # Precompilation
+# BEWARE!!!
+# This may not work even if interpretation works.
+# Depending on versions and platforms.
 #
 
 OOHaskell.o: OOHaskell.hs HList/*.hs Makefile
@@ -82,10 +85,9 @@ OOHaskell.zip: *.hs *.ref *.html Makefile README
 ##############################################################################
 #
 # Run test cases
+#  Use "make test" for GHC-only test cases.
+#  Use "make test-all" to include C/C++/Hugs test cases.
 #
-
-# Compiled testing crashes.
-# test: HList OOHaskell.o
 
 test: HList
 	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
@@ -120,14 +122,17 @@ test: HList
 	diff -b LocalSigs.out LocalSigs.ref
 	${ghci}	-v0 TwoTables.hs < Main.in > TwoTables.out
 	diff -b TwoTables.out TwoTables.ref
-	(cd interpreter; make test)
-	(cd Rathman; make test)
 	(cd Shapes1; make test)
 	(cd Shapes2; make test)
 	(cd Shapes3; make test)
 	(cd Shapes4; make test)
 	(cd Shapes5; make test)
 	(cd Shapes6; make test)
+
+test-all: test
+	(cd Rathman; make test)
+	(cd interpreter; make test)
+
 
 
 ##############################################################################
