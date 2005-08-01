@@ -18,9 +18,6 @@ import Record
 import Data.Typeable
 import Data.Dynamic
 
-infixr 9 #
-m # field = (m .!. field)
-
 
 -- Up-cast
 
@@ -30,6 +27,7 @@ upCast x = UpCast (narrow x) (toDyn x)
 
 
 -- Down-cast
+
 downCast :: (Typeable b, Narrow b a) => UpCast (Record a) -> Maybe (Record b)
 downCast (UpCast _ d) = fromDynamic d
 

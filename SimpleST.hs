@@ -19,7 +19,7 @@ created that. In that sense, objects are a generalization of a STRef.
 
 module SimpleST where
 
-import OOHaskell
+import OOHaskell hiding (( # ))
 
 -- Our records are wrapped up in STRecord that carries the 's'
 -- type (as a phantom type)

@@ -4,14 +4,12 @@
 
 {-
 
-OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+-- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
+-- Haskell's overlooked object system
 
-UNDER DEVELOPMENT
-
--- Playing with covariance
--- http://www.faqs.org/faqs/eiffel-faq/
--- Question 
--- LCON: Please explain and discuss covariance vs. contravariance.
+-- We demonstrate the encoding of covariance and its type safety in OOHaskell.
+-- We adopt an example from http://www.faqs.org/faqs/eiffel-faq/
+-- Cf. FAQ "LCON: Please explain and discuss covariance vs. contravariance."
 
 -}
 
@@ -19,15 +17,16 @@ UNDER DEVELOPMENT
 module Covariance where
 
 import OOHaskell
-
-infixr 9 #
-m # field = (m .!. field) 
+import qualified Prelude (print)
+import Prelude hiding (print)
 
 
 {-
-Here's another example where a real-world situation suggests a
-covariant solution. Herbivores eat plants. Cows are herbivores. Grass
-is a plant. Cows eat grass but not other plants.
+
+Quoted from the aforementioned FAQ: "Here's another example where a
+real-world situation suggests a covariant solution. Herbivores eat
+plants. Cows are herbivores. Grass is a plant. Cows eat grass but not
+other plants."
 
    class HERBIVORE                               class PLANT
    feature
@@ -41,133 +40,161 @@ is a plant. Cows eat grass but not other plants.
       end
    feature eat(food: GRASS) is ...
 
-
 -}
 
--- class and field labels
-data CLPlant;   cl_plant   = proxy::Proxy CLPlant
-data CLGrass;   cl_grass   = proxy::Proxy CLGrass
-data Print;     printIt    = proxy::Proxy Print
-data Eat;       eat        = proxy::Proxy Eat
-data Diet;      diet       = proxy::Proxy Diet
 
-{-
--- Note, the interface is polymorphic in the type of the value, a
-type PPInterface a
- = Record (  (Proxy GetX    , IO a)
-         :*: (Proxy MoveTo  , a -> IO ())
-         :*: (Proxy Print    , IO ())
-         :*: HNil )
--}
+-- Many labels
 
-class_plant self 
+data Eat;    eat       = proxy::Proxy Eat
+data Diet;   diet      = proxy::Proxy Diet
+data Print;  print     = proxy::Proxy Print
+data Meadow; meadow    = proxy::Proxy Meadow
+
+
+-- The plant base class
+
+plant self 
   = do
-      returnIO $
-           cl_plant  .=. "Plant"
-       .*. printIt   .=. print (self # cl_plant )
-       .*. emptyRecord
+       returnIO
+          $  print .=. putStr "PLANT"
+         .*. emptyRecord
+ 
 
-class_grass self 
+-- Grass -- a subclass of plant
+
+grass (aMeadow::String) self 
   = do
-      plant <- class_plant self
-      let printSuper = plant .!. printIt
-      returnIO $
-           cl_grass  .=. "Grass"
-       .*. printIt   .=. do { print (self # cl_grass ); printSuper }
-       .*. (plant .-. printIt)
+       super <- plant self
+       returnIO
+          $  print  .=. putStr "GRASS"
+         .<. meadow .=. aMeadow -- Grass is more than plant.
+         .*. super
+
+
+-- The interface types for plant and grass
 
 type IPlant 
- = Record (  (Proxy CLPlant , String)
-         :*: (Proxy Print    , IO ())
+ = Record ( Print :=: IO ()
          :*: HNil )
 
-type IPHerbFixed
- = Record (  (Proxy Eat      , IPlant -> IO ())
-         :*: (Proxy Print    , IO ())
+type IGrass
+ = Record (  Print  :=: IO ()
+         :*: Meadow :=: String
          :*: HNil )
 
--- this is just a compile-time function
-assert_class cl label = const (return ()) (cl # label)
 
-class_herbivore self 
+-- The herbivore base class
+
+herbivore self 
   = do
-      returnIO $
-           printIt   .=. print "HERBIVORE"
-       .*. eat       .=. herb_eats self
-       .*. emptyRecord
+       returnIO
+          $  print .=. putStr "HERBIVORE"
+         .*. eat   .=. (\food ->
+                          do
+                             -- We also document the argument type.
+                             let (_::IPlant) = narrow food
+                             self # print
+                             putStr " eats "
+                             food # print
+                             putStr ".\n"
+                       )
+         .*. emptyRecord
 
---herb_eats self (food :: IPlant) = 
-herb_eats self food = 
-    do
-    self # printIt
-    print "Eats"
-    food # printIt
+
+-- A first test case -- no covariance yet
 
 test1 = do
-	print "test1"
-	plant <- mfix class_plant
-	grass <- mfix class_grass
-	herb  <- mfix class_herbivore
-	herb # eat $ plant
-	-- Alas, the explicit narrow seems to be needed here
-	-- herb is not polymorphic, due to lambda-binding
-	herb # eat $ narrow grass
-	print "OK"
+           Prelude.print "test1"
+           --
+           aPlant <- mfix $ plant
+           aGrass <- mfix $ grass "MSFT grassland"
+           aHerb1 <- mfix $ herbivore
+           aHerb2 <- mfix $ herbivore
+           aHerb1 # eat $ aPlant
+           aHerb2 # eat $ aGrass
+           --
+           -- Alas, herbs need to be forced to eat grass once they had plant.
+           -- And we cannot even force them to eat plant once they had grass.
+           -- This is due insufficient polymorphism for the do bindings.
+           --
+           aHerb1 # eat $ narrow aGrass    -- eat with force
+           -- aHerb2 # eat $ narrow aPlant -- cannot eat in this type system
+           --
+           Prelude.print "OK"
 
-class_cow self 
+
+-- Cow -- a subclass of herbivore
+
+cow self 
   = do
-      herb <- class_herbivore self
-      let eatSuper = herb .!. eat
-      returnIO $
-           printIt   .=. print "Cow"
-       .*. eat       .=. (\food -> do { assert_class food cl_grass;
-					eatSuper food})
-       .*. ((herb .-. printIt) .-. eat)
+       super <- herbivore self
+       returnIO
+          $  print .=. putStr "COW"
+         .<. eat   .=. (\food ->
+                          do
+                             -- We assure the picky food constraint.
+                             let (_::IGrass) = narrow food
+                             super # eat $ food
+                       )
+         .<. super
+
+
+-- A test case -- with covariance at work
 
 test2 = do
-	print "test2"
-	plant <- mfix class_plant
-	grass <- mfix class_grass
-	herb  <- mfix class_herbivore
-	cow   <- mfix class_cow
-	herb # eat $ plant
-	-- cow  # eat $ plant -- that would be an error
-	cow  # eat $ grass
-	-- Alas, the explicit narrow seems to be needed here
-	-- monomorphic restriction on herb...
-	herb # eat $ narrow grass
-	print "OK"
+           Prelude.print "test2"
+           --
+           aPlant <- mfix $ plant
+           aGrass <- mfix $ grass "MSFT grassland"
+           aHerb  <- mfix $ herbivore
+           aCow   <- mfix $ cow
+           aHerb # eat $ aPlant
+           -- aCow  # eat $ aPlant -- That would be a type error!
+           aCow  # eat $ aGrass
+           --
+           Prelude.print "OK"
+
+
+-- Let's try to place cows and herbivores together in a container.
+-- We will see that the eat method prevents us from doing so.
 
 test3 = do
-	print "test3"
-	plant <- mfix class_plant
-	grass <- mfix class_grass
-	herb  <- mfix class_herbivore
-	cow   <- mfix class_cow
-	herb # eat $ plant
-	-- cow  # eat $ plant -- that would be an error
-	cow  # eat $ grass
-	-- Alas, the explicit narrow seems to be needed here
-	-- monomorphic restriction on herb...
-	herb # eat $ narrow grass
-	-- let herbl = [herb]
-	-- let herbl1 = cow : herbl -- can't do that: eat method prevents
-	-- let herbl1 = narrow cow : herbl -- that too: eat method prevents
-	let herbl = [herb .-. eat]
-	let herbl1 = narrow cow : herbl -- now that works
-	mapM_ ( # printIt ) herbl1
-	print "OK"
+           Prelude.print "test3"
+           --
+           aHerb  <- mfix herbivore
+           aCow   <- mfix cow
+           --
+           -- Alas, we need to resolve the polymorphism of both guys.
+           --
+           aGrass <- mfix $ grass "any meadow"
+           aHerb # eat $ aGrass
+           aCow  # eat $ aGrass
+           --
+	   let herbList1 = [aHerb]
+	   -- let herbList2 = aCow : herbList1        -- Type error!
+	   -- let herbList2 = narrow aCow : herbList1 -- Still type error!
+           --
+           -- We can treat non-eating cows and herbivores the same.
+           --
+	   let herbList3 = [aHerb .-. eat]
+	   let herbList4 = narrow aCow : herbList3
+	   mapM_ (\x -> do x # print; putStr "\n" ) herbList4
+           --
+           Prelude.print "OK"
 
-{- 
- Regarding the last block of commented lines above.
- The Eiffel FAQ says:
+
+{-
+
+ The aforementioned Eiffel FAQ says:
 
  "The compiler must stop us from putting a COW object into a HERBIVORE
-attribute and trying to feed it a PLANT, but we shouldn't be trying to
-do this anyway."
+ attribute and trying to feed it a PLANT, but we shouldn't be trying
+ to do this anyway."
 
-And indeed, GHC does stop us.
+ And indeed, OOHaskell does stop us.
+
 -}
 
 
 main = do test1; test2; test3
+

@@ -19,10 +19,6 @@ module Shapes where
 import OOHaskell
 
 
-infixr 9 #
-m # field = (m .!. field) 
-
-
 -- The class Shape
 
 -- First, declare the labels.

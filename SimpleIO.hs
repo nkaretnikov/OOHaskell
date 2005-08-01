@@ -17,7 +17,7 @@ The idea is to reconstruct these examples very directly in OOHaskell.
 
 module SimpleIO where
 
-import OOHaskell
+import OOHaskell hiding (( # ))
 import qualified Prelude (print)
 import Prelude hiding (print)
 

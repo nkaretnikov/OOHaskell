@@ -19,12 +19,10 @@ import qualified Prelude (print)
 import Prelude hiding (print)
 import TypeCastGeneric2
 
-infixr 9 #
-m # field = (m .!. field) 
-
 
 -- We use the example of 1D points and color points we have seen
 -- earlier (see Selfish.hs)
+
 data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
 data MoveX;    moveX     = proxy::Proxy MoveX
@@ -323,8 +321,4 @@ instance DeepNarrow a b => DeepNarrow' ItsIO (IO a) (IO b) where
     deep'narrow' _ a = a >>= (return . deep'narrow)
 
 
-main = do
-	  test1
-	  test2
-	  test3
-	  test4
+main = do test1; test2; test3; test4

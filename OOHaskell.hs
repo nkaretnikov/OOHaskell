@@ -32,11 +32,13 @@ module OOHaskell (
 
 ) where
 
+
 import CommonMain hiding ( HDeleteMany
                          , hDeleteMany
                          , TypeCast
                          , typeCast
                          )
+
 import GhcSyntax hiding (( .*. ), ( :=: ))
 import GhcRecord
 import GhcExperiments
@@ -52,6 +54,9 @@ import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
 import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef,unsafeIOToST)
+
+infixr 9 #
+m # field = (m .!. field) 
 
 infixr 2 .*.
 (l,v) .*. (Record r) = mkRecord (HCons (l,v) r)

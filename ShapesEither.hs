@@ -103,6 +103,18 @@ class DownCastSeen seen u s
   where
     downCastSeen :: seen -> u -> Maybe s
 
+{-
+
+In the following, we could replace TypeEq with the subsumption
+predicate that returns HTrue if the record contains all the fields of
+the targeted type. Another design choice: we may assume the label name
+to determine the type of the corresponding method. That forces the
+width subtyping and consistent use of names, at least within one union
+type. In that case, we can process even records with polymorphic
+fields.
+
+-}
+
 instance (DownCastEither seen b x y s, TypeEq x s b) 
       =>  DownCastSeen seen (Either x y) s
   where

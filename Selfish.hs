@@ -20,9 +20,6 @@ import OOHaskell
 import qualified Prelude (print)
 import Prelude hiding (print)
 
-infixr 9 #
-m # field = (m .!. field)
-
 
 -- First, declare the labels.
 -- We use proxies as of HList/Label4.hs

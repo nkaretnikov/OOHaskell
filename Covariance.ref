@@ -1,37 +1,15 @@
 "test1"
-"HERBIVORE"
-"Eats"
-"Plant"
-"HERBIVORE"
-"Eats"
-"Grass"
-"Plant"
+HERBIVORE eats PLANT.
+HERBIVORE eats GRASS.
+HERBIVORE eats GRASS.
 "OK"
 "test2"
-"HERBIVORE"
-"Eats"
-"Plant"
-"Cow"
-"Eats"
-"Grass"
-"Plant"
-"HERBIVORE"
-"Eats"
-"Grass"
-"Plant"
+HERBIVORE eats PLANT.
+COW eats GRASS.
 "OK"
 "test3"
-"HERBIVORE"
-"Eats"
-"Plant"
-"Cow"
-"Eats"
-"Grass"
-"Plant"
-"HERBIVORE"
-"Eats"
-"Grass"
-"Plant"
-"Cow"
-"HERBIVORE"
+HERBIVORE eats GRASS.
+COW eats GRASS.
+COW
+HERBIVORE
 "OK"

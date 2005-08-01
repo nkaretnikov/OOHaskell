@@ -19,9 +19,6 @@ module RecList where
 
 import OOHaskell
 import Record
-infixr 9 #
-
-m # field = (m .!. field) 
 
 
 -- Some labels for list operations

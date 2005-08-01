@@ -21,7 +21,7 @@ An approach that uses separate tables for data and methods.
 module TwoTables where
 
 
-import OOHaskell hiding ((.@.))
+import OOHaskell hiding ((.@.),( # ))
 
 
 {- Ocaml Tutorial: 3.12 Functional objects

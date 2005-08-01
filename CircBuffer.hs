@@ -17,9 +17,6 @@ module CircBuffer where
 import OOHaskell
 import Data.Array.IO
 
-infixr 9 #
-m # field = (m .!. field) 
-
 data EmptyP;       emptyP     = proxy::Proxy EmptyP
 data Insert;       insert     = proxy::Proxy Insert
 data Delete;       delete     = proxy::Proxy Delete

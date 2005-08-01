@@ -15,15 +15,15 @@ OOHaskell (C) 2004--2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
 -}
 
+
 module SelfReturn where
 
 import OOHaskell
 import qualified Prelude (print)
 import Prelude hiding (print)
 
-infixr 9 #
-m # field = (m .!. field) 
 
+-- All the labels that are needed
 
 data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
@@ -54,6 +54,8 @@ printable_point x_init s =
        .*. emptyRecord
 
 
+-- A subclass that returns self
+
 self_returning_point (x_init::a) self =
    do
       super <- printable_point x_init self
@@ -73,8 +75,12 @@ testp1 = do
 	  Prelude.print "OK"
 
 
+-- Another label
 
 data Color;  colorP   = proxy::Proxy Color
+
+
+-- Variation on self_returning_point
 
 self_returning_point' x_init color self
   = do
@@ -86,6 +92,9 @@ self_returning_point' x_init color self
                            Prelude.print color
                            super_print
 	 .*. (p .-. print)
+
+
+-- More test cases
 
 testp2 = do
 	  Prelude.print "testp2"

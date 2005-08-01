@@ -20,7 +20,7 @@ An approach that uses local signatures.
 
 module LocalSigs where
 
-import OOHaskell hiding ((.@.))
+import OOHaskell hiding ((.@.),( # ))
 
 
 {- Ocaml Tutorial: 3.12 Functional objects
