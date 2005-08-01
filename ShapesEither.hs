@@ -12,7 +12,7 @@ open-ended normal disjoint unions. When we attempt record look-up, we
 simply require that both summands admit the look-up since we could
 find that any summand is actually inhabited at the value level. Two
 strengths of this approach are these: it readily allows for
-down-casts, and and no nominal up-casts are required from the
+down-casts, and no nominal up-casts are required from the
 programmer. Down-casts are completely type-safe; we can only attempt
 to cast to types that are part of the union. In order to make all this
 work, we need to define a few new type-level functions. These new
@@ -23,7 +23,8 @@ The given encoding and its use in the shapes example is somewhat
 inefficient in so far that the depth of the sum resembles the length
 of the subtype-polymorphic list. It should be clear that the
 construction of the sum type and its inhabitation (through the helper
-eitherCons) was easily optimised to observe the existence of summands.
+eitherCons) were easily optimised to observe the existence of
+summands. We leave this as an exercise to the reader.
 
 -}
 
@@ -93,92 +94,58 @@ instance (HasField l x v, HasField l y v)
 
 -- Down-cast a value of a union type to a summand type.
 -- Make sure that the summand type occurs once at least.
--- Rely on a right associativity assumption for unions.
+-- (To this end we use a type-level Boolean "type seen".)
+-- We rely on right associativity for unions.
 
-class DownCast u s
+downCast = downCastSeen hFalse
+
+class DownCastSeen seen u s
   where
-    downCast :: u -> Maybe s
+    downCastSeen :: seen -> u -> Maybe s
 
-instance (DownCastEither b x y s, TypeEq x s b) 
-      =>  DownCast (Either x y) s
+instance (DownCastEither seen b x y s, TypeEq x s b) 
+      =>  DownCastSeen seen (Either x y) s
   where
-    downCast = downCastEither (undefined::b)
+    downCastSeen seen = downCastEither seen (undefined::b)
 
-instance TypeCast x s
-      => DownCast x s
+instance (TypeCastSeen seen b x s, TypeEq x s b)
+      =>  DownCastSeen seen x s
   where
-    downCast = Just . typeCast
+    downCastSeen seen = typeCastSeen seen (undefined::b)
 
 
--- Downcast a sum-typed value.
--- Make sure that the summand type occurs once at least.
+-- Type-level type cast.
+-- Insist on total cast if we haven't seen the type in question.
+-- Return potentially Nothing otherwise,
 
-class DownCastEither b x y s
+class TypeCastSeen seen b x y 
   where
-    downCastEither :: b -> Either x y -> Maybe s
-
-instance DownCast y s
-      => DownCastEither HFalse x y s
-  where
-    downCastEither _ (Left x)  = Nothing
-    downCastEither _ (Right y) = downCast y
-
-instance (TypeCast x s, DownCastTotal y s)
-      =>  DownCastEither HTrue x y s
-  where
-    downCastEither _ (Left x)  = Just (typeCast x)
-    downCastEither _ (Right y) = downCastTotal y
-
-
--- Down-cast a value of a union type to a summand type.
--- Do not insist on the summand type to be present.
-
-class DownCastTotal u s
-  where
-    downCastTotal :: u -> Maybe s
-
-instance (DownCastEitherTotal b x y s, TypeEq x s b) 
-      =>  DownCastTotal (Either x y) s
-  where
-    downCastTotal = downCastEitherTotal (undefined::b)
-
-instance (TypeCastBool b x s, TypeEq x s b)
-      =>  DownCastTotal x s
-  where
-    downCastTotal = typeCastBool (undefined::b)
-
-
--- Type-level type cast; return Nothing if all fails.
-
-class TypeCastBool b x y 
-  where
-    typeCastBool :: b -> x -> Maybe y
+    typeCastSeen :: seen -> b -> x -> Maybe y
 
 instance TypeCast x y
-      => TypeCastBool HTrue x y
+      => TypeCastSeen seen HTrue x y
   where
-    typeCastBool _ = Just . typeCast
+    typeCastSeen _ _ = Just . typeCast
 
-instance TypeCastBool HFalse x y
+instance TypeCastSeen HTrue HFalse x y
   where
-    typeCastBool _ = const Nothing
+    typeCastSeen _ _ = const Nothing
 
 
 -- Downcast a sum-typed value.
--- Do not insist on the summand type to be present.
 
-class DownCastEitherTotal b x y s
+class DownCastEither seen b x y s
   where
-    downCastEitherTotal :: b -> Either x y -> Maybe s
+    downCastEither :: seen -> b -> Either x y -> Maybe s
 
-instance DownCastTotal y s
-      => DownCastEitherTotal HFalse x y s
+instance (DownCastSeen HTrue y s, TypeCast x s)
+      =>  DownCastEither seen HTrue x y s
   where
-    downCastEitherTotal _ (Left x)  = Nothing
-    downCastEitherTotal _ (Right y) = downCastTotal y
+    downCastEither _ _ (Left x)  = Just (typeCast x)
+    downCastEither _ _ (Right y) = downCastSeen hTrue y
 
-instance (TypeCast x s, DownCastTotal y s)
-      =>  DownCastEitherTotal HTrue x y s
+instance DownCastSeen seen y s
+      => DownCastEither seen HFalse x y s
   where
-    downCastEitherTotal _ (Left x)  = Just (typeCast x)
-    downCastEitherTotal _ (Right y) = downCastTotal y
+    downCastEither _ _    (Left x)  = Nothing
+    downCastEither seen _ (Right y) = downCastSeen seen y
