@@ -164,13 +164,17 @@ test3 = do
            aHerb  <- mfix herbivore
            aCow   <- mfix cow
            --
+           -- This is still for preparation.
            -- Alas, we need to resolve the polymorphism of both guys.
            --
            aGrass <- mfix $ grass "any meadow"
            aHerb # eat $ aGrass
            aCow  # eat $ aGrass
            --
+           -- Now we try to construct containers -- lists in fact.
+           --
 	   let herbList1 = [aHerb]
+           --
 	   -- let herbList2 = aCow : herbList1        -- Type error!
 	   -- let herbList2 = narrow aCow : herbList1 -- Still type error!
            --
@@ -197,4 +201,3 @@ test3 = do
 
 
 main = do test1; test2; test3
-
