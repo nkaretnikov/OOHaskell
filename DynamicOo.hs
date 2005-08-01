@@ -9,7 +9,7 @@ OOHaskell (C) 2005, Oleg Kiselyov, Ralf Laemmel
 -}
 
 
-module DownCast where
+module DynamicOo where
 
 import OOHaskell
 import Record

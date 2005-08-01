@@ -1,17 +1,36 @@
+##############################################################################
+#
+# Useful make targets
+#
+# make test        -- run all GHC-based test cases.
+# make test-all    -- run more test cases (C/C++/Hugs, if any) 
+# make clean       -- remove all generated and temporary and backup files
+# make OOHaskell.o -- precompile OOHaskell (use at your own risk!
+#
+
+
+##############################################################################
+#
+# Some variables
+#
+
+# Pointer to GHC
 ghci = ghci \
 		-fglasgow-exts \
 		-fallow-overlapping-instances \
 		-fallow-undecidable-instances \
 		-i./HList
 
+# All the local samples
 hs =	OOHaskell.hs	   \
 	SimpleIO.hs	   \
 	SimpleST.hs	   \
 	CircBuffer.hs	   \
 	Selfish.hs	   \
-	Shapes.hs	   \
+	Shapes*.hs	   \
 	SelfReturn.hs	   \
 	CovariantReturn.hs \
+	DynamicOo.hs	   \
 	RecList.hs 	   \
 	Covariance.hs	   \
 	LocalSigs.hs	   \
@@ -19,10 +38,17 @@ hs =	OOHaskell.hs	   \
 
 ##############################################################################
 #
-# By default build source distribution
+# By default tell user to have a look at the Makefile's header.
 #
 
-all: index.html OOHaskell.zip
+all:
+	@echo
+	@echo "*****************************************************"
+	@echo "* See the Makefile's header for reasonable targets. *"
+	@echo "* Perhaps, you may want to run make test?           *"
+	@echo "*****************************************************"
+	@echo
+
 
 ##############################################################################
 #
@@ -33,54 +59,6 @@ all: index.html OOHaskell.zip
 	${ghci}	$*.hs
 
 
-##############################################################################
-#
-# Precompilation
-# BEWARE!!!
-# This may not work even if interpretation works.
-# Depending on versions and platforms.
-#
-
-OOHaskell.o: OOHaskell.hs HList/*.hs Makefile
-	rm -f HList/*.o
-	ghc  \
-		-fglasgow-exts \
-		-fallow-overlapping-instances \
-		-fallow-undecidable-instances \
-		--make \
-		-i./HList \
-		OOHaskell.hs
-
-
-##############################################################################
-
-
-index.html: pre.html README post.html
-	cat pre.html README post.html > index.html
-
-OOHaskell.zip: *.hs *.ref *.html Makefile README
-	mkdir -p OOHaskell
-	cp --preserve ${hs} *.in *.ref README LICENSE Makefile OOHaskell
-	(cd Weirich; make clean)
-	(cd Rathman; make clean)
-	(cd Shapes1; make clean)
-	(cd Shapes2; make clean)
-	(cd Shapes3; make clean)
-	(cd Shapes4; make clean)
-	(cd Shapes5; make clean)
-	(cd Shapes6; make clean)
-	(cd interpreter; make clean)
-	cp --preserve -r Weirich Rathman Shapes1 Shapes2 Shapes3 Shapes4 Shapes5 Shapes6 interpreter OOHaskell
-	rm -rf OOHaskell/Weirich/CVS
-	rm -rf OOHaskell/Rathman/CVS
-	rm -rf OOHaskell/Shapes1/CVS
-	rm -rf OOHaskell/Shapes2/CVS
-	rm -rf OOHaskell/Shapes3/CVS
-	rm -rf OOHaskell/Shapes4/CVS
-	rm -rf OOHaskell/Shapes5/CVS
-	rm -rf OOHaskell/Shapes6/CVS
-	rm -rf OOHaskell/interpreter/CVS
-	zip -r OOHaskell.zip OOHaskell
 
 ##############################################################################
 #
@@ -110,8 +88,8 @@ test: HList
 	diff -b Shapes.out ShapesDown.ref
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
 	diff -b SelfReturn.out SelfReturn.ref
-	${ghci}	-v0 DownCast.hs < Main.in > DownCast.out
-	diff -b DownCast.out DownCast.ref
+	${ghci}	-v0 DynamicOo.hs < Main.in > DynamicOo.out
+	diff -b DynamicOo.out DynamicOo.ref
 	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
 	diff -b CovariantReturn.out CovariantReturn.ref
 	${ghci}	-v0 RecList.hs < Main.in > RecList.out
@@ -129,39 +107,22 @@ test: HList
 	(cd Shapes5; make test)
 	(cd Shapes6; make test)
 
+#
+# The following may require some particular C/C++ compilers.
+# Don't mind if these tests don't complete fine.
+# We also run the HList tests.
+# The normal "test" target is enough for using OOHaskell with ghc(i).
+#
+
 test-all: test
 	(cd Rathman; make test)
 	(cd interpreter; make test)
-
-
-
-##############################################################################
-#
-# Remind the user of the need to link to HList library
-#
-
-HList:
-	@echo
-	@echo "*****************************************"
-	@echo "* Link the HList src library to ./HList *"
-	@echo "*****************************************"
-	@echo
+	(cd HList; make test)
 
 
 ##############################################################################
 #
-# Start a ghci session for selfish examples
-#
-
-self:
-	${ghci} \
-		-fallow-overlapping-instances \
-		-fallow-undecidable-instances \
-		-i./HList Selfish.hs
-
-##############################################################################
-#
-# Clean up file system
+# Clean up things
 #
 
 clean:
@@ -180,5 +141,77 @@ clean:
 	(cd Shapes5; make clean)
 	(cd Shapes6; make clean)
 	(cd interpreter; make clean)
+
+
+##############################################################################
+#
+# Precompilation of OOHaskell.
+#
+# BEWARE!!!
+# This may not work even if interpretation works.
+# Depending on versions and platforms.
+#
+
+OOHaskell.o: OOHaskell.hs HList/*.hs Makefile
+	rm -f HList/*.o
+	ghc  \
+		-fglasgow-exts \
+		-fallow-overlapping-instances \
+		-fallow-undecidable-instances \
+		--make \
+		-i./HList \
+		OOHaskell.hs
+
+
+##############################################################################
+#
+# Target used by the authors for distributing OOHaskell.
+#
+
+distr:
+	cat pre.html README post.html > index.html
+	rm -f OOHaskell.zip
+	(cd HList; make distr)
+	rm -rf OOHaskell
+	mkdir -p OOHaskell
+	cp --preserve ${hs} *.in *.ref README LICENSE Makefile OOHaskell
+	(cd Weirich; make clean)
+	(cd Rathman; make clean)
+	(cd Shapes1; make clean)
+	(cd Shapes2; make clean)
+	(cd Shapes3; make clean)
+	(cd Shapes4; make clean)
+	(cd Shapes5; make clean)
+	(cd Shapes6; make clean)
+	(cd interpreter; make clean)
+	cp --preserve HList/HList.zip OOHaskell
+	(cd OOHaskell; unzip HList.zip; rm HList.zip)
+	cp --preserve -r Weirich Rathman Shapes1 Shapes2 Shapes3 Shapes4 Shapes5 Shapes6 interpreter OOHaskell
+	rm -rf OOHaskell/Weirich/CVS
+	rm -rf OOHaskell/Rathman/CVS
+	rm -rf OOHaskell/Shapes1/CVS
+	rm -rf OOHaskell/Shapes2/CVS
+	rm -rf OOHaskell/Shapes3/CVS
+	rm -rf OOHaskell/Shapes4/CVS
+	rm -rf OOHaskell/Shapes5/CVS
+	rm -rf OOHaskell/Shapes6/CVS
+	rm -rf OOHaskell/interpreter/CVS
+	zip -r OOHaskell.zip OOHaskell
+
+
+##############################################################################
+#
+# Remind the CVS user of the need to link to the HList library
+# A user of OOHaskell should not see this message.
+# These days HList is distributed with OOHaskell.
+#
+
+HList:
+	@echo
+	@echo "*****************************************"
+	@echo "* Link the HList src library to ./HList *"
+	@echo "*****************************************"
+	@echo
+
 
 ##############################################################################

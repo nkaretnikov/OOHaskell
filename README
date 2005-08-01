@@ -3,10 +3,11 @@
 OOHaskell -- Haskell's overlooked object system
 
 The code relies on the HList library.
+(The HList library is included into the OOHaskell distribution.)
 The code has been released for GHC 6.4.
 See the Makefile for ways of running test cases.
 We use overlapping instances because of the favoured model of labels.
-A different model can be used if this is considered an issue.
+There are other OOHaskell models of labels that could be used instead.
 
 Here is a brief overview on the sample files:
 
