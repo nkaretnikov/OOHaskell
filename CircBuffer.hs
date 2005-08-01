@@ -24,13 +24,16 @@ data Underflow;    underflow  = proxy::Proxy Underflow
 data Overflow;     overflow   = proxy::Proxy Overflow
 
 {-
+
 -- Note, the interface is polymorphic in the type of the value, a
 type PPInterface a
  = Record (  (Proxy GetX    , IO a)
          :*: (Proxy MoveTo  , a -> IO ())
          :*: (Proxy Print    , IO ())
          :*: HNil )
+
 -}
+
 
 -- The textbook `Stack' example, a bit spiced up
 -- we illustrate: parameterized objects (aka classes/constructors), 
@@ -93,6 +96,7 @@ test1 = do
 	  print "OK"
 
 {-
+
 And here we come across something interesting. Our Buffer is a
 polymorphic collection. Elements can be of any type. Until
 very recently, one can't express this in Java and in C#. And here 
@@ -102,6 +106,7 @@ uncommenting the statement in testb2). We get the fully
 static type checking of all collection operations. Another point: no
 declaration for the type of testset: the compiler figured it all
 out. We can print it out (and explain the printout).
+
 -}
 
 
@@ -123,14 +128,16 @@ test2 =
 	 print "OK"
 
 {-
+
 Here we wrote a function that takes a constructor (a class!) and 
 superimposed on the insert function. We
 define a new class in a lexical scope. We pass the extended class to
 the old function testb1, which would call the overridden function.
 In C++ one can't define a new class
-in a local scope. Classes are top level objects. In Haskell, an OO
-Class is just a parameterized object, which is first-class. We can
+in a local scope. Classes are top level objects. In OOHaskell, an OO
+class is just a parameterized object, which is first-class. We can
 declare a class in a local scope -- without giving this any thought.
+
 -}
 
 

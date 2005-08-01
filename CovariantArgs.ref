@@ -1,0 +1,41 @@
+test1
+1
+5
+Point at - 10
+color  - "red"
+Point at - 25
+color  - "red"
+Moving the origin to 0
+0
+5
+Point at - 0
+color  - "red"
+Point at - 25
+color  - "red"
+OK
+test2
+1
+5
+Point at - 10
+color  - "red"
+Point at - 25
+color  - "red"
+Setting the origin to 0
+0
+5
+Point at - 10
+color  - "red"
+Point at - 25
+color  - "red"
+Length of v2: 5
+Length of colored cv2: 15
+Vectors
+0
+5
+Length is 5
+Point at - 10
+color  - "red"
+Point at - 25
+color  - "red"
+Length is 15
+OK

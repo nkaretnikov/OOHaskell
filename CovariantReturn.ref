@@ -1,59 +1,11 @@
-0
-5
-Point at - 10
-color  - "red"
-Point at - 25
-color  - "red"
-Length of v
-5
-Length of colored cv
-15
-OK
-Vectors
-0
-5
-Length is 5
-Point at - 10
-color  - "red"
-Point at - 25
-color  - "red"
-Length is 15
-1
-5
-Point at - 10
-color  - "red"
-Point at - 25
-color  - "red"
-Moving the origin to 0
-0
-5
-Point at - 0
-color  - "red"
-Point at - 25
-color  - "red"
-1
-5
-Point at - 10
-color  - "red"
-Point at - 25
-color  - "red"
-Setting the origin to 0
-0
-5
-Point at - 10
-color  - "red"
-Point at - 25
-color  - "red"
-Length of v2
-5
-Length of colored cv2
-15
-Vectors
-0
-5
-Length is 5
-Point at - 10
-color  - "red"
-Point at - 25
-color  - "red"
-Length is 15
+"test1"
+Volume of cuboid
+6000
+Volume of cube
+64000
+"OK"
+"test2"
+Volumes of cuboids
+6000
+64000
+"OK"

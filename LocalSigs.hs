@@ -6,7 +6,12 @@
  
 OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
-UNDER DEVELOPMENT
+NOTE! UNDER DEVELOPMENT!
+
+A model of functional objects.
+This code is not discussed in the OOHaskell paper.
+It's included here as a starting point for future work.
+
 
 -- Pure objects with open recursion
 -- In the following, we refer to the tutorial "Objects in Caml"

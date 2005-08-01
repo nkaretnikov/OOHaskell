@@ -22,19 +22,24 @@ ghci = ghci \
 		-i./HList
 
 # All the local samples
-hs =	OOHaskell.hs	   \
-	SimpleIO.hs	   \
-	SimpleST.hs	   \
-	CircBuffer.hs	   \
-	Selfish.hs	   \
-	Shapes*.hs	   \
-	SelfReturn.hs	   \
-	CovariantReturn.hs \
-	DynamicOo.hs	   \
-	RecList.hs 	   \
-	Covariance.hs	   \
-	LocalSigs.hs	   \
+hs =			    \
+	OOHaskell.hs	    \
+	DeepNarrow.hs	    \
+	SimpleIO.hs	    \
+	SimpleST.hs	    \
+	CircBuffer.hs	    \
+	Selfish.hs	    \
+	Shapes*.hs	    \
+	SelfReturn.hs	    \
+	RecList.hs 	    \
+	DeepSubtyping.hs    \
+	CovariantReturn.hs  \
+	CovariantArgs.hs    \
+	EiffelFaqLcon.h	    \
+	DynamicOo.hs	    \
+	LocalSigs.hs	    \
 	TwoTables.hs
+
 
 ##############################################################################
 #
@@ -90,12 +95,16 @@ test: HList
 	diff -b SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 DynamicOo.hs < Main.in > DynamicOo.out
 	diff -b DynamicOo.out DynamicOo.ref
+	${ghci}	-v0 DeepSubtyping.hs < Main.in > DeepSubtyping.out
+	diff -b DeepSubtyping.out DeepSubtyping.ref
 	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
 	diff -b CovariantReturn.out CovariantReturn.ref
+	${ghci}	-v0 CovariantArgs.hs < Main.in > CovariantArgs.out
+	diff -b CovariantArgs.out CovariantArgs.ref
 	${ghci}	-v0 RecList.hs < Main.in > RecList.out
 	diff -b RecList.out RecList.ref
-	${ghci}	-v0 Covariance.hs < Main.in > Covariance.out
-	diff -b Covariance.out Covariance.ref
+	${ghci}	-v0 EiffelFaqLcon.hs < Main.in > EiffelFaqLcon.out
+	diff -b EiffelFaqLcon.out EiffelFaqLcon.ref
 	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
 	diff -b LocalSigs.out LocalSigs.ref
 	${ghci}	-v0 TwoTables.hs < Main.in > TwoTables.out

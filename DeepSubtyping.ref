@@ -1,0 +1,25 @@
+test1
+Vector:
+0
+5
+Colored vector:
+Point at - 10
+color  - "red"
+Point at - 25
+color  - "red"
+Length of vector:
+5
+Length of colored vector:
+15
+OK
+test2
+Vectors
+0
+5
+Length is 5
+Point at - 10
+color  - "red"
+Point at - 25
+color  - "red"
+Length is 15
+OK
