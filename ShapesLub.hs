@@ -29,7 +29,7 @@ main =
        -- set up array of shapes
        s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
        s2 <- mfix (circle (15::Int) 25 8)
-       let scribble = hLubNarrow (HCons s1 (HCons s2 HNil))
+       let scribble = consLub s1 (consLub s2 nilLub)
        
        -- iterate through the array
        -- and handle shapes polymorphically
