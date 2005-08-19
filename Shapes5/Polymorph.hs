@@ -45,3 +45,4 @@ main =
 
          -- Handle rectangle-specific instance
          draw $ setWidth 30 (rectangle 0 0 15 15)
+
