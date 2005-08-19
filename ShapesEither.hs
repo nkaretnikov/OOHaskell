@@ -23,7 +23,7 @@ The given encoding and its use in the shapes example is somewhat
 inefficient in so far that the depth of the sum resembles the length
 of the subtype-polymorphic list. It should be clear that the
 construction of the sum type and its inhabitation (through the helper
-eitherCons) were easily optimised to observe the existence of
+consEither) were easily optimised to observe the existence of
 summands. We leave this as an exercise to the reader.
 
 -}
@@ -49,10 +49,11 @@ main =
        s3 <- mfix (square (35::Int) (45::Int) (8::Int))
 
        -- We could have used a vararg function.
-       let scribble =  eitherCons s2
-                      (eitherCons s1
-                      (eitherCons s2
-                      [s3] ))
+       let scribble =  consEither s2
+                      (consEither s1
+                      (consEither s2
+                      (consEither s3
+                       nilEither)))
 
        -- Iterate through the array
        -- and handle shapes polymorphically.
@@ -76,10 +77,23 @@ main =
              scribble
 
 
--- Normal list cons combined with embedding into a sum
+-- List constructors that intersect as well
 
-eitherCons :: x -> [y] -> [Either x y]
-eitherCons x ys = Left x : map Right ys
+data NilEither
+nilEither = undefined :: NilEither
+
+class ConsEither h t l | h t -> l
+ where
+  consEither :: h -> t -> l
+
+instance ConsEither e  NilEither [e]
+ where
+  consEither h _ = [h]
+
+instance ConsEither e1 [e2] [Either e1 e2]
+ where
+  consEither h t = Left h : map Right t
+
 
 
 -- We instantiate the look-up (HasField) class for records.
