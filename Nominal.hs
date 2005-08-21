@@ -28,9 +28,24 @@ data GetColor; getColor = proxy::Proxy GetColor
 
 -- Newtypes for nominal type distinctions
 
-newtype PP x = PP { unPP :: x } -- Printable points
-newtype CP x = CP { unCP :: x } -- Colored points
-newtype SP x = SP { unSP :: x } -- "Special" points
+newtype PP x = PP x -- Printable points
+newtype CP x = CP x -- Colored points
+newtype SP x = SP x -- "Special" points
+
+
+-- A class for newtypes
+
+class Nomination f
+ where
+  wrap   :: x -> f x
+  unwrap :: f x -> x
+
+
+-- Wrapping and unwrapping for PP, CP, SP
+
+instance Nomination PP where wrap = PP; unwrap (PP x) = x
+instance Nomination CP where wrap = CP; unwrap (CP x) = x
+instance Nomination SP where wrap = SP; unwrap (SP x) = x
 
 
 -- The familiar printable points but nominal this time
@@ -55,7 +70,7 @@ colored_point x_init (color::String) self =
         $  print .=. ( do  putStr "so far - "; super # print
                            putStr "color  - "; Prelude.print color )
        .<. getColor .=. (returnIO color)
-       .*. unPP super
+       .*. unwrap super -- Remove wrapper!
 
 
 -- Special points that are structurally equal to PP
@@ -63,19 +78,13 @@ colored_point x_init (color::String) self =
 special_point x_init self = 
    do
       super <- printable_point x_init self
-      returnIO $ SP $ unPP super
+      returnIO $ SP $ unwrap super
 
 
 -- For method look-up
 
-instance HasField l x v => HasField l (PP x) v
- where hLookupByLabel l (PP x) = x # l
-
-instance HasField l x v => HasField l (CP x) v
- where hLookupByLabel l (CP x) = x # l
-
-instance HasField l x v => HasField l (SP x) v
- where hLookupByLabel l (SP x) = x # l
+instance (HasField l x v, Nomination f) => HasField l (f x) v
+ where hLookupByLabel l o = unwrap o # l
 
 
 -- These versions require explicit cast
@@ -94,10 +103,12 @@ printSP' o = let (aSP::SP x) = upCast o in aSP # print
 
 -- The presentation of the nominal inheritance hierarchy
 
-class UpCast f g where upCast :: f x -> g x
-instance UpCast f f where upCast = id
-instance UpCast CP PP where upCast (CP x) = PP x
-instance UpCast SP PP where upCast (SP x) = PP x
+class (Nomination f, Nomination g) => NSubtype f g
+ where upCast :: f x -> g x
+       upCast = wrap . unwrap
+instance Nomination f => NSubtype f f -- subtyping is reflexive
+instance NSubtype CP PP -- colored points are printable points
+instance NSubtype SP PP -- special points are printable points
 
 
 -- Time to demo
@@ -127,4 +138,3 @@ main = do
            -- Nominal not equal structural subtyping
 	   printSP aSP
 	   -- printSP aPP -- Error! Nominal type different
-
