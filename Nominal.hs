@@ -19,95 +19,112 @@ import qualified Prelude (print)
 import Prelude hiding (print)
 
 
--- Some labels
-
-data Print; print = proxy::Proxy Print
-data Void;  void  = proxy::Proxy Void
-
-
--- Nominal type protectors
-
-newtype A x = A { unA :: x }
-newtype B x = B { unB :: x }
-newtype C x = C { unC :: x }
+data MutableX; mutableX = proxy::Proxy MutableX
+data GetX;     getX     = proxy::Proxy GetX
+data MoveX;    moveX    = proxy::Proxy MoveX
+data Print;    print    = proxy::Proxy Print
+data GetColor; getColor = proxy::Proxy GetColor
 
 
--- Base class
+-- Newtypes for nominal type distinctions
 
-a = returnIO $ A $
-         print .=. putStr "a"
-     .*. emptyRecord
-
-
--- Subclass with overriding
-
-b = do 
-       anA <- a
-       returnIO $ B $
-            print .=. do { anA # print; putStr "b" }
-        .<. unA anA
+newtype PP x = PP { unPP :: x } -- Printable points
+newtype CP x = CP { unCP :: x } -- Colored points
+newtype SP x = SP { unSP :: x } -- "Special" points
 
 
--- Subclass with overriding and extension
+-- The familiar printable points but nominal this time
 
-c = do 
-       anA <- a
-       returnIO $ C $
-            print .=. do { anA # print; putStr "c" }
-        .<. void  .=. returnIO ()
-        .*. unA anA
-
-
--- For structural subtype polymorphism
-
-instance HasField l x v => HasField l (A x) v
- where hLookupByLabel l (A x) = x # l
-
-instance HasField l x v => HasField l (B x) v
- where hLookupByLabel l (B x) = x # l
-
-instance HasField l x v => HasField l (C x) v
- where hLookupByLabel l (C x) = x # l
+printable_point x_init s =
+   do
+      x <- newIORef x_init
+      returnIO $ PP -- Nominal!
+        $  mutableX .=. x
+       .*. getX     .=. readIORef x
+       .*. moveX     .=. (\d -> modifyIORef x (+d))
+       .*. print    .=. ((s # getX ) >>= Prelude.print)
+       .*. emptyRecord
 
 
--- This version requires explicit cast
+-- Colored points exercising overriding and extension
 
-printA (anA::A x) = anA # print
+colored_point x_init (color::String) self =
+   do
+      super <- printable_point x_init self
+      returnIO $ CP -- Nominal!
+        $  print .=. ( do  putStr "so far - "; super # print
+                           putStr "color  - "; Prelude.print color )
+       .<. getColor .=. (returnIO color)
+       .*. unPP super
 
 
--- This version upcasts by itself
+-- Special points that are structurally equal to PP
 
-printA' o = let (anA::A x) = upCast o in anA # print
+special_point x_init self = 
+   do
+      super <- printable_point x_init self
+      returnIO $ SP $ unPP super
+
+
+-- For method look-up
+
+instance HasField l x v => HasField l (PP x) v
+ where hLookupByLabel l (PP x) = x # l
+
+instance HasField l x v => HasField l (CP x) v
+ where hLookupByLabel l (CP x) = x # l
+
+instance HasField l x v => HasField l (SP x) v
+ where hLookupByLabel l (SP x) = x # l
+
+
+-- These versions require explicit cast
+
+printPP (aPP::PP x) = aPP # print
+printCP (aCP::CP x) = aCP # print
+printSP (aSP::SP x) = aSP # print
+
+
+-- These versions upcast by themselves
+
+printPP' o = let (aPP::PP x) = upCast o in aPP # print
+printCP' o = let (aCP::CP x) = upCast o in aCP # print
+printSP' o = let (aSP::SP x) = upCast o in aSP # print
 
 
 -- The presentation of the nominal inheritance hierarchy
 
 class UpCast f g where upCast :: f x -> g x
 instance UpCast f f where upCast = id
-instance UpCast B A where upCast (B x) = A x
-instance UpCast C A where upCast (C x) = A x
+instance UpCast CP PP where upCast (CP x) = PP x
+instance UpCast SP PP where upCast (SP x) = PP x
 
+
+-- Time to demo
 
 main = do
-           anA <- a
-           anB <- b
-           anC <- c
-           anA # print
-           putStr "\n"
-           anB # print
-           putStr "\n"
-           anC # print
-           putStr "\n"
-	   printA anA
-           putStr "\n"
-           -- printA anB -- needs up-cast
-           printA (upCast anB)
-           putStr "\n"
-           printA (upCast anC)
-           putStr "\n"
-	   printA' anA
-           putStr "\n"
-	   printA' anB -- does not need up-cast
-           putStr "\n"
-	   printA' anC -- does not need up-cast
-           putStr "\n"
+           -- Some sample objects
+           aPP <- mfix $ printable_point 5
+           aCP <- mfix $ colored_point 5 "red"
+           aSP <- mfix $ special_point 42
+
+           -- Method invocations based on HasField
+           aPP # print
+           aCP # print
+           aSP # print
+
+           -- Nominal subtyping with explicit up-cast
+	   printPP aPP
+           -- printPP aCP -- Error! Up-cast needed.
+           printPP (upCast aCP)
+           printPP (upCast aSP)
+
+           -- Nominal subtyping with implicit up-cast
+	   printPP' aPP
+           printPP' aCP -- No need to up-cast.
+           printPP' aSP -- No need to up-cast.
+
+           -- Nominal not equal structural subtyping
+	   printSP aSP
+	   -- printSP aPP -- Error! Nominal type different
+
