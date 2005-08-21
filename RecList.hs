@@ -18,7 +18,6 @@ HasField instance so that "#" can be used as before.
 module RecList where
 
 import OOHaskell
-import Record
 
 
 -- Some labels for list operations
@@ -52,13 +51,12 @@ newtype ListObj a =
 instance HasField l (ListInterface a) v =>
          HasField l (ListObj a) v
   where
-  hLookupByLabel l (ListObj x) = 
-      hLookupByLabel l x
+  hLookupByLabel l (ListObj x) = x # l
 
 
 -- The class for empty lists
 
-nil_class (_::Proxy a) self
+nilOO (_::Proxy a) self
  = returnIO
      $  isEmpty  .=. returnIO True
     .*. getHead  .=. ((failIO "No head!")::IO a)
@@ -70,15 +68,15 @@ nil_class (_::Proxy a) self
 
 -- Reusable insert operation
 
-reusableInsHead self (head::a)
+reusableInsHead list (head::a)
  = do 
-      newCons <- mfix (cons_class head self)
+      newCons <- mfix (consOO head list)
       returnIO ((ListObj newCons)::ListObj a)
 
 
 -- The class for nonempty lists
 
-cons_class head tail self
+consOO head tail self
  = do
       hRef <- newIORef head
       returnIO
@@ -97,19 +95,18 @@ printList aList
       empty <- aList # isEmpty
       if empty
         then putStrLn ""
-        else ( do 
-                  head <- aList # getHead
-                  putStr $ show head
-                  tail <- aList # getTail
-                  putStr " "
-                  printList tail
-             )
+        else do 
+                head <- aList # getHead
+                putStr $ show head
+                tail <- aList # getTail
+                putStr " "
+                printList tail
 
 
 -- Test case
 
 main = do
-          list1 <- mfix $ nil_class (proxy::Proxy Int)
+          list1 <- mfix $ nilOO (proxy::Proxy Int)
           list2 <- (list1 # insHead) (88::Int)
           list3 <- (list2 # insHead) (41::Int)
           (list3 # setHead) (42::Int)

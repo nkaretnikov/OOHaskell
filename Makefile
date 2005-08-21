@@ -5,7 +5,7 @@
 # make test        -- run all GHC-based test cases.
 # make test-all    -- run more test cases (C/C++/Hugs, if any) 
 # make clean       -- remove all generated and temporary and backup files
-# make OOHaskell.o -- precompile OOHaskell (use at your own risk!
+# make OOHaskell.o -- precompile OOHaskell (untested!!!)
 #
 
 
@@ -32,6 +32,7 @@ hs =			    \
 	Shapes*.hs	    \
 	SelfReturn.hs	    \
 	RecList.hs 	    \
+	Nominal.hs 	    \
 	DeepSubtyping.hs    \
 	CovariantReturn.hs  \
 	CovariantArgs.hs    \
@@ -103,6 +104,8 @@ test: HList
 	diff -b CovariantArgs.out CovariantArgs.ref
 	${ghci}	-v0 RecList.hs < Main.in > RecList.out
 	diff -b RecList.out RecList.ref
+	${ghci}	-v0 Nominal.hs < Main.in > Nominal.out
+	diff -b Nominal.out Nominal.ref
 	${ghci}	-v0 EiffelFaqLcon.hs < Main.in > EiffelFaqLcon.out
 	diff -b EiffelFaqLcon.out EiffelFaqLcon.ref
 	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out

@@ -585,7 +585,7 @@ heavy_point x_init color self =
                               super3 # moveX $ d )
      return 
        $    print  .=. myprint
-      .*.   moveX   .=. mymove
+      .*.   moveX  .=. mymove
       .*.   emptyRecord
       .<++. super1
       .<++. super2
