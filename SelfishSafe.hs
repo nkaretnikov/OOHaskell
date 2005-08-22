@@ -26,7 +26,7 @@ import Debug.Trace
 
 data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
-data Move;     move     = proxy::Proxy Move
+data MoveX;    moveX    = proxy::Proxy MoveX
 data Print;    print    = proxy::Proxy Print
 
 
@@ -44,7 +44,7 @@ printable_point x_init s =
 	   -- seq (trace "in srret, seq 2" 1) $
            mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. move     .=. (\d -> modifyIORef x ((+) d))
+       .*. moveX    .=. (\d -> modifyIORef x ((+) d))
        .*. print    .=. ((s # getX ) >>= Prelude.print)
        .*. emptyRecord)
 
@@ -52,7 +52,7 @@ test_pp =
    do
 --      p <- smrfix (printable_point 7)
       p <- new (printable_point 7)
-      p # move $ 2
+      p # moveX $ 2
       p # print
 
 -- We need another label.
@@ -120,10 +120,10 @@ testGeneric
 -- This is an optional part in case we want to fix types of virtuals.
 {-
 
-abstract_point (x_init::a) (self :: NotFixed r)
+abstract_point (x_init::a) (self :: New r)
   | const False (constrain (undefined::r) ::
                  Proxy ( (Proxy GetX, IO a)
-                      :*: (Proxy Move, a -> IO ())
+                      :*: (Proxy MoveX, a -> IO ())
                       :*: HNil ))
   = undefined
 -}
@@ -144,7 +144,7 @@ concrete_point x_init self
         constructWithSuper p self $ \ p self ->
         -- add the missing (pure virtual) methods
              getX  .=. readIORef (self # mutableX)
-         .*. move .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+         .*. moveX .=. (\d -> modifyIORef (self # mutableX) ((+) d))
          .*. p
 
 testVirtual
@@ -158,7 +158,7 @@ testVirtual
         -- which reads as follows:
         -- (HasField (Proxy GetX) HNil (IO a))
         p # getX >>= Prelude.print
-        p # move $ 2
+        p # moveX $ 2
         p # getX >>= Prelude.print
         p # print
 
@@ -171,7 +171,7 @@ abstract_point' x_init self
       construct self $ \self ->
 	   mutableX  .=. x
        .*. getX      .=. (proxy::Proxy (IO Int))
-       .*. move      .=. (proxy::Proxy (Int -> IO ()))
+       .*. moveX     .=. (proxy::Proxy (Int -> IO ()))
        .*. print     .=. (self # getX >>= Prelude.print )
        .*. emptyRecord
 
@@ -188,7 +188,7 @@ concrete_point' x_init self
         constructWithSuper p self $ \ p self ->
         -- use disciplined record update
               getX    .=. readIORef (self # mutableX)
-          .^. move   .=. (\d -> modifyIORef (self # mutableX) ((+) d))
+          .^. moveX   .=. (\d -> modifyIORef (self # mutableX) ((+) d))
           .^. myLabel .=. ()                -- This line could be activated.
 --        .^. myLabel .=. (proxy::Proxy ()) -- A proxy that disables mnew.
           .*. p
@@ -199,7 +199,7 @@ mnew (f::NotConstructed a -> m (NotConstructed a)) = smrfix f
  where
   () = hasNoProxies (undefined::a) 
 -}
-mnew (f::NotFixed a -> m (NotFixed a)) = new f
+mnew (f::New a -> m (New a)) = new f
  where
   () = hasNoProxies (undefined::a) 
 
@@ -207,7 +207,7 @@ testVirtual'
    = do
         p <- mnew (concrete_point' 7)
         p # getX >>= Prelude.print
-        p # move $ 2
+        p # moveX $ 2
         p # getX >>= Prelude.print
         p # print
 

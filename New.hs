@@ -28,6 +28,7 @@ newtype NotFixed a = NotFixed a
 
 new :: (NotFixed (Record a) -> IO (NotFixed (Record a))) 
     -> IO (Record a)
+
 new f = mfix f >>= (\(NotFixed a) -> return a)
 
 
