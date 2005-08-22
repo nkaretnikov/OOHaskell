@@ -26,13 +26,13 @@ import DeepSubtyping hiding (test1,test2,main)
 data MoveO; moveO = proxy::Proxy MoveO
 
 vector1 (p1::p) (p2::p) self =
-   do super <- vector p1 p2 self
+   do
+      super <- vector p1 p2 self
       returnIO
          $  moveO .=. (\p ->
-                          do p1 <- self # getP1
-	 		     xold <- p1 # getX
-	                     xnew <- p  # getX
-			     p1 # moveX $ (xnew-xold))
+                          do p1  <- self # getP1
+	 		     x   <- p # getX
+			     p1 # moveX $ x)
         .*. super
 
 
@@ -40,8 +40,8 @@ vector1 (p1::p) (p2::p) self =
 
 move_origin_to_0 varg = 
     do
-    zero <- mfix (printable_point 0)
-    varg # moveO $ zero
+       zero <- mfix (printable_point 0)
+       varg # moveO $ zero
 
 
 -- Demo vectors and colored vectors
@@ -69,7 +69,9 @@ test1 = do
 data SetO; setO = proxy::Proxy SetO
 
 vector2 (p1::p) (p2::p) self =
-   do p1r <- newIORef p1; p2r <- newIORef p2
+   do
+      p1r <- newIORef p1
+      p2r <- newIORef p2
       returnIO $
            getP1    .=. readIORef p1r
        .*. getP2    .=. readIORef p2r
@@ -89,10 +91,10 @@ set_origin_to_0 varg =
 
 test2 = do
            putStrLn "test2"
-           p1  <- mfix (printable_point 1)
-           p2  <- mfix (printable_point 5)
+           p1  <- mfix (printable_point (1::Int))
+           p2  <- mfix (printable_point (5::Int))
            cp1 <- mfix (colored_point (10::Int) "red")
-           cp2 <- mfix (colored_point 25 "red")
+           cp2 <- mfix (colored_point (25::Int) "red")
            v2  <- mfix (vector2 p1 p2)
            cv2 <- mfix (vector2 cp1 cp2)
            v2 # print

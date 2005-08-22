@@ -6,9 +6,9 @@ color  - "red"
 Point at - 25
 color  - "red"
 Moving the origin to 0
-0
+1
 5
-Point at - 0
+Point at - 10
 color  - "red"
 Point at - 25
 color  - "red"
