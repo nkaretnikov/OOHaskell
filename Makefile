@@ -29,6 +29,7 @@ hs =			    \
 	SimpleST.hs	    \
 	CircBuffer.hs	    \
 	Selfish.hs	    \
+	SelfishSafe.hs	    \
 	Shapes*.hs	    \
 	SelfReturn.hs	    \
 	RecList.hs 	    \
@@ -82,6 +83,8 @@ test: HList
 	diff -b CircBuffer.out CircBuffer.ref
 	${ghci}	-v0 Selfish.hs < Main.in > Selfish.out
 	diff -b Selfish.out Selfish.ref
+	${ghci}	-v0 SelfishSafe.hs < Main.in > SelfishSafe.out
+	diff -b SelfishSafe.out SelfishSafe.ref
 	${ghci}	-v0 ShapesNarrow.hs < Main.in > Shapes.out
 	diff -b Shapes.out Shapes.ref
 	${ghci}	-v0 ShapesLub.hs < Main.in > Shapes.out

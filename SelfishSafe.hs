@@ -17,11 +17,8 @@ module SelfishSafe where
 import OOHaskell
 import qualified Prelude (print)
 import Prelude hiding (print)
-import SMRFix
+-- import SMRFix
 import Debug.Trace
-
-infixr 9 #
-m # field = (m .!. field)
 
 
 -- First, declare the labels.
@@ -39,7 +36,8 @@ printable_point x_init s =
       -- If we uncomment this, we get the type error.
       -- Alas, the error is reported at the place of smfix rather than here...
       -- s # print 
-      srret s (\s->
+--      srret s (\s->
+      construct s (\s->
 	   --trace "in srret" $
 	   -- seq (trace "in srret, seq" 1) $
 	   -- s `seq`
@@ -52,7 +50,8 @@ printable_point x_init s =
 
 test_pp =
    do
-      p <- smrfix (printable_point 7)
+--      p <- smrfix (printable_point 7)
+      p <- new (printable_point 7)
       p # move $ 2
       p # print
 
@@ -65,12 +64,14 @@ colored_point x_init (color::String) self =
         p <- printable_point x_init self
 	-- This causes the type error (alas, at the confusing place)
 	-- p # print
-        srret p $ \p -> getColor .=. (returnIO color) .*. p
+--        srret p $ \p -> getColor .=. (returnIO color) .*. p
+        construct p $ \p -> getColor .=. (returnIO color) .*. p
 
 
 myColoredOOP =
    do
-      p' <- smrfix (colored_point 5 "red")
+--      p' <- smrfix (colored_point 5 "red")
+      p' <- new (colored_point 5 "red")
       x  <- p' # getX
       c  <- p' # getColor
       Prelude.print (x,c)
@@ -81,7 +82,8 @@ myColoredOOP =
 colored_point' x_init color self =
    do
       p <- colored_point x_init color self
-      srret p $ \p -> 
+--      srret p $ \p -> 
+      construct p $ \p -> 
 	  -- Here, it's OK to access the method print of p,
 	  -- even if p isn't constructed yet. Courtesy of non-strict
 	  -- evaluation, old_print will be evaluated only when the construction
@@ -94,15 +96,18 @@ colored_point' x_init color self =
 
 myOverridingOOP =
    do
-      p  <- smrfix (colored_point' 5 "red")
+--      p  <- smrfix (colored_point' 5 "red")
+      p  <- new (colored_point' 5 "red")
       p  # print
 
 
 
 testGeneric
    = do
-        p  <- smrfix (printable_point 7)
-        p' <- smrfix (colored_point 5 "red")
+--        p  <- smrfix (printable_point 7)
+--        p' <- smrfix (colored_point 5 "red")
+        p  <- new (printable_point 7)
+        p' <- new (colored_point 5 "red")
         let get_succ_x obj = obj # getX >>= (returnIO . (+ 1))
         x  <- get_succ_x p
         x' <- get_succ_x p'
@@ -115,7 +120,7 @@ testGeneric
 -- This is an optional part in case we want to fix types of virtuals.
 {-
 
-abstract_point (x_init::a) (self :: NotConstructed r)
+abstract_point (x_init::a) (self :: NotFixed r)
   | const False (constrain (undefined::r) ::
                  Proxy ( (Proxy GetX, IO a)
                       :*: (Proxy Move, a -> IO ())
@@ -125,7 +130,8 @@ abstract_point (x_init::a) (self :: NotConstructed r)
 abstract_point x_init self =
    do
       x <- newIORef x_init
-      srret self $ \self ->
+--      srret self $ \self ->
+      construct self $ \self ->
            mutableX  .=. x
        .*. print     .=. (self # getX >>= Prelude.print )
        .*. emptyRecord
@@ -134,7 +140,8 @@ abstract_point x_init self =
 concrete_point x_init self
    = do
         p <- abstract_point x_init self -- inherit ...
-        srret (p,self) $ \ (p,self) ->
+--        srret (p,self) $ \ (p,self) ->
+        constructWithSuper p self $ \ p self ->
         -- add the missing (pure virtual) methods
              getX  .=. readIORef (self # mutableX)
          .*. move .=. (\d -> modifyIORef (self # mutableX) ((+) d))
@@ -142,7 +149,8 @@ concrete_point x_init self
 
 testVirtual
    = do
-        p  <- smrfix (concrete_point 7)
+--        p  <- smrfix (concrete_point 7)
+        p  <- new (concrete_point 7)
         --
         -- Note, if the latter is uncommented
         --   p' <- smrfix (abstract_point 7)
@@ -159,7 +167,8 @@ testVirtual
 abstract_point' x_init self
   = do
       x <- newIORef x_init
-      srret self $ \self ->
+--      srret self $ \self ->
+      construct self $ \self ->
 	   mutableX  .=. x
        .*. getX      .=. (proxy::Proxy (IO Int))
        .*. move      .=. (proxy::Proxy (Int -> IO ()))
@@ -175,7 +184,8 @@ data MyLabel; myLabel = proxy::Proxy MyLabel
 concrete_point' x_init self
    = do
         p <- abstract_point' x_init self -- inherit ...
-        srret (p,self) $ \(p,self) ->
+--        srret (p,self) $ \(p,self) ->
+        constructWithSuper p self $ \ p self ->
         -- use disciplined record update
               getX    .=. readIORef (self # mutableX)
           .^. move   .=. (\d -> modifyIORef (self # mutableX) ((+) d))
@@ -184,7 +194,12 @@ concrete_point' x_init self
           .*. p
 
 -- We introduce a constrained new method to refuse proxy fields in records.
+{-
 mnew (f::NotConstructed a -> m (NotConstructed a)) = smrfix f
+ where
+  () = hasNoProxies (undefined::a) 
+-}
+mnew (f::NotFixed a -> m (NotFixed a)) = new f
  where
   () = hasNoProxies (undefined::a) 
 
@@ -209,4 +224,3 @@ main =
 
 -- :t colored_point
 -- :t mfix $ colored_point (1::Int) "red"
-

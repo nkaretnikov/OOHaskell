@@ -29,6 +29,7 @@ module OOHaskell (
  module Control.Monad.Fix,
  module GHC.IOBase,
  module DeepNarrow,
+ module New,
  module OOHaskell
 
 ) where
@@ -48,6 +49,7 @@ import TypeEqGeneric1
 import TypeCastGeneric1
 import Label4
 import DeepNarrow
+import New
 
 import Data.STRef
 import Data.IORef
