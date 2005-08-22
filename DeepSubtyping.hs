@@ -145,4 +145,29 @@ test2 = do
            putStrLn "OK"
 
 
+-- Some extra test cases for DeepNarrow
+
+data Label1; label1 = proxy::Proxy Label1
+data Label2; label2 = proxy::Proxy Label2
+data Label3; label3 = proxy::Proxy Label3
+
+-- o2 extends o1 (width subtyping)
+o1 = returnIO emptyRecord
+o2 = do super <- o1; returnIO $ label1 .=. returnIO (1::Int) .*. super
+
+-- o3 takes an object type o
+o3 o = returnIO
+          $
+             label2 .=. o
+--         .*. label3 .=. (\(x::Int) -> o) -- deep'narrow does not skip args
+         .*. emptyRecord
+
+-- o5 is a deep subtype of o4
+o4 = o3 o1
+o5 = o3 o2
+
+-- We test the deep'narrow operation
+l1 = [deep'narrow o5,o4] 
+
+
 main = do test1; test2

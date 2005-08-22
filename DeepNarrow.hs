@@ -72,3 +72,4 @@ instance ( DeepNarrow' ItsRecord (Record r) (Record r')
 		  
 instance DeepNarrow a b => DeepNarrow' ItsIO (IO a) (IO b) where
     deep'narrow' _ a = a >>= (return . deep'narrow)
+

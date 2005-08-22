@@ -32,11 +32,11 @@ data InsHead; insHead  = proxy::Proxy InsHead
 -- The interface of a recursive list
 
 type ListInterface a =
-     Record (     (Proxy IsEmpty  , IO Bool)
-              :*: (Proxy GetHead  , IO a)
-              :*: (Proxy GetTail  , IO (ListObj a))
-              :*: (Proxy SetHead  , a -> IO ())
-              :*: (Proxy InsHead  , a -> IO (ListObj a))
+     Record (     IsEmpty :=: IO Bool
+              :*: GetHead :=: IO a
+              :*: GetTail :=: IO (ListObj a)
+              :*: SetHead :=: (a -> IO ())
+              :*: InsHead :=: (a -> IO (ListObj a))
               :*: HNil )
 
 
