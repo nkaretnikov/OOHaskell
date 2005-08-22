@@ -150,24 +150,33 @@ test2 = do
 data Label1; label1 = proxy::Proxy Label1
 data Label2; label2 = proxy::Proxy Label2
 data Label3; label3 = proxy::Proxy Label3
+data Label4; label4 = proxy::Proxy Label4
 
 -- o2 extends o1 (width subtyping)
 o1 = returnIO emptyRecord
 o2 = do super <- o1; returnIO $ label1 .=. returnIO (1::Int) .*. super
 
--- o3 takes an object type o
-o3 o = returnIO
+-- o3 takes objects of types o o'
+o3 o (o'::o') = returnIO
           $
              label2 .=. o
---         .*. label3 .=. (\(x::Int) -> o) -- deep'narrow does not skip args
+         .*. label3 .=. (\(x::Int) -> o)
+         .*. label4 .=. (\(x::Int) (y::o') -> o)
          .*. emptyRecord
 
 -- o5 is a deep subtype of o4
-o4 = o3 o1
-o5 = o3 o2
+o4 = o3 o1 o2
+o5 = o3 o2 o1
+
+o6 = o3 o1 o1
+o7 = o3 o2 o2
 
 -- We test the deep'narrow operation
 l1 = [deep'narrow o5,o4] 
+l2 = [deep'narrow o6,o4] 
+
+--l1bad = [deep'narrow o7,o6] 
+--l2bad = [deep'narrow o4,o6] 
 
 
 main = do test1; test2

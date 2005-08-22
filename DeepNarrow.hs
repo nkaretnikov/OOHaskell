@@ -25,17 +25,19 @@ import GhcSyntax
 
 data ItsRecord
 data ItsIO
+data ItsFunction
 data ItsOther
 
-class IsIORecord a b | a -> b
-instance IsIORecord (Record y) ItsRecord
-instance IsIORecord (IO y) ItsIO
-instance TypeCast f ItsOther => IsIORecord a f
+class TopTyCon a b | a -> b
+instance TopTyCon (Record y) ItsRecord
+instance TopTyCon (IO y) ItsIO
+instance TopTyCon (a->b) ItsFunction
+instance TypeCast f ItsOther => TopTyCon a f
 
 class DeepNarrow a b where
     deep'narrow :: a -> b
 
-instance (IsIORecord a f, DeepNarrow' f a b) => DeepNarrow a b where
+instance (TopTyCon a f, DeepNarrow' f a b) => DeepNarrow a b where
     deep'narrow = deep'narrow' (undefined::f)
 
 class DeepNarrow' f a b where
@@ -43,6 +45,14 @@ class DeepNarrow' f a b where
 
 instance TypeCast a b => DeepNarrow' ItsOther a b where
     deep'narrow' _ = typeCast
+
+-- Contra-variance on the argument type, co-variance in the result-type
+-- The type-checker won't accept in any other way...
+
+instance (DeepNarrow a' a, DeepNarrow b b')
+    => DeepNarrow' ItsFunction (a->b) (a'->b') where
+    deep'narrow' _ f = \x -> deep'narrow (f (deep'narrow x))
+
 
 instance DeepNarrow' ItsRecord r (Record HNil) where
     deep'narrow' _ _ = emptyRecord
@@ -58,7 +68,7 @@ constraints which are then indeed added as to complete the instance.
 
 instance ( DeepNarrow' ItsRecord (Record r) (Record r')
          , H2ProjectByLabels (HCons l HNil) r (HCons (l, v) HNil) rout
-	 , IsIORecord v f, DeepNarrow' f v v'
+	 , TopTyCon v f, DeepNarrow' f v v'
 	 , HRLabelSet (HCons (l,v') r')
 	 )
     => DeepNarrow' ItsRecord (Record r) (Record (HCons (l,v') r')) where
