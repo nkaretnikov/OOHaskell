@@ -60,7 +60,7 @@ self_returning_point (x_init::a) self =
    do
       super <- printable_point x_init self
       returnIO
-          -- Returning self directly is caught by occurs check!
+          -- Returning self directly is caught by the occurs check!
           -- $  me .=. self
           $  me .=. (narrow self :: PPInterface a)
          .*. super
