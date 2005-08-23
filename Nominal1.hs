@@ -23,44 +23,52 @@ data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
 data MoveX;    moveX    = proxy::Proxy MoveX
 data Print;    print    = proxy::Proxy Print
+data PrintInt; printi   = proxy::Proxy PrintInt
 data GetColor; getColor = proxy::Proxy GetColor
 data GetMass;  getMass  = proxy::Proxy GetMass
 
 
 -- Newtypes for nominal type distinctions
 
-newtype PP x  = PP x  -- Printable points
-newtype CP x  = CP x  -- Colored points
-newtype MCP x = MCP x -- Massive Colored points
-newtype SP x  = SP x  -- "Special" points
+data PP  = PP  -- Printable points
+data CP  = CP  -- Colored points
+data MCP = MCP -- Massive Colored points
+data SP  = SP  -- "Special" points
 
+newtype N label rec = N rec
 
 -- A class for newtypes
 
 class Nomination f
  where
-  wrap   :: x -> f x
-  unwrap :: f x -> x
+  wrap   :: x -> N f x
+  wrap x = N x
+  unwrap :: N f x -> x
+  unwrap (N x) = x
 
 
--- Wrapping and unwrapping for PP, CP, SP
+-- Wrapping and unwrapping for PP, CP, SP, MCP
 
-instance Nomination PP where wrap = PP; unwrap (PP x) = x
-instance Nomination CP where wrap = CP; unwrap (CP x) = x
-instance Nomination MCP where wrap = MCP; unwrap (MCP x) = x
-instance Nomination SP where wrap = SP; unwrap (SP x) = x
+instance Nomination PP
+instance Nomination CP
+instance Nomination MCP
+instance Nomination SP
 
+
+asnp :: nt -> x -> N nt x
+asnp nt x = N x
 
 -- The familiar printable points but nominal this time
 
 printable_point x_init s =
    do
       x <- newIORef x_init
-      returnIO $ PP -- Nominal!
+      returnIO $ asnp PP -- Nominal!
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. moveX     .=. (\d -> modifyIORef x (+d))
-       .*. print    .=. ((s # getX ) >>= Prelude.print)
+       .*. moveX    .=. (\d -> modifyIORef x (+d))
+       .*. printi   .=. ((s # getX ) >>= Prelude.print)
+       .*. print    .=. s # printi
        .*. emptyRecord
 
 
@@ -69,9 +77,9 @@ printable_point x_init s =
 colored_point x_init (color::String) self =
    do
       super <- printable_point x_init self
-      returnIO $ CP -- Nominal!
-        $  print .=. ( do  putStr "so far - "; super # print
-                           putStr "color  - "; Prelude.print color )
+      returnIO $ asnp CP -- Nominal!
+        $  printi .=. ( do  putStr "so far - "; super # printi
+                            putStr "color  - "; Prelude.print color )
        .<. getColor .=. (returnIO color)
        .*. unwrap super -- Remove wrapper!
 
@@ -81,9 +89,9 @@ colored_point x_init (color::String) self =
 mcolored_point x_init color (mass::Float) self =
    do
       super <- colored_point x_init color self
-      returnIO $ MCP -- Nominal!
-        $  print .=. ( do  putStr "so far - "; super # print
-                           putStr "mass  - "; Prelude.print mass )
+      returnIO $ asnp MCP -- Nominal!
+        $  printi .=. ( do  putStr "so far - "; super # printi
+                            putStr "mass  - "; Prelude.print mass )
        .<. getMass .=. (returnIO mass)
        .*. unwrap super -- Remove wrapper!
 
@@ -92,27 +100,27 @@ mcolored_point x_init color (mass::Float) self =
 special_point x_init self = 
    do
       super <- printable_point x_init self
-      returnIO $ SP $ unwrap super
+      returnIO $ asnp SP $ unwrap super
 
 
--- For method look-up
+-- For method look-up. It should not overlap with anything else
 
-instance (HasField l x v, Nomination f) => HasField l (f x) v
+instance (HasField l x v, Nomination f) => HasField l (N f x) v
  where hLookupByLabel l o = unwrap o # l
 
 
 -- These versions require explicit cast
 
-printPP (aPP::PP x) = aPP # print
-printCP (aCP::CP x) = aCP # print
-printSP (aSP::SP x) = aSP # print
+printPP (aPP::N PP x) = aPP # print
+printCP (aCP::N CP x) = aCP # print
+printSP (aSP::N SP x) = aSP # print
 
 
 -- These versions upcast by themselves
 
-printPP' o = let (aPP::PP x) = upCast o in aPP # print
-printCP' o = let (aCP::CP x) = upCast o in aCP # print
-printSP' o = let (aSP::SP x) = upCast o in aSP # print
+printPP' o = let (aPP::N PP x) = upCast o in aPP # print
+printCP' o = let (aCP::N CP x) = upCast o in aCP # print
+printSP' o = let (aSP::N SP x) = upCast o in aSP # print
 
 
 -- The presentation of the nominal inheritance hierarchy
@@ -121,7 +129,7 @@ printSP' o = let (aSP::SP x) = upCast o in aSP # print
 -- For multiple inheritance, we should define the list of parents.
 -- That is explored in the message on the Haskell mailing list ca end 2003
 
-class NSuper (sub :: * -> * ) (super :: * -> * ) | sub -> super
+class NSuper sub super | sub -> super
 
 instance NSuper CP PP -- colored points are printable points
 instance NSuper SP PP -- special points are printable points
@@ -131,21 +139,28 @@ instance NSuper MCP CP -- massive colored points are colored points
 -- to any of its ancestors
 
 class (Nomination f, Nomination g) => NSubclass f g
- where upCast :: f x -> g x
+ where upCast :: N f x -> N g x
        upCast = wrap . unwrap
-instance Nomination f => NSubclass f f -- subclassing is reflexive
-instance (Nomination f, Nomination g, Nomination g',
-	  NSuper f g', TypeEq (g' ()) (g ()) bool,
-	  NSubclass' bool f g)
+
+instance (Nomination f, Nomination g, TypeEq f g bool,
+	  NSubclass' bool f g) 
     => NSubclass f g
-
 class (Nomination f, Nomination g) => NSubclass' bool f g
-
-instance (Nomination f, Nomination g) => NSubclass' HTrue f g
+instance Nomination f => NSubclass' HTrue f f  -- subclassing is reflexive
 instance (Nomination f, Nomination g, Nomination g',
-	  NSuper f g', NSubclass g' g) => NSubclass' HFalse f g
+	  NSuper f g', TypeEq g' g bool,
+	  NSubclass'' bool f g)
+    => NSubclass' HFalse f g
+
+class (Nomination f, Nomination g) => NSubclass'' bool f g
+
+instance (Nomination f, Nomination g) => NSubclass'' HTrue f g
+instance (Nomination f, Nomination g, Nomination g',
+	  NSuper f g', NSubclass g' g) => NSubclass'' HFalse f g
 
 -- Time to demo
+
+castto x (np::np) = let (o::N np x) = upCast x in o
 
 main = do
            -- Some sample objects
@@ -172,6 +187,15 @@ main = do
            printPP' aCP -- No need to up-cast.
            printPP' aSP -- No need to up-cast.
            printPP' aMP -- No need to up-cast.
+
+           printPP' aMP -- No need to up-cast.
+
+           -- moveX must be inherited from the remote parent
+	   putStrLn "    after moving MP..."
+           (castto aMP PP) # moveX $ 10
+           printPP' aMP -- No need to up-cast.
+
+
 
            -- Nominal not equal structural subtyping
 	   printSP aSP
