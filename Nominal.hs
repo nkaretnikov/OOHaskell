@@ -7,134 +7,120 @@
 -- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
-Illustration of nominal subtyping.
+Support nominal subtyping.
 
 -}
 
 
-module Nominal where
+module Nominal (
+ module Nominal
+) where
 
-import OOHaskell
-import qualified Prelude (print)
-import Prelude hiding (print)
-
-
-data MutableX; mutableX = proxy::Proxy MutableX
-data GetX;     getX     = proxy::Proxy GetX
-data MoveX;    moveX    = proxy::Proxy MoveX
-data Print;    print    = proxy::Proxy Print
-data GetColor; getColor = proxy::Proxy GetColor
+import FakePrelude
+import HListPrelude
+import HOccurs
+import Record
 
 
--- Newtypes for nominal type distinctions
+-- A newtype wrapper for nominal types
 
-newtype PP x = PP x -- Printable points
-newtype CP x = CP x -- Colored points
-newtype SP x = SP x -- "Special" points
+newtype N label rec = N rec
 
 
--- A class for newtypes
+-- A class for nominal types
 
 class Nomination f
- where
-  wrap   :: x -> f x
-  unwrap :: f x -> x
 
 
--- Wrapping and unwrapping for PP, CP, SP
+-- An operation to `nominate' a record as nominal object
 
-instance Nomination PP where wrap = PP; unwrap (PP x) = x
-instance Nomination CP where wrap = CP; unwrap (CP x) = x
-instance Nomination SP where wrap = SP; unwrap (SP x) = x
-
-
--- The familiar printable points but nominal this time
-
-printable_point x_init s =
-   do
-      x <- newIORef x_init
-      returnIO $ PP -- Nominal!
-        $  mutableX .=. x
-       .*. getX     .=. readIORef x
-       .*. moveX     .=. (\d -> modifyIORef x (+d))
-       .*. print    .=. ((s # getX ) >>= Prelude.print)
-       .*. emptyRecord
+nominate ::  Nomination nt => nt -> x -> N nt x
+nominate nt x = N x
 
 
--- Colored points exercising overriding and extension
+-- An operation to `anonymize' a nominal object
 
-colored_point x_init (color::String) self =
-   do
-      super <- printable_point x_init self
-      returnIO $ CP -- Nominal!
-        $  print .=. ( do  putStr "so far - "; super # print
-                           putStr "color  - "; Prelude.print color )
-       .<. getColor .=. (returnIO color)
-       .*. unwrap super -- Remove wrapper!
+anonymize ::  Nomination nt => N nt x -> x
+anonymize (N x) = x
 
 
--- Special points that are structurally equal to PP
+-- For method look-up. It should not overlap with anything else
 
-special_point x_init self = 
-   do
-      super <- printable_point x_init self
-      returnIO $ SP $ unwrap super
+instance (HasField l x v, Nomination f) => HasField l (N f x) v
+ where hLookupByLabel l o = hLookupByLabel l (anonymize o)
 
 
--- For method look-up
-
-instance (HasField l x v, Nomination f) => HasField l (f x) v
- where hLookupByLabel l o = unwrap o # l
-
-
--- These versions require explicit cast
-
-printPP (aPP::PP x) = aPP # print
-printCP (aCP::CP x) = aCP # print
-printSP (aSP::SP x) = aSP # print
-
-
--- These versions upcast by themselves
-
-printPP' o = let (aPP::PP x) = upCast o in aPP # print
-printCP' o = let (aCP::CP x) = upCast o in aCP # print
-printSP' o = let (aSP::SP x) = upCast o in aSP # print
-
-
+--
 -- The presentation of the nominal inheritance hierarchy
+-- Define which nominal type is a parent for which type.
+--
 
-class (Nomination f, Nomination g) => NSubtype f g
- where upCast :: f x -> g x
-       upCast = wrap . unwrap
-instance Nomination f => NSubtype f f -- subtyping is reflexive
-instance NSubtype CP PP -- colored points are printable points
-instance NSubtype SP PP -- special points are printable points
+class ( Nomination child
+      , Nominations parents
+      ) 
+        => Parents child parents | child -> parents
 
 
--- Time to demo
+-- Lists of nominations
 
-main = do
-           -- Some sample objects
-           aPP <- mfix $ printable_point 5
-           aCP <- mfix $ colored_point 5 "red"
-           aSP <- mfix $ special_point 42
+class Nominations ns
+instance Nominations HNil
+instance ( Nomination h
+         , Nominations t
+         )
+           => Nominations (HCons h t)
 
-           -- Method invocations based on HasField
-           aPP # print
-           aCP # print
-           aSP # print
 
-           -- Nominal subtyping with explicit up-cast
-	   printPP aPP
-           -- printPP aCP -- Error! Up-cast needed.
-           printPP (upCast aCP)
-           printPP (upCast aSP)
+-- Test whether g is an ancestor class of f
 
-           -- Nominal subtyping with implicit up-cast
-	   printPP' aPP
-           printPP' aCP -- No need to up-cast.
-           printPP' aSP -- No need to up-cast.
+class ( Nomination f
+      , Nomination g
+      )
+        => Ancestor f g
 
-           -- Nominal not equal structural subtyping
-	   printSP aSP
-	   -- printSP aPP -- Error! Nominal type different
+
+-- Compute all ancestors and perform membership test
+
+instance ( Nomination f
+         , Nomination g
+         , Ancestors (HCons f HNil) hs
+         , HOccurs g hs
+         )
+           => Ancestor f g
+
+
+-- Compute transitive closure of ancestors
+
+class ( Nominations fs
+      , Nominations gs
+      )
+        => Ancestors fs gs | fs -> gs
+
+
+-- No more ancestors
+
+instance Ancestors HNil HNil
+
+
+-- Append ancestors
+
+instance ( Parents h l1
+         , Ancestors l1 l2
+         , Ancestors t l3
+         , HAppend l2 l3 l4
+         , HAppend l4 (HCons h HNil) l0
+         , Nominations l0
+         )
+           => Ancestors (HCons h t) l0
+
+
+-- An up-cast operation
+
+nUpCast :: Ancestor f g => N f x -> N g x
+nUpCast = N . anonymize
+
+
+-- An up-cast operation with target type
+
+nUpCastTo :: Ancestor f g => N f x -> g -> N g x
+nUpCastTo x (nt::nt) = nUpCast x

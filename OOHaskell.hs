@@ -29,6 +29,7 @@ module OOHaskell (
  module Control.Monad.Fix,
  module GHC.IOBase,
  module DeepNarrow,
+ module Nominal,
  module New,
  module OOHaskell
 
@@ -49,6 +50,7 @@ import TypeEqGeneric1
 import TypeCastGeneric1
 import Label4
 import DeepNarrow
+import Nominal
 import New
 
 import Data.STRef

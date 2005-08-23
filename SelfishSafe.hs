@@ -120,7 +120,7 @@ testGeneric
 -- This is an optional part in case we want to fix types of virtuals.
 {-
 
-abstract_point (x_init::a) (self :: New r)
+abstract_point (x_init::a) (self :: NotFixed r)
   | const False (constrain (undefined::r) ::
                  Proxy ( (Proxy GetX, IO a)
                       :*: (Proxy MoveX, a -> IO ())
@@ -199,7 +199,7 @@ mnew (f::NotConstructed a -> m (NotConstructed a)) = smrfix f
  where
   () = hasNoProxies (undefined::a) 
 -}
-mnew (f::New a -> m (New a)) = new f
+mnew (f::NotFixed a -> m (NotFixed a)) = new f
  where
   () = hasNoProxies (undefined::a) 
 

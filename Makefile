@@ -34,6 +34,7 @@ hs =			    \
 	SelfReturn.hs	    \
 	RecList.hs 	    \
 	Nominal.hs 	    \
+	NominalTest.hs 	    \
 	DeepSubtyping.hs    \
 	CovariantReturn.hs  \
 	CovariantArgs.hs    \
@@ -107,8 +108,8 @@ test: HList
 	diff -b CovariantArgs.out CovariantArgs.ref
 	${ghci}	-v0 RecList.hs < Main.in > RecList.out
 	diff -b RecList.out RecList.ref
-	${ghci}	-v0 Nominal.hs < Main.in > Nominal.out
-	diff -b Nominal.out Nominal.ref
+	${ghci}	-v0 NominalTest.hs < Main.in > NominalTest.out
+	diff -b NominalTest.out NominalTest.ref
 	${ghci}	-v0 EiffelFaqLcon.hs < Main.in > EiffelFaqLcon.out
 	diff -b EiffelFaqLcon.out EiffelFaqLcon.ref
 	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
