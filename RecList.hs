@@ -56,23 +56,22 @@ instance HasField l (ListInterface a) v =>
 
 
 -- The class for empty lists
-
-nilOO (_::Proxy a) self
+nilOO self :: IO (ListInterface a)
  = returnIO
      $  isEmpty  .=. returnIO True
-    .*. getHead  .=. ((failIO "No head!")::IO a)
-    .*. getTail  .=. ((failIO "No tail!")::IO (ListObj a))
-    .*. setHead  .=. const ((failIO "No head!")::IO ())
+    .*. getHead  .=. failIO "No head!"
+    .*. getTail  .=. failIO "No tail!"
+    .*. setHead  .=. const (failIO "No head!")
     .*. insHead  .=. reusableInsHead self
     .*. emptyRecord
 
 
 -- Reusable insert operation
 
-reusableInsHead list (head::a)
+reusableInsHead list head
  = do 
       newCons <- mfix (consOO head list)
-      returnIO ((ListObj newCons)::ListObj a)
+      returnIO (ListObj newCons)
 
 
 -- The class for nonempty lists
@@ -107,7 +106,7 @@ printList aList
 -- Test case
 
 main = do
-          list1 <- mfix $ nilOO (proxy::Proxy Int)
+          list1 <- mfix $ nilOO 
           list2 <- (list1 # insHead) (88::Int)
           list3 <- (list2 # insHead) (41::Int)
           (list3 # setHead) (42::Int)
