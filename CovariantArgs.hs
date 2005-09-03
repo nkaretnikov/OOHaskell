@@ -81,6 +81,13 @@ vector2 (p1::p) (p2::p) self =
        .*. emptyRecord
 
 
+-- A polymorphic method for aligning the origins of two vectors
+
+align_origins va vb = 
+    do
+    pa <- va # getP1
+    vb # setO $ pa
+
 -- A polymorphic method for setting the origin to zero
 
 set_origin_to_0 varg = 
@@ -113,6 +120,9 @@ test2 = do
            norm v2 >>= Prelude.print
 	   putStr "Length of colored cv2: "
            norm cv2 >>= Prelude.print
+
+           align_origins v2 v2
+           align_origins cv2 cv2
 
            -- The following is a type error: can't subtype
 	   -- Let vectors = [deep'narrow v2, deep'narrow cv2]
