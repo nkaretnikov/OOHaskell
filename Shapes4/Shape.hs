@@ -63,7 +63,7 @@ shape' x y tail self
                                     x <- getX self
                                     y <- getY self
                                     moveTo self (x+deltax) (y+deltay)
-                 , draw      = putStrLn "Nothing to dwaw"
+                 , draw      = putStrLn "Nothing to draw"
                  , shapeTail = tail' self
                  }
 
