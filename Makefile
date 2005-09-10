@@ -33,15 +33,14 @@ hs =			    \
 	Shapes*.hs	    \
 	SelfReturn.hs	    \
 	RecList.hs 	    \
+	New.hs	 	    \
 	Nominal.hs 	    \
 	NominalTest.hs 	    \
 	DeepSubtyping.hs    \
 	CovariantReturn.hs  \
 	CovariantArgs.hs    \
-	EiffelFaqLcon.h	    \
-	DynamicOo.hs	    \
-	LocalSigs.hs	    \
-	TwoTables.hs
+	EiffelFaqLcon.hs    \
+	DynamicOo.hs
 
 
 ##############################################################################
@@ -112,10 +111,6 @@ test: HList
 	diff -b NominalTest.out NominalTest.ref
 	${ghci}	-v0 EiffelFaqLcon.hs < Main.in > EiffelFaqLcon.out
 	diff -b EiffelFaqLcon.out EiffelFaqLcon.ref
-	${ghci}	-v0 LocalSigs.hs < Main.in > LocalSigs.out
-	diff -b LocalSigs.out LocalSigs.ref
-	${ghci}	-v0 TwoTables.hs < Main.in > TwoTables.out
-	diff -b TwoTables.out TwoTables.ref
 	(cd Shapes1; make test)
 	(cd Shapes2; make test)
 	(cd Shapes3; make test)

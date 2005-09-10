@@ -3,7 +3,7 @@
 OOHaskell -- Haskell's overlooked object system
 
 The code relies on the HList library.
-Since recently, HList is contained in the OOHaskell distribution.
+Since 10 September 2005, HList is contained in the OOHaskell distribution.
 The code has been released for GHC 6.4.
 See the Makefile for ways of running test cases.
 
@@ -34,11 +34,4 @@ Non-OOHaskell examples:
 - Shapes1 .. 6  -- non-OOHaskell-based implementations of shapes example.
 - interpreter	-- An example that simulates extensible datatypes
 
-
-More examples with status "UNDER DEVELOPMENT"
-
-- LocalSigs.hs  -- Functional objects with local signatures.
-- TwoTables.hs  -- Functional objects with methods and data separated.
-
-
-Last updated; August 28, 2005
+Last updated; September 10, 2005
