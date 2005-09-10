@@ -24,7 +24,7 @@ import Record
 
 -- A newtype wrapper for nominal types
 
-newtype N label rec = N rec
+newtype N nom rec = N rec
 
 
 -- A class for nominal types
