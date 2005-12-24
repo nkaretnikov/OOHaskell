@@ -131,11 +131,6 @@ test2 = do
            add2 # print; putStr "\n"
 --           set (add2 # right) lit2
 --           add2 # print; putStr "\n"
-           --
-           -- Cannot change type of children!
-           --
-           -- set (add2 # right) add1
-           -- add2 # print; putStr "\n"
            Prelude.print "test2 done."
 
 main = do
