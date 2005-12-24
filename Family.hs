@@ -23,11 +23,11 @@ fooClass x self =
    .*. emptyRecord
 
 
-client family =
+client1 family =
   do
      o1 <- mfix ((family # foo) True)
      o1 # bar
---   family monomorphic
+--   Sigh! Family monomorphic
 --     o2 <- mfix ((family # foo) "True")
 --     o2 # bar
      o3 <- mfix (fooClass True)
@@ -35,5 +35,14 @@ client family =
      o4 <- mfix (fooClass "True")
      o4 # bar
 
+client2 fooClass = 
+  do
+     o5 <- mfix (fooClass True)
+     o5 # bar
+--   Sigh! Constructor monomorphic
+--     o6 <- mfix (fooClass "True")
+--     o6 # bar
+
 main = do 
-          client family1
+          client1 family1
+          client2 fooClass
