@@ -23,7 +23,6 @@ data Print deriving Typeable; print = proxy::Proxy Print
 get = fst
 p `set` x = (snd p) x
 property ref = ( readIORef ref, writeIORef ref )
-baseProperty (ref::IORef x) = ( readIORef ref, \new -> writeIORef ref ( dynUpCast new :: x ) )
 
 
 -- Int literals
@@ -58,18 +57,13 @@ add (l::l) (r::r) self =
 
 type Exp = Record ( Print :=: IO () :*: HNil )
 
-{-
-baseProperty (ref::IORef (DynUpCast Exp))
-  = let (get,set) = property ref
-     in (get,set . dynUpCast)
--}
 
 -- Add expressions; using dynamics-based casts
 
 addDyn l r self = 
   do
-     lRef <- newIORef ((dynUpCast l) :: DynUpCast Exp)
-     rRef <- newIORef ((dynUpCast r) :: DynUpCast Exp)
+     lRef <- newIORef (dynUpCast l :: DynUpCast Exp)
+     rRef <- newIORef (dynUpCast r :: DynUpCast Exp)
      returnIO $  left  .=. property lRef
              .*. right .=. property rRef
              .*. print .=. ( do 
@@ -77,6 +71,25 @@ addDyn l r self =
                                 l # print
                                 putStr "+"
                                 (r::DynUpCast Exp) <- get (self # right)
+                                r # print
+                                returnIO ()
+                           )
+             .*. emptyRecord                                
+
+
+-- Add expressions; using forgetful narrow
+
+addNarrow l r self = 
+  do
+     lRef <- newIORef ((narrow l) :: Exp)
+     rRef <- newIORef ((narrow r) :: Exp)
+     returnIO $  left  .=. property lRef
+             .*. right .=. property rRef
+             .*. print .=. ( do 
+                                (l::Exp) <- get (self # left)
+                                l # print
+                                putStr "+"
+                                (r::Exp) <- get (self # right)
                                 r # print
                                 returnIO ()
                            )
@@ -107,7 +120,9 @@ test1 = do
            --
            -- set (add2 # right) add1
            -- add2 # print; putStr "\n"
+
            Prelude.print "test1 done."
+
 
 test2 = do
 
@@ -121,18 +136,53 @@ test2 = do
            add1 <- mfix (addDyn lit1 lit2)
            add2 <- mfix (addDyn add1 lit3)
            add1 # print; putStr "\n"
---           add2 # print; putStr "\n"
---           l <- get (add2 # left)
---           r <- get (add2 # right)
---           set (add2 # left) r
---           set (add2 # right) l
---           set (add2 # left) lit1
---           set (add2 # right) lit1
            add2 # print; putStr "\n"
---           set (add2 # right) lit2
---           add2 # print; putStr "\n"
+
+           -- Apparant type change
+           l <- get (add2 # left)    -- heavy tree
+           r <- get (add2 # right)   -- light tree
+           set (add2 # left) r       -- swap subtrees
+           set (add2 # right) l      -- swap cont'd
+           add2 # print; putStr "\n"
+
+           -- Type change through setters
+           set (add2 # left)  (dynUpCast lit1) -- Ooh!
+           set (add2 # right) (dynUpCast lit1) -- Eeh!
+           add2 # print; putStr "\n"
+
            Prelude.print "test2 done."
+
+
+test3 = do
+
+           -- Construct and manipulate literal object
+           lit1 <- mfix (lit 42)
+           lit2 <- mfix (lit 37)
+           lit3 <- mfix (lit 88)
+           lit1 # print; putStr "\n"
+           lit2 # print; putStr "\n"
+           lit3 # print; putStr "\n"
+           add1 <- mfix (addNarrow lit1 lit2)
+           add2 <- mfix (addNarrow add1 lit3)
+           add1 # print; putStr "\n"
+           add2 # print; putStr "\n"
+
+           -- Apparant type change
+           l <- get (add2 # left)    -- heavy tree
+           r <- get (add2 # right)   -- light tree
+           set (add2 # left) r       -- swap subtrees
+           set (add2 # right) l      -- swap cont'd
+           add2 # print; putStr "\n"
+
+           -- Type change through setters
+           set (add2 # left)  (narrow lit1) -- Ooh!
+           set (add2 # right) (narrow lit1) -- Eeh!
+           add2 # print; putStr "\n"
+
+           Prelude.print "test3 done."
+
 
 main = do
           test1
           test2
+          test3
