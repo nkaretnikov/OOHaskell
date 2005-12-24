@@ -13,30 +13,6 @@ module DynamicOo where
 
 import OOHaskell
 import Record
--- import qualified Prelude (print)
--- import Prelude hiding (print)
-import Data.Typeable
-import Data.Dynamic
-
-
--- Up-cast
-
-data UpCast x = UpCast x Dynamic -- Should be opaque!
-upCast :: (Typeable (Record a), Narrow a b) => Record a -> UpCast (Record b)
-upCast x = UpCast (narrow x) (toDyn x)
-
-
--- Down-cast
-
-downCast :: (Typeable b, Narrow b a) => UpCast (Record a) -> Maybe (Record b)
-downCast (UpCast _ d) = fromDynamic d
-
-
--- Method look-up for up-casted values
-
-instance HasField l x v => HasField l (UpCast x) v
- where
-  hLookupByLabel l (UpCast x _) =  hLookupByLabel l x
 
 
 -- Some labels that derive Typeable
@@ -69,8 +45,8 @@ dsub2  = toDyn sub2
 
 -- Some up-casted values
 
-usub1 = upCast sub1 :: UpCast Super
-usub2 = upCast sub2 :: UpCast Super
+usub1 = dynUpCast sub1 :: DynUpCast Super
+usub2 = dynUpCast sub2 :: DynUpCast Super
 
 
 -- Demo
@@ -87,13 +63,13 @@ main = do
            print $ sub2  # label3
            print $ maybe Nothing
                          (\(x::Sub1) -> Just (x # label2))
-                         (downCast usub1) 
+                         (dynDownCast usub1) 
            print $ maybe Nothing
                          (\(x::Sub1) -> Just (x # label2))
-                         (downCast usub2) 
+                         (dynDownCast usub2) 
            print $ maybe Nothing
                          (\(x::Sub2) -> Just (x # label3))
-                         (downCast usub1) 
+                         (dynDownCast usub1) 
            print $ maybe Nothing
                          (\(x::Sub2) -> Just (x # label3))
-                         (downCast usub2) 
+                         (dynDownCast usub2) 

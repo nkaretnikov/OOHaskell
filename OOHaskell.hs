@@ -4,13 +4,12 @@
 
 {-
 
-OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+OOHaskell (C) 2004--2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
 This module gathers the API that we need for OOP in Haskell.  We
 basically select a certain configuration of the HList library, and we
 also import modules that are needed for mutable data and monads. Note
-on overlapping: Needed for the chosen model of labels. Other models
-can be used instead, but the chosen look better in types.
+on overlapping: merely needed for the chosen model of labels.
 
 -}
 
@@ -23,13 +22,14 @@ module OOHaskell (
  module GhcExperiments,
  module Data.STRef,
  module Data.IORef,
- module Data.Typeable,
+ module Data.Dynamic,
  module Control.Monad,
  module Control.Monad.ST,
  module Control.Monad.Fix,
  module GHC.IOBase,
  module DeepNarrow,
  module Nominal,
+ module Dynamic,
  module New,
  module OOHaskell
 
@@ -51,11 +51,13 @@ import TypeCastGeneric1
 import Label4
 import DeepNarrow
 import Nominal
+import Dynamic
 import New
 
 import Data.STRef
 import Data.IORef
 import Data.Typeable
+import Data.Dynamic
 import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
