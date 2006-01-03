@@ -1,7 +1,6 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
-{-# OPTIONS -fno-monomorphism-restriction #-}
 
 module DML where
 
