@@ -1,6 +1,6 @@
-<<HList.Record (HList.HCons ((HList.Proxy DynamicOo.Label1),Bool) HList.HNil)>>
-<<HList.Record (HList.HCons ((HList.Proxy DynamicOo.Label1),Bool) (HList.HCons ((HList.Proxy DynamicOo.Label2),Int) HList.HNil))>>
-<<HList.Record (HList.HCons ((HList.Proxy DynamicOo.Label1),Bool) (HList.HCons ((HList.Proxy DynamicOo.Label3),Float) HList.HNil))>>
+<<HList.Record (HList.HCons (HList.F (HList.Proxy DynamicOo.Label1) Bool) HList.HNil)>>
+<<HList.Record (HList.HCons (HList.F (HList.Proxy DynamicOo.Label1) Bool) (HList.HCons (HList.F (HList.Proxy DynamicOo.Label2) Int) HList.HNil))>>
+<<HList.Record (HList.HCons (HList.F (HList.Proxy DynamicOo.Label1) Bool) (HList.HCons (HList.F (HList.Proxy DynamicOo.Label3) Float) HList.HNil))>>
 Just Record{label1=True,label2=1}
 Nothing
 True

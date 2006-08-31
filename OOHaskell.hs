@@ -67,10 +67,10 @@ infixr 9 #
 m # field = (m .!. field) 
 
 infixr 2 .*.
-(l,v) .*. (Record r) = mkRecord (HCons (l,v) r)
+f@(F v :: F l v) .*. (Record r) = mkRecord (HCons f r)
 
 infixr 4 :=:
-type l :=: v = (Proxy l,v)
+type l :=: v = F (Proxy l) v
 
 concrete generator self = generator self
  where
