@@ -14,10 +14,33 @@ import Polymorph hiding (main)
 
 main =
       do
+           -- Handle the shapes polymorphically
+           let scribble = consEither
+                           (rectangle 10 20 5 6)
+                           [circle 15 25 8]
+           mapM_ ( \x -> 
+                    do
+                       draw x
+                       draw (rMoveTo 100 100 x) )
+                 scribble
+
+           -- Handle rectangle-specific instance
+           draw $ setWidth 30 (rectangle 0 0 15 15)
+
+-- A union-constructing cons operation
+consEither :: h -> [t] -> [Either h t]
+consEither h t@(_:_) = Left h : map Right t 
+consEither _ _ = error "Cannot cons with empty tail!"
+
+
+-- A variation that uses a less generic consEither but works w/o deep unions
+
+main' =
+      do
          -- Handle the shapes polymorphically
-         let scribble = consEither
-                        (rectangle 10 20 5 6)
-                        [circle 15 25 8]
+         let scribble = consEither' (rectangle 10 20 5 6)
+                            $ consEither' (circle 15 25 8)
+                            $ []
          mapM_ ( \x -> 
                    do
                       draw x
@@ -29,6 +52,16 @@ main =
          draw $ setWidth 30 (rectangle 0 0 15 15)
 
 
-consEither :: h -> [t] -> [Either h t]
-consEither h t@(_:_) = Left h : map Right t 
-consEither _ _ = error "Cannot cons with empty tail!"
+type AllShapes = Either RectangleData CircleData
+
+class ConsEither x 
+ where
+  consEither' :: x -> [AllShapes] -> [AllShapes]
+
+instance ConsEither RectangleData
+ where
+  consEither' = (:) . Left
+
+instance ConsEither CircleData
+ where
+  consEither' = (:) . Right

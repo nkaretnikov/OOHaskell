@@ -13,7 +13,8 @@ class Circle extends Shape {
 
    // draw the circle
    void draw() {
-      System.out.println("Drawing a Circle at:(" + getX() + ", " + getY() +
+      System.out.println(
+         "Drawing a Circle at:(" + getX() + ", " + getY() +
          "), radius " + getRadius());
    }
 }

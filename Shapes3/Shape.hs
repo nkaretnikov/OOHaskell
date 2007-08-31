@@ -20,13 +20,13 @@ data Shape w =
 
 -- Constructor for shapes
 
-shape x y d t
+shape x y d w
   = Shape { getX      = x
           , getY      = y
-          , setX      = \x' -> shape x' y d t
-          , setY      = \y' -> shape x y' d t
-          , moveTo    = \x' y' -> shape x' y' d t
-          , rMoveTo   = \deltax deltay -> shape (x+deltax) (y+deltay) d t
+          , setX      = \x' -> shape x' y d w
+          , setY      = \y' -> shape x y' d w
+          , moveTo    = \x' y' -> shape x' y' d w
+          , rMoveTo   = \deltax deltay -> shape (x+deltax) (y+deltay) d w
           , draw      = d x y
-          , shapeTail = t
+          , shapeTail = w
           }

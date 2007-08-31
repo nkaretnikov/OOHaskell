@@ -28,19 +28,34 @@ instance (Shape a, Shape b) => Shape (Either a b)
   draw         = either draw draw
 
 
+-- Up-cast operation
+
+type AnyShape = Either RectangleData CircleData
+
+class UpCastToShape x
+ where
+  upCastToShape :: x -> AnyShape
+
+instance UpCastToShape RectangleData
+ where
+  upCastToShape = Left
+
+instance UpCastToShape CircleData
+ where
+  upCastToShape = Right
+
+
 -- Weirich's / Rathman's test case
 
 main =
       do
          -- Handle the shapes polymorphically
-         let scribble = [ Left  (rectangle 10 20 5 6)
-                        , Right (circle 15 25 8)
-                        ]
+         let scribble = [ upCastToShape  (rectangle 10 20 5 6)
+                        , upCastToShape (circle 15 25 8) ]
          mapM_ ( \x -> 
                    do
                       draw x
-                      draw (rMoveTo 100 100 x)
-               )
+                      draw (rMoveTo 100 100 x) )
                scribble
 
          -- Handle rectangle-specific instance

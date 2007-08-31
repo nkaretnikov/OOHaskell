@@ -9,7 +9,7 @@ test:
 	diff -b Polymorph.out Polymorph.ref
 	ghci -v0 Inference.hs < Main.in > Polymorph.out
 	diff -b Polymorph.out Polymorph.ref
-	ghci -v0 -i../../HList Heterogeneous.hs < Main.in > Polymorph.out
+	ghci -v0 -i../../HList/src:../../HList/examples Heterogeneous.hs < Main.in > Polymorph.out
 	diff -b Polymorph.out Polymorph.ref
 
 clean:

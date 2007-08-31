@@ -8,6 +8,7 @@ import Shape
 import Circle
 import Rectangle
 import Control.Monad.Fix
+import Data.IORef
 
 
 -- Narrow shapes to a uniform base type
@@ -39,3 +40,14 @@ main =
          s3 <- mfix $ rectangle' 0 0 15 15
          setWidth s3 30
          draw s3
+
+
+-- Test overriding
+
+main' =
+      do
+         l <- newIORef 0
+         c <- mfix $ circle' 15 25 8 l
+         draw c
+         t <- readIORef l
+         print t

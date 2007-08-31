@@ -13,8 +13,7 @@ import Shape
 data CircleDelta w =
      CircleDelta { getRadius'  :: IO Int
                  , setRadius'  :: Int -> IO ()
-                 , circleTail  :: w
-                 }
+                 , circleTail  :: w }
 
 
 -- An extension of Shape
@@ -24,18 +23,15 @@ type Circle w = Shape (CircleDelta w)
 
 -- Closed constructor for circles
 
-circle x y r
-  = shape x y drawCircle shapeTail
+circle x y r = shape x y d w
  where
 
-  drawCircle self
-    =  
-       putStr  "Drawing a Circle at:(" <<
-       getX self << ls "," << getY self <<
-       ls "), radius " << getRadius self <<
-       ls "\n"
+  d self =  putStr  "Drawing a Circle at:("
+         << getX self << ls "," << getY self 
+         << ls "), radius " << getRadius self
+         << ls "\n"
 
-  shapeTail 
+  w 
     = do 
          rRef <- newIORef r
          return ( \self -> 
@@ -45,6 +41,17 @@ circle x y r
                 , circleTail = ()
                 } )
 
+
+-- A variation on circle with logging facilities
+
+circle' x y r l self 
+  = do
+       super <- circle x y r self
+       return super
+         { getX = do { tick; getX super }
+         , getY = do { tick; getY super } }
+ where
+   tick = modifyIORef l ((+) 1)
 
 -- Hide nested position of rectangle accessors
 

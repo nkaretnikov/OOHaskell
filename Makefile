@@ -1,3 +1,8 @@
+#
+# This is mostly LEGACY at this point.
+# Needs to be worked on.
+#
+
 ##############################################################################
 #
 # Useful make targets

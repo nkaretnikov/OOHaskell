@@ -17,7 +17,8 @@ class Rectangle extends Shape {
 
    // draw the rectangle
    void draw() {
-      System.out.println("Drawing a Rectangle at:(" + getX() + ", " + getY() +
+      System.out.println(
+         "Drawing a Rectangle at:(" + getX() + ", " + getY() +
          "), width " + getWidth() + ", height " + getHeight());
    }
 }
