@@ -10,18 +10,18 @@ import Shape
 -- The composed type of rectangles
 
 data RectangleData =
-     RectangleData { getShape  :: ShapeData
-                   , getWidth  :: Int 
-                   , getHeight :: Int
+     RectangleData { shapeData  :: ShapeData
+                   , widthData  :: Int 
+                   , heightData :: Int
                    }
 
 
 -- A "closed" constructor
 
 rectangle x y w h
- = RectangleData { getShape  = shape x y
-                 , getWidth  = w
-                 , getHeight = h
+ = RectangleData { shapeData  = shape x y
+                 , widthData  = w
+                 , heightData = h
                  }
 
 
@@ -29,14 +29,14 @@ rectangle x y w h
 
 instance Shape RectangleData
  where
-  moveTo x y s = s { getShape = moveTo' x y (getShape s) }
-  rMoveTo deltax deltay s = s { getShape = rMoveTo' deltax deltay (getShape s) }
+  moveTo x y s = s { shapeData = moveTo' x y (shapeData s) }
+  rMoveTo dx dy s = s { shapeData = rMoveTo' dx dy (shapeData s) }
   draw s
     =   putStrLn ("Drawing a Rectangle at:("
-    ++ (show (getX (getShape s)))
+    ++ (show (xData (shapeData s)))
     ++ ","
-    ++ (show (getY (getShape s)))
+    ++ (show (yData (shapeData s)))
     ++ "), width "
-    ++ (show (getWidth s))
+    ++ (show (widthData s))
     ++ ", height "
-    ++ (show (getHeight s)))
+    ++ (show (heightData s)))

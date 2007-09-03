@@ -27,3 +27,8 @@ class Circle implements IShape {
            "), radius " + getRadius());
     }
 }
+
+interface ICircle extends IShape {
+    int getRadius();
+    void setRadius(int newradius);
+}

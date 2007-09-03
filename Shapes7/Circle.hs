@@ -10,29 +10,34 @@ import Shape
 -- The composed type of circles
 
 data CircleData =
-     CircleData { getShape :: ShapeData
-                 , getRadius :: Int
-                 }
+     CircleData { shapeData :: ShapeData
+                 , radiusData :: Int }
 
 
 -- A "closed" constructor
 
-circle x y r
- = CircleData { getShape  = shape x y
-              , getRadius = r
-              }
+circle x y r = CircleData { shapeData  = shape x y
+              , radiusData = r }
 
 
 -- A circle is a shape
 
 instance Shape CircleData
  where
-  moveTo x y s = s { getShape = moveTo' x y (getShape s) }
-  rMoveTo deltax deltay s = s { getShape = rMoveTo' deltax deltay (getShape s) }
+  moveTo x y s = s { shapeData = moveTo' x y (shapeData s) }
+  rMoveTo dx dy s = s { shapeData = rMoveTo' dx dy (shapeData s) }
   draw s
     =  putStrLn ("Drawing a Circle at:("
-    ++ (show (getX (getShape s)))
+    ++ (show (xData (shapeData s)))
     ++ ","
-    ++ (show (getY (getShape s)))
+    ++ (show (yData (shapeData s)))
     ++ "), radius "
-    ++ (show (getRadius s)))
+    ++ (show (radiusData s)))
+
+
+-- An interface in case more kinds of circles show up
+
+class Shape s => Circle s
+ where
+  getRadius :: s -> Int
+  setRadius :: Int -> s -> s

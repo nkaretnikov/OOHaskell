@@ -11,14 +11,14 @@ import Rectangle
 
 -- Define a closed union over kinds of shapes
 
-type AllShapes w = Shape (Either (RectangleDelta w) (CircleDelta w))
+type AnyShape w = Shape (Either (RectangleDelta w) (CircleDelta w))
 
 
 -- Define overloaded embedding into union
 
 class UpCastToShape w
  where
-  upCastToShape :: Shape (w w') -> AllShapes w'
+  upCastToShape :: Shape (w w') -> AnyShape w'
 
 instance UpCastToShape RectangleDelta
  where

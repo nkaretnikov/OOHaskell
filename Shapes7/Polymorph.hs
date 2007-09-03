@@ -24,7 +24,7 @@ instance BiFunctor Either where
 instance (Shape a, Shape b) => Shape (Either a b)
  where
   moveTo x y = bimap (moveTo x y) (moveTo x y)
-  rMoveTo deltax deltay = bimap (rMoveTo deltax deltay) (rMoveTo deltax deltay)
+  rMoveTo dx dy = bimap (rMoveTo dx dy) (rMoveTo dx dy)
   draw = either draw draw
 
 
@@ -60,5 +60,5 @@ main =
 
          -- Handle rectangle-specific instance
          let r = rectangle 0 0 15 15
-         let r' = r { getWidth = 30 } 
+         let r' = r { widthData = 30 } 
          draw r' 

@@ -8,14 +8,14 @@ module Shape where
 -- Data of shapes
 
 data ShapeData =
-     ShapeData { getX :: Int
-               , getY :: Int }
+     ShapeData { xData :: Int
+               , yData :: Int }
 
 
 -- Constructor for shapes
 
-shape x y = ShapeData { getX = x
-                      , getY = y }
+shape x y = ShapeData { xData = x
+                      , yData = y }
 
 
 -- The shape interface
@@ -29,5 +29,5 @@ class Shape s
 moveTo' x y s = shape x y 
 rMoveTo' deltax deltay s = moveTo' x y s
   where
-     x = getX s + deltax
-     y = getY s + deltay
+    x = xData s + deltax
+    y = yData s + deltay

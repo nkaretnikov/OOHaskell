@@ -3,7 +3,7 @@ all:
 build:
 	javac *.java
 
-check: build
+test: build
 	java Polymorph > Polymorph.out
 	diff Polymorph.out Polymorph.ref
 
