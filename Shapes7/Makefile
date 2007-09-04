@@ -9,6 +9,8 @@ test:
 	diff -b Polymorph.out Polymorph.ref
 	ghci -v0 Existential.hs < Main.in > Polymorph.out
 	diff -b Polymorph.out Polymorph.ref
+	ghci -v0 Existential1.hs < Main.in > Polymorph.out
+	diff -b Polymorph.out Polymorph.ref
 	ghci -v0 Heterogeneous.hs < Main.in > Polymorph.out
 	diff -b Polymorph.out Polymorph.ref
 #	ghci -v0 Inference.hs < Main.in > Polymorph.out
