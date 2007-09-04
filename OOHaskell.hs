@@ -67,7 +67,7 @@ infixr 9 #
 m # field = (m .!. field) 
 
 infixr 2 .*.
-f@(F v :: F l v) .*. (Record r) = mkRecord (HCons f r)
+f@(F v) .*. (Record r) = mkRecord (HCons f r)
 
 infixr 4 :=:
 type l :=: v = F (Proxy l) v
