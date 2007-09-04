@@ -28,9 +28,11 @@ main =
            draw $ setWidth 30 (rectangle 0 0 15 15)
 
 -- A union-constructing cons operation
+-- The second argument should be a non-empty list (see the example above)
+-- Otherwise, we get eventually a type error (unresolved overloading
+-- or ambigous type variable)
 consEither :: h -> [t] -> [Either h t]
-consEither h t@(_:_) = Left h : map Right t 
-consEither _ _ = error "Cannot cons with empty tail!"
+consEither h t = Left h : map Right t 
 
 
 -- A variation that uses a less generic consEither but works w/o deep unions
