@@ -16,38 +16,28 @@ data RectangleData =
                    }
 
 
--- A "closed" constructor
 
-rectangle_data x y w h
- = RectangleData { shapeData  = shape_data x y
-                 , widthData  = w
-                 , heightData = h
-                 }
+-- Concrete rectangles
 
--- A rectangle is a shape
+rectangle x y w h = ShapeC { getData = RectangleData (ShapeData x y) w h
+                           , moveToI  = moveTo
+                           , rMoveToI = rMoveTo
+                           , drawI    = draw }
 
-rectangle x y w h = ShapeR {sh_data    = rdata,
-			    sh_moveTo  = moveTo,
-			    sh_rMoveTo = rMoveTo,
-			    sh_draw    = draw}
  where
- rdata  = rectangle_data x y w h
- moveTo x y s    = s{ shapeData = moveTo' x y (shapeData s) }
- rMoveTo dx dy s = s{ shapeData = rMoveTo' dx dy (shapeData s) }
- draw s
-    =   putStrLn ("Drawing a Rectangle at:("
-    ++ (show (xData (shapeData s)))
-    ++ ","
-    ++ (show (yData (shapeData s)))
-    ++ "), width "
-    ++ (show (widthData s))
-    ++ ", height "
-    ++ (show (heightData s)))
+  moveTo x y s    = updData s (moveTo' x y)
+  rMoveTo dx dy s = updData s (rMoveTo' dx dy)
+  updData s f = s { shapeData = f (shapeData s) }
+  draw s =   putStrLn ("Drawing a Rectangle at:("
+         ++ (show (xData (shapeData s)))
+         ++ ","
+         ++ (show (yData (shapeData s)))
+         ++ "), width "
+         ++ (show (widthData s))
+         ++ ", height "
+         ++ (show (heightData s)))
 
 -- rectangle-specific operation
 
-set_width :: Int -> ShapeR RectangleData -> ShapeR RectangleData
-set_width w s = s{ sh_data = (sh_data s) {widthData = w} }
-
-
-
+setWidth :: Int -> ShapeC RectangleData -> ShapeC RectangleData
+setWidth w s = s { getData = (getData s) { widthData = w } }

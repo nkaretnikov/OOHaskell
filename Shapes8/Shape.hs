@@ -3,7 +3,8 @@
 -- (C) 2004-2007, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
--- Shapes with existentials instead of typeclasses
+-- Shapes with existential types
+
 
 module Shape where
 
@@ -15,42 +16,42 @@ data ShapeData =
                , yData :: Int }
 
 
--- Constructor for shapes
 
-shape_data x y = ShapeData { xData = x
-			   , yData = y }
+-- Concrete data with an interface
+
+data ShapeC s = 
+     ShapeC { getData  :: s
+            , moveToI  :: Int -> Int -> s -> s
+	    , rMoveToI :: Int -> Int -> s -> s
+	    , drawI    :: s -> IO () }
 
 
--- The shape interface
+-- Abstracted data with an interface
 
--- interface with the explicit type of private data
-data ShapeR shapedata = 
-    ShapeR{ sh_data :: shapedata,
-	    sh_moveTo  :: Int -> Int -> shapedata -> shapedata,
-	    sh_rMoveTo :: Int -> Int -> shapedata -> shapedata,
-	    sh_draw    :: shapedata -> IO () }
-
--- transform private state
-xf_shapeR sr fn = sr {sh_data = fn (sh_data sr)}
-
--- Interface with the abstracted data
-data Shape = forall shapedata . Shape (ShapeR shapedata)
+data ShapeA = forall s. ShapeA (ShapeC s)
 
 
 -- Public interface of shapes
-moveTo :: Int -> Int -> Shape -> Shape
-moveTo x y (Shape sr)    = Shape (xf_shapeR sr (sh_moveTo sr x y))
 
-rMoveTo :: Int -> Int -> Shape -> Shape
-rMoveTo dx dy (Shape sr) = Shape (xf_shapeR sr (sh_rMoveTo sr dx dy))
+moveTo :: Int -> Int -> ShapeA -> ShapeA
+moveTo x y (ShapeA s) = ShapeA (updData s (moveToI s x y))
 
-draw :: Shape -> IO ()
-draw (Shape sr) = sh_draw sr (sh_data sr)
+rMoveTo :: Int -> Int -> ShapeA -> ShapeA
+rMoveTo dx dy (ShapeA s) = ShapeA (updData s (rMoveToI s dx dy))
+
+draw :: ShapeA -> IO ()
+draw (ShapeA s) = drawI s (getData s)
 
 
--- Auxiliary
-moveTo' x y s = shape_data x y 
-rMoveTo' deltax deltay s = moveTo' x y s
+-- Update data par of shape records
+
+updData s f = s { getData = f (getData s) }
+
+
+-- Reusable definitions of moving methods
+
+moveTo' x y s = ShapeData x y 
+rMoveTo' dx dy s = moveTo' x y s
   where
-    x = xData s + deltax
-    y = yData s + deltay
+    x = xData s + dx
+    y = yData s + dy

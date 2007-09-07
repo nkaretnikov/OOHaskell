@@ -12,16 +12,16 @@ import Rectangle
 
 -- An existential envelope for shapes
 
-data OpaqueShape = forall x. Shape x => HideShape x
+data AbstractShape = forall x. Shape x => AbstractShape x
 
 
 -- Opaque shapes are shapes
 
-instance Shape OpaqueShape 
+instance Shape AbstractShape 
  where
-  moveTo x y    (HideShape s) = HideShape $ moveTo x y s
-  rMoveTo dx dy (HideShape s) = HideShape $ rMoveTo dx dy s
-  draw          (HideShape x) = draw x
+  moveTo x y    (AbstractShape s) = AbstractShape $ moveTo x y s
+  rMoveTo dx dy (AbstractShape s) = AbstractShape $ rMoveTo dx dy s
+  draw          (AbstractShape x) = draw x
 
 
 -- Weirich's / Rathman's test case
@@ -29,8 +29,8 @@ instance Shape OpaqueShape
 main =
       do
          -- Handle the shapes polymorphically
-         let scribble = [ HideShape (rectangle 10 20 5 6)
-                        , HideShape (circle 15 25 8)
+         let scribble = [ AbstractShape (rectangle 10 20 5 6)
+                        , AbstractShape (circle 15 25 8)
                         ]
          mapM_ ( \x -> 
                    do

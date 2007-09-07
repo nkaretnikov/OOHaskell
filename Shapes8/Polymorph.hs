@@ -14,8 +14,8 @@ import Rectangle
 main =
       do
          -- Handle the shapes polymorphically
-         let scribble = [ Shape (rectangle 10 20 5 6)
-                        , Shape (circle 15 25 8) ]
+         let scribble = [ ShapeA (rectangle 10 20 5 6)
+                        , ShapeA (circle 15 25 8) ]
          mapM_ ( \x -> 
                    do
                       draw x
@@ -24,6 +24,5 @@ main =
 
          -- Handle rectangle-specific instance
          let r = rectangle 0 0 15 15
-         let r' = set_width 30 r
-         draw (Shape r')
-
+         let r' = setWidth 30 r
+         draw (ShapeA r')
