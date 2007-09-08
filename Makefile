@@ -24,7 +24,7 @@ ghci = ghci \
 		-fglasgow-exts \
 		-fallow-overlapping-instances \
 		-fallow-undecidable-instances \
-		-i../HList
+		-i../HList/src
 
 # All the local samples
 hs =			    \
@@ -82,14 +82,14 @@ all:
 test: HList
 	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
 	diff -b SimpleIO.out SimpleIO.ref
-	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
-	diff -b SimpleST.out SimpleST.ref
+#	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
+#	diff -b SimpleST.out SimpleST.ref
 	${ghci}	-v0 CircBuffer.hs < Main.in > CircBuffer.out
 	diff -b CircBuffer.out CircBuffer.ref
-	${ghci}	-v0 Selfish.hs < Main.in > Selfish.out
-	diff -b Selfish.out Selfish.ref
-	${ghci}	-v0 SelfishSafe.hs < Main.in > SelfishSafe.out
-	diff -b SelfishSafe.out SelfishSafe.ref
+#	${ghci}	-v0 Selfish.hs < Main.in > Selfish.out
+#	diff -b Selfish.out Selfish.ref
+#	${ghci}	-v0 SelfishSafe.hs < Main.in > SelfishSafe.out
+#	diff -b SelfishSafe.out SelfishSafe.ref
 	${ghci}	-v0 ShapesNarrow.hs < Main.in > Shapes.out
 	diff -b Shapes.out Shapes.ref
 	${ghci}	-v0 ShapesLub.hs < Main.in > Shapes.out
@@ -100,20 +100,20 @@ test: HList
 	diff -b Shapes.out Shapes.ref
 	${ghci}	-v0 ShapesEither.hs < Main.in > Shapes.out
 	diff -b Shapes.out ShapesDown.ref
-	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
-	diff -b SelfReturn.out SelfReturn.ref
+#	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
+#	diff -b SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 DynamicOo.hs < Main.in > DynamicOo.out
 	diff -b DynamicOo.out DynamicOo.ref
-	${ghci}	-v0 DeepSubtyping.hs < Main.in > DeepSubtyping.out
-	diff -b DeepSubtyping.out DeepSubtyping.ref
+#	${ghci}	-v0 DeepSubtyping.hs < Main.in > DeepSubtyping.out
+#	diff -b DeepSubtyping.out DeepSubtyping.ref
 	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
 	diff -b CovariantReturn.out CovariantReturn.ref
-	${ghci}	-v0 CovariantArgs.hs < Main.in > CovariantArgs.out
-	diff -b CovariantArgs.out CovariantArgs.ref
-	${ghci}	-v0 RecList.hs < Main.in > RecList.out
-	diff -b RecList.out RecList.ref
-	${ghci}	-v0 NominalTest.hs < Main.in > NominalTest.out
-	diff -b NominalTest.out NominalTest.ref
+#	${ghci}	-v0 CovariantArgs.hs < Main.in > CovariantArgs.out
+#	diff -b CovariantArgs.out CovariantArgs.ref
+#	${ghci}	-v0 RecList.hs < Main.in > RecList.out
+#	diff -b RecList.out RecList.ref
+#	${ghci}	-v0 NominalTest.hs < Main.in > NominalTest.out
+#	diff -b NominalTest.out NominalTest.ref
 	${ghci}	-v0 EiffelFaqLcon.hs < Main.in > EiffelFaqLcon.out
 	diff -b EiffelFaqLcon.out EiffelFaqLcon.ref
 	(cd Shapes1; make test)
@@ -122,6 +122,8 @@ test: HList
 	(cd Shapes4; make test)
 	(cd Shapes5; make test)
 	(cd Shapes6; make test)
+	(cd Shapes7; make test)
+	(cd Shapes8; make test)
 
 #
 # The following may require some particular C/C++ compilers.
@@ -232,6 +234,6 @@ HList:
 
 ##############################################################################
 
-commit-with-darcs:
+commit:
 	darcs record -a -m "Committed from the Makefile"
 	darcs push
