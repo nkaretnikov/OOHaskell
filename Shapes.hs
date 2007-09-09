@@ -47,26 +47,22 @@ shape x_init y_init self
 
 -- This is the actual definition
 
-shape x_init y_init self
+shape xNew yNew self
   = do
-      x <- newIORef x_init
-      y <- newIORef y_init
-      returnIO $
-           getX     .=. readIORef x
-       .*. getY     .=. readIORef y
-       .*. setX     .=. (\newx -> writeIORef x newx)
-       .*. setY     .=. (\newy -> writeIORef y newy)
-       .*. moveTo   .=. (\newx newy -> do
-                                        (self # setX) newx
-                                        (self # setY) newy 
-                        )
-       .*. rMoveTo  .=. (\deltax deltay ->
-                 do
-                    x  <- self # getX
-                    y  <- self # getY
-                    (self # moveTo) (x + deltax) (y + deltay)
-                        )
-       .*. emptyRecord
+       xRef <- newIORef xNew
+       yRef <- newIORef yNew
+       return $
+            getX     .=. readIORef xRef
+        .*. getY     .=. readIORef yRef
+        .*. setX     .=. writeIORef xRef
+        .*. setY     .=. writeIORef yRef
+        .*. moveTo   .=. (\x y -> do (self # setX) x; (self # setY) y)
+        .*. rMoveTo  .=. (\dx dy ->
+              do
+                 x  <- self # getX
+                 y  <- self # getY
+                 (self # moveTo) (x + dx) (y + dy))
+        .*. emptyRecord
 
 
 -- We make the instantiation test.
@@ -112,24 +108,24 @@ newtype LS = LS String
 ls = return . LS
 instance Show LS where show (LS x) = x
 
-rectangle x y width height self
+rectangle xNew yNew widthNew heightNew self
   = do
-      super <- shape x y self
-      w <- newIORef width
-      h <- newIORef height
-      returnIO $
-           getWidth  .=. readIORef w
-       .*. getHeight .=. readIORef h
-       .*. setWidth  .=. (\neww -> writeIORef w neww)
-       .*. setHeight .=. (\newh -> writeIORef h newh)
-       .*. draw      .=. 
-           do
+       super <- shape xNew yNew self
+       widthRef <- newIORef widthNew
+       heightRef <- newIORef heightNew
+       returnIO $
+            getWidth  .=. readIORef widthRef
+        .*. getHeight .=. readIORef heightRef
+        .*. setWidth  .=. writeIORef widthRef
+        .*. setHeight .=. writeIORef heightRef
+        .*. draw      .=. 
               putStr  "Drawing a Rectangle at:(" <<
                       self # getX << ls "," << self # getY <<
                       ls "), width " << self # getWidth <<
                       ls ", height " << self # getHeight <<
                       ls "\n"
-       .*. super
+        .*. super
+
 
 -- Square: inherits from Shape
 -- Again, it is polymorphic in the types of its fields
@@ -159,17 +155,16 @@ square x y width self
 data GetRadius;    getRadius     = proxy::Proxy GetRadius
 data SetRadius;    setRadius     = proxy::Proxy SetRadius
 
-circle x y radius self
+circle xNew yNew radiusNew self
   = do
-      super <- shape x y self
-      r <- newIORef radius
-      returnIO $
-           getRadius  .=. readIORef r
-       .*. setRadius  .=. (\newr -> writeIORef r newr)
-       .*. draw       .=. 
-           do
-              putStr  "Drawing a Circle at:(" <<
-                      self # getX << ls "," << self # getY <<
-                      ls "), radius " << self # getRadius <<
-                      ls "\n"
-       .*. super
+       super <- shape xNew yNew self
+       radiusRef <- newIORef radiusNew
+       return $
+            getRadius  .=. readIORef radiusRef
+        .*. setRadius  .=. writeIORef radiusRef
+        .*. draw       .=. 
+               putStr  "Drawing a Circle at:(" <<
+                       self # getX << ls "," << self # getY <<
+                       ls "), radius " << self # getRadius <<
+                       ls "\n"
+        .*. super

@@ -28,11 +28,11 @@ main =
          let scribble = [ narrowToShape s1
                         , narrowToShape s2
                         ]
-         mapM_ ( \x -> 
+         mapM_ ( \s -> 
                    do
-                      draw x
-                      rMoveTo x 100 100
-                      draw x
+                      draw s
+                      rMoveTo s 100 100
+                      draw s
                )
                scribble
 

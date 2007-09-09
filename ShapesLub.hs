@@ -22,24 +22,20 @@ import OOHaskell
 import Shapes
 
 
--- The polymorphic scribble loop.
+-- Weirich's / Rathman's test case
 
 main =
   do
-       -- set up array of shapes
-       s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
-       s2 <- mfix (circle (15::Int) 25 8)
-       let scribble = consLub s1 (consLub s2 nilLub)
-       
-       -- iterate through the array
-       -- and handle shapes polymorphically
-       mapM_ (\shape -> do
-                           shape # draw
-                           (shape # rMoveTo) 100 100
-                           shape # draw)
+       s1 <- mfix $ rectangle 10 20 5 6
+       s2 <- mfix $ circle 15 25 8
+       let scribble = cons s1 (cons s2 nil)
+       mapM_ (\x -> do
+                       x # draw
+                       (x # rMoveTo) 100 100
+                       x # draw)
              scribble
 
-       -- call a rectangle specific function
+      -- call a rectangle specific function
        arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
        arec # setWidth $ 30
 --       arec # setRadius $ 40

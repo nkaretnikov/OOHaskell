@@ -23,23 +23,20 @@ type Circle w = Shape (CircleDelta w)
 
 -- Closed constructor for circles
 
-circle x y r = shape x y d w
+circle xNew yNew rNew = shape xNew yNew draw tail
  where
-
-  d self =  putStr  "Drawing a Circle at:("
+  draw self =  putStr  "Drawing a Circle at:("
          << getX self << ls "," << getY self 
          << ls "), radius " << getRadius self
          << ls "\n"
-
-  w 
+  tail
     = do 
-         rRef <- newIORef r
+         rRef <- newIORef rNew
          return ( \self -> 
             CircleDelta
                 { getRadius' = readIORef rRef
-                , setRadius' = \r' ->  writeIORef rRef r'
-                , circleTail = ()
-                } )
+                , setRadius' = \r ->  writeIORef rRef r
+                , circleTail = () } )
 
 
 -- A variation on circle with logging facilities

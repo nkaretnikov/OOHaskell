@@ -75,3 +75,6 @@ type l :=: v = F (Proxy l) v
 concrete generator self = generator self
  where
   _ = mfix generator
+
+nil = nilLub
+cons h t = consLub h t
