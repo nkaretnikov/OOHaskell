@@ -26,7 +26,7 @@ import Prelude hiding (print)
 
 data MutableX; mutableX = proxy::Proxy MutableX
 data GetX;     getX     = proxy::Proxy GetX
-data MoveX;     moveX     = proxy::Proxy MoveX
+data MoveX;    moveX    = proxy::Proxy MoveX
 data Print;    print    = proxy::Proxy Print
 
 
@@ -295,14 +295,16 @@ class concrete_point x_init =
 
 -- This is an optional part in case we want to fix types of virtuals.
 
-abstract_point (x_init::a) self 
-  | const False (
-      (narrow self) :: Record (  GetX  :=: IO a
-                             :*: MoveX :=: (a -> IO ())
-                             :*: HNil ) )
+abstract_point x_init self 
+  | const False ( (narrow self) `asTypeOf` desired_type x_init )
   = undefined
+ where 
+ desired_type :: a -> Record (  GetX  :=: IO a
+				:*: MoveX :=: (a -> IO ())
+				:*: HNil )
+ desired_type = undefined
 
-abstract_point (x_init::a) self =
+abstract_point x_init self =
    do
       xRef <- newIORef x_init
       returnIO $
@@ -312,10 +314,12 @@ abstract_point (x_init::a) self =
 
  -- This is an optional part in case we want to fix types of virtuals.
  where
-  _ = narrow self :: Record (  GetX  :=: IO a
-                           :*: MoveX :=: (a -> IO ())
-                           :*: HNil )
+  _ = narrow self `asTypeOf` desired_type x_init
 
+  desired_type :: a -> Record (  GetX  :=: IO a
+				:*: MoveX :=: (a -> IO ())
+				:*: HNil )
+  desired_type = undefined
 
 concrete_point x_init self
    = do
@@ -371,9 +375,11 @@ concrete_point' x_init self
           .*. p
 
 -- We introduce a constrained new method to refuse proxy fields in records.
-mnew (f::a -> m a) = mfix f
+mnew f = mfix f
  where
-  () = hasNoProxies (undefined::a) 
+  () = hasNoProxies (get_class_type f) 
+  get_class_type:: (a->m a) -> a
+  get_class_type = undefined
 
 testVirtual'
    = do

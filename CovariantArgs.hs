@@ -25,7 +25,7 @@ import DeepSubtyping hiding (test1,test2,main)
 
 data MoveO; moveO = proxy::Proxy MoveO
 
-vector1 (p1::p) (p2::p) self =
+vector1 p1 p2 self =
    do
       super <- vector p1 p2 self
       returnIO
@@ -68,7 +68,7 @@ test1 = do
 
 data SetO; setO = proxy::Proxy SetO
 
-vector2 (p1::p) (p2::p) self =
+vector2 p1 p2 self =
    do
       p1r <- newIORef p1
       p2r <- newIORef p2

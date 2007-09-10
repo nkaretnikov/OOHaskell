@@ -35,17 +35,19 @@ newtype STRecord s r = STRecord r
 infixr 9 #
 m@(STRecord r) # field = r .!. (field m)
 
-blessST (_::st s a) (r::r)  = (STRecord r) :: STRecord s r
+blessST :: st s a -> r -> STRecord s r
+blessST _ r  = STRecord r
 
 
 -- First, declare the labels.
 -- We use proxies as of HList/Label4.hs
 -- We explicitly carry the ST thread type 's' in the type of the label
 
-data MutableX; mutableX (_::st s t)  = proxy::Proxy (s, MutableX)
-data GetX;     getX (_::st s t)      = proxy::Proxy (s, GetX)
-data MoveD;    moveD (_::st s t)     = proxy::Proxy (s, MoveD)
-data OffsetX;  offsetX (_::st s t)   = proxy::Proxy (s, OffsetX)
+data MutableX; mutableX::st s t -> Proxy (s, MutableX); mutableX=undefined
+data GetX;     getX::st s t ->Proxy (s, GetX);          getX=undefined
+data MoveD;    moveD::st s t ->Proxy (s, MoveD);        moveD=undefined
+data OffsetX;  offsetX::st s t ->Proxy (s, OffsetX);    offsetX=undefined
+
 
 -- test that hLookupByHNat works even on lists that contain ST s t
 -- with s being the quantified (eventually) variable

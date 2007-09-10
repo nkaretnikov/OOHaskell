@@ -66,7 +66,7 @@ data GetP2; getP2 = proxy::Proxy GetP2
 --   class Vector<PointT> { PointT p1,p2; ...};
 -- In OOHaskell, we don't need to do declare such polymorphism.
 
-vector (p1::p) (p2::p) self =
+vector p1 p2 self =
    do 
       p1r <- newIORef p1
       p2r <- newIORef p2
@@ -157,11 +157,11 @@ o1 = returnIO emptyRecord
 o2 = do super <- o1; returnIO $ label1 .=. returnIO (1::Int) .*. super
 
 -- o3 takes objects of types o o'
-o3 o (o'::o') = returnIO
+o3 o o' = returnIO
           $
              label2 .=. o
          .*. label3 .=. (\(x::Int) -> o)
-         .*. label4 .=. (\(x::Int) (y::o') -> o)
+         .*. label4 .=. (\(x::Int) y -> const o (y `asTypeOf` o'))
          .*. emptyRecord
 
 -- o5 is a deep subtype of o4

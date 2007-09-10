@@ -26,7 +26,7 @@ module OOHaskell (
  module Control.Monad,
  module Control.Monad.ST,
  module Control.Monad.Fix,
- module GHC.IOBase,
+ returnIO,
  module DeepNarrow,
  module Nominal,
  module Dynamic,
@@ -61,7 +61,9 @@ import Data.Dynamic
 import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
-import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef,unsafeIOToST)
+
+-- import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef,unsafeIOToST)
+import GHC.IOBase (returnIO)
 
 infixr 9 #
 m # field = (m .!. field) 

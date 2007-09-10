@@ -195,13 +195,16 @@ concrete_point' x_init self
 
 -- We introduce a constrained new method to refuse proxy fields in records.
 {-
-mnew (f::NotConstructed a -> m (NotConstructed a)) = smrfix f
- where
-  () = hasNoProxies (undefined::a) 
--}
 mnew (f::NotFixed a -> m (NotFixed a)) = new f
  where
   () = hasNoProxies (undefined::a) 
+-}
+
+mnew f = new f
+ where
+  () = hasNoProxies (get_class_type f) 
+  get_class_type:: (NotFixed a -> m (NotFixed a)) -> a
+  get_class_type = undefined
 
 testVirtual'
    = do

@@ -56,12 +56,13 @@ instance HasField l (ListInterface a) v =>
 
 
 -- The class for empty lists
-nilOO self :: IO (ListInterface a)
+nilOO self | False = undefined :: IO (ListInterface a)
+nilOO self
  = returnIO
      $  isEmpty  .=. returnIO True
-    .*. getHead  .=. failIO "No head!"
-    .*. getTail  .=. failIO "No tail!"
-    .*. setHead  .=. const (failIO "No head!")
+    .*. getHead  .=. fail "No head!"
+    .*. getTail  .=. fail "No tail!"
+    .*. setHead  .=. const (fail "No head!")
     .*. insHead  .=. reusableInsHead self
     .*. emptyRecord
 

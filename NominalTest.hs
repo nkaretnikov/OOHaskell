@@ -92,9 +92,11 @@ special_point x_init self =
 
 -- These versions require explicit cast
 
-printPP (aPP::N PP x) = aPP # print
-printCP (aCP::N CP x) = aCP # print
-printSP (aSP::N SP x) = aSP # print
+cast_as_p :: p -> N p x -> N p x; cast_as_p _ = id
+
+printPP aPP = (cast_as_p PP aPP) # print
+printCP aCP = (cast_as_p CP aCP) # print
+printSP aSP = (cast_as_p SP aSP) # print
 
 
 -- These versions upcast by themselves

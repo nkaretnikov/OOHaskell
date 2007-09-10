@@ -56,14 +56,16 @@ printable_point x_init s =
 
 -- A subclass that returns self
 
-self_returning_point (x_init::a) self =
+self_returning_point x_init self =
    do
       super <- printable_point x_init self
       returnIO
           -- Returning self directly is caught by the occurs check!
           -- $  me .=. self
-          $  me .=. (narrow self :: PPInterface a)
+          $  me .=. narrow self `asTypeOf` desired_type x_init
          .*. super
+ where
+ desired_type :: a -> PPInterface a; desired_type = undefined
 
 testp1 = do
 	  Prelude.print "testp1"
