@@ -18,7 +18,6 @@ module Shapes where
 
 import OOHaskell
 
-
 -- The class Shape
 
 -- First, declare the labels.
@@ -47,10 +46,10 @@ shape x_init y_init self
 
 -- This is the actual definition
 
-shape xNew yNew self
+shape x y self
   = do
-       xRef <- newIORef xNew
-       yRef <- newIORef yNew
+       xRef <- newIORef x
+       yRef <- newIORef y
        return $
             getX     .=. readIORef xRef
         .*. getY     .=. readIORef yRef
@@ -108,11 +107,11 @@ newtype LS = LS String
 ls = return . LS
 instance Show LS where show (LS x) = x
 
-rectangle xNew yNew widthNew heightNew self
+rectangle x y width height self
   = do
-       super <- shape xNew yNew self
-       widthRef <- newIORef widthNew
-       heightRef <- newIORef heightNew
+       super <- shape x y self
+       widthRef <- newIORef width
+       heightRef <- newIORef height
        returnIO $
             getWidth  .=. readIORef widthRef
         .*. getHeight .=. readIORef heightRef
@@ -155,9 +154,9 @@ square x y width self
 data GetRadius;    getRadius     = proxy::Proxy GetRadius
 data SetRadius;    setRadius     = proxy::Proxy SetRadius
 
-circle xNew yNew radiusNew self
+circle x y radiusNew self
   = do
-       super <- shape xNew yNew self
+       super <- shape x y self
        radiusRef <- newIORef radiusNew
        return $
             getRadius  .=. readIORef radiusRef

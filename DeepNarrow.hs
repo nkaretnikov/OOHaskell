@@ -67,18 +67,18 @@ constraints which are then indeed added as to complete the instance.
 -}
 
 instance ( DeepNarrow' ItsRecord (Record r) (Record r')
-         , H2ProjectByLabels (HCons l HNil) r (HCons (F l v) HNil) rout
+         , H2ProjectByLabels (HCons l HNil) r (HCons (LVPair l v) HNil) rout
 	 , TopTyCon v f, DeepNarrow' f v v'
-	 , HRLabelSet (HCons (F l v') r')
+	 , HRLabelSet (HCons (LVPair l v') r')
 	 )
-    => DeepNarrow' ItsRecord (Record r) (Record (HCons (F l v') r')) where
+    => DeepNarrow' ItsRecord (Record r) (Record (HCons (LVPair l v') r')) where
     deep'narrow' _ r = result
 	where
 	r'       = (deep'narrow r) :: (Record r')
 	labels   = HCons (undefined::l) HNil
-	Record (HCons (F v) HNil) = hProjectByLabels labels  r
+	Record (HCons (LVPair v) HNil) = hProjectByLabels labels  r
 	(v'::v') = deep'narrow v
-	result   = (newF undefined v') .*. r'
+	result   = (newLVPair undefined v') .*. r'
 		  
 instance DeepNarrow a b => DeepNarrow' ItsIO (IO a) (IO b) where
     deep'narrow' _ a = a >>= (return . deep'narrow)
