@@ -21,8 +21,8 @@ type Circle w = Shape (CircleDelta w)
 
 -- A "closed" constructor
 
-circle x y r
- = shape x y $ CircleDelta { getRadius  = r
+circle x y radius
+ = shape x y $ CircleDelta { getRadius  = radius
                            , circleTail = () }
 
 

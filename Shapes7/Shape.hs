@@ -27,7 +27,7 @@ class Shape s
   draw       :: s -> IO ()
 
 moveTo' x y s = shape x y 
-rMoveTo' deltax deltay s = moveTo' x y s
+rMoveTo' dx dy s = moveTo' x y s
   where
-    x = xData s + deltax
-    y = yData s + deltay
+    x = xData s + dx
+    y = yData s + dy

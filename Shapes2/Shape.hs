@@ -14,9 +14,9 @@ data Shape w =
 
 -- Constructor for shapes
 
-shape x y w = Shape { getX = x
-                    , getY = y
-                    , shapeTail = w }
+shape x y tail = Shape { getX = x
+                       , getY = y
+                       , shapeTail = tail }
 
 
 -- Reusable functionality on shapes

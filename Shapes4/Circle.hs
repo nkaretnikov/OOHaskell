@@ -23,34 +23,33 @@ type Circle w = Shape (CircleDelta w)
 
 -- Closed constructor for circles
 
-circle xNew yNew rNew = shape xNew yNew draw tail
- where
-  draw self =  putStr  "Drawing a Circle at:("
-         << getX self << ls "," << getY self 
-         << ls "), radius " << getRadius self
-         << ls "\n"
-  tail
-    = do 
-         rRef <- newIORef rNew
-         return ( \self -> 
-            CircleDelta
-                { getRadius' = readIORef rRef
-                , setRadius' = \r ->  writeIORef rRef r
-                , circleTail = () } )
+circle x y radius = shape x y draw tail
+  where
+    draw self = putStr "Drawing a Circle at:("
+                              << getX self << ls "," << getY self 
+                              << ls "), radius " << getRadius self
+                              << ls "\n"
+    tail = do 
+              rRef <- newIORef radius
+              return ( \self -> 
+                CircleDelta { getRadius' = readIORef rRef
+                            , setRadius' = writeIORef rRef
+                            , circleTail = () } )
 
-
--- A variation on circle with logging facilities
-
-circle' x y r l self 
-  = do
-       super <- circle x y r self
-       return super
-         { getX = do { tick; getX super }
-         , getY = do { tick; getY super } }
- where
-   tick = modifyIORef l ((+) 1)
 
 -- Hide nested position of rectangle accessors
 
 getRadius = getRadius'  . shapeTail
 setRadius = setRadius'  . shapeTail
+
+
+-- A variation on circle with logging facilities
+
+circle' x y radius counter self 
+  = do
+       super <- circle x y radius self
+       return super
+         { getX = do { tick; getX super }
+         , getY = do { tick; getY super } }
+ where
+   tick = modifyIORef counter ((+) 1)

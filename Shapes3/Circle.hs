@@ -22,19 +22,18 @@ type Circle w = Shape (CircleDelta w)
 
 
 -- Closed constructor for circles
+circle x y radius = shape x y draw tail
+  where
+    draw x y =  putStrLn ("Drawing a Circle at:("
+                   ++ (show x)
+                   ++ ","
+                   ++ (show y)
+                   ++ "), radius "
+                   ++ (show radius) )
 
-circle x y r = shape x y d w
- where
-  d x y =  putStrLn ("Drawing a Circle at:("
-        ++ (show x)
-        ++ ","
-        ++ (show y)
-        ++ "), radius "
-        ++ (show r) )
-
-  w = CircleDelta { getRadius' = r
-                  , setRadius' = \r' -> circle x y r'
-                  , circleTail = () }
+    tail = CircleDelta { getRadius' = radius
+                       , setRadius' = \radius -> circle x y radius
+                       , circleTail = () }
 
 
 -- Hide nested position of rectangle accessors
