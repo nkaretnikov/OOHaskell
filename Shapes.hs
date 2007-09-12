@@ -1,6 +1,7 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
+{-# OPTIONS -fth #-}
 
 {-
 
@@ -18,11 +19,18 @@ module Shapes where
 
 import OOHaskell
 
+import MakeLabels
+
 -- The class Shape
 
 -- First, declare the labels.
 -- We use proxies as of HList/Label4.hs
 
+-- This template Haskell splice
+$(makeLabels ["getX","getY","setX","setY","moveTo","rMoveTo","draw"])
+
+-- is equivalent to the following
+{-
 data GetX;     getX     = proxy::Proxy GetX
 data GetY;     getY     = proxy::Proxy GetY
 data SetX;     setX     = proxy::Proxy SetX
@@ -30,6 +38,7 @@ data SetY;     setY     = proxy::Proxy SetY
 data MoveTo;   moveTo   = proxy::Proxy MoveTo
 data RMoveTo;  rMoveTo  = proxy::Proxy RMoveTo
 data Draw;     draw     = proxy::Proxy Draw
+-}
 
 -- Note that unlike C++ version, our class is polymorphic in x and y.
 -- Those fields can be any Num.

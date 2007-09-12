@@ -62,7 +62,6 @@ import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
 
--- import GHC.IOBase hiding (stToIO, writeIORef, readIORef, newIORef, IORef,unsafeIOToST)
 import GHC.IOBase (returnIO)
 
 infixr 9 #
