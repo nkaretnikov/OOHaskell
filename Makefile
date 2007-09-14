@@ -106,6 +106,8 @@ test:
 	diff -b Shapes.out Shapes.ref
 	${ghci}	-v0 ShapesEither.hs < Main.in > Shapes.out
 	diff -b Shapes.out ShapesDown.ref
+	${ghci}	-v0 ShapesGlb.hs < Main.in > Shapes.out
+	diff -b Shapes.out ShapesGlb.ref
 	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
 	diff -b SelfReturn.out SelfReturn.ref
 	${ghci}	-v0 DynamicOo.hs < Main.in > DynamicOo.out
