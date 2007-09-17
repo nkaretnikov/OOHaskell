@@ -14,7 +14,7 @@ OOHaskell (C) 2004--2007, Oleg Kiselyov, Ralf Laemmel
 -}
 
 
-module Shapes where
+module ShapesAtGlance where
 
 import OOHaskell
 import Label5
@@ -23,13 +23,13 @@ import Label5
 
 -- First, declare the labels.
 
-data GetX    = GetX
-data GetY    = GetY
-data SetX    = SetX
-data SetY    = SetY
-data MoveTo  = MoveTo
-data RMoveTo = RMoveTo
-data Draw    = Draw -- Needed in concrete subclasses
+data GetX;    getX =    undefined::GetX
+data GetY;    getY =    undefined::GetY
+data SetX;    setX =    undefined::SetX
+data SetY;    setY =    undefined::SetY
+data MoveTo;  moveTo =  undefined::MoveTo
+data RMoveTo; rMoveTo = undefined::RMoveTo
+data Draw;    draw =    undefined::Draw -- Needed in concrete subclasses
 
 
 -- Note that unlike C++ version, our class is polymorphic in x and y.
@@ -41,16 +41,16 @@ shape x y self
        xRef <- newIORef x
        yRef <- newIORef y
        return $
-            GetX     .=. readIORef xRef
-        .*. GetY     .=. readIORef yRef
-        .*. SetX     .=. writeIORef xRef
-        .*. SetY     .=. writeIORef yRef
-        .*. MoveTo   .=. (\x y -> do (self # SetX) x; (self # SetY) y)
-        .*. RMoveTo  .=. (\dx dy ->
+            getX     .=. readIORef xRef
+        .*. getY     .=. readIORef yRef
+        .*. setX     .=. writeIORef xRef
+        .*. setY     .=. writeIORef yRef
+        .*. moveTo   .=. (\x y -> do (self # setX) x; (self # setY) y)
+        .*. rMoveTo  .=. (\dx dy ->
               do
-                 x  <- self # GetX
-                 y  <- self # GetY
-                 (self # MoveTo) (x + dx) (y + dy))
+                 x  <- self # getX
+                 y  <- self # getY
+                 (self # moveTo) (x + dx) (y + dy))
         .*. emptyRecord
 
 
@@ -72,22 +72,22 @@ rectangle x y width height self
        widthRef <- newIORef width
        heightRef <- newIORef height
        return $
-            GetWidth  .=. readIORef widthRef
-        .*. GetHeight .=. readIORef heightRef
-        .*. SetWidth  .=. writeIORef widthRef
-        .*. SetHeight .=. writeIORef heightRef
-        .*. Draw      .=. 
+            getWidth  .=. readIORef widthRef
+        .*. getHeight .=. readIORef heightRef
+        .*. setWidth  .=. writeIORef widthRef
+        .*. setHeight .=. writeIORef heightRef
+        .*. draw      .=. 
               putStr  "Drawing a Rectangle at:(" <<
-                      self # GetX << ls "," << self # GetY <<
-                      ls "), width " << self # GetWidth <<
-                      ls ", height " << self # GetHeight <<
+                      self # getX << ls "," << self # getY <<
+                      ls "), width " << self # getWidth <<
+                      ls ", height " << self # getHeight <<
                       ls "\n"
         .*. super
 
-data GetWidth  = GetWidth
-data GetHeight = GetHeight
-data SetWidth  = SetWidth
-data SetHeight = SetHeight
+data GetWidth; getWidth = undefined::GetWidth
+data GetHeight; getHeight = undefined::GetHeight
+data SetWidth; setWidth = undefined::SetWidth
+data SetHeight; setHeight = undefined::SetHeight
 
 
 -- Circle: inherits from Shape
@@ -97,18 +97,17 @@ circle x y radius self
        super <- shape x y self
        radiusRef <- newIORef radius
        return $
-            GetRadius  .=. readIORef radiusRef
-        .*. SetRadius  .=. writeIORef radiusRef
-        .*. Draw       .=. 
+            getRadius  .=. readIORef radiusRef
+        .*. setRadius  .=. writeIORef radiusRef
+        .*. draw       .=. 
               putStr  "Drawing a Circle at:(" <<
-                      self # GetX << ls "," << self # GetY <<
-                      ls "), radius " << self # GetRadius <<
+                      self # getX << ls "," << self # getY <<
+                      ls "), radius " << self # getRadius <<
                       ls "\n"
         .*. super
 
-data GetRadius = GetRadius
-data SetRadius = SetRadius
-
+data GetRadius; getRadius = undefined::GetRadius
+data SetRadius; setRadius = undefined::SetRadius
 
 -- Weirich's / Rathman's test case
 
@@ -118,13 +117,13 @@ main =
        s2 <- mfix $ circle 15 25 8
        let scribble = cons s1 (cons s2 nil)
        mapM_ (\x -> do
-                       x # Draw
-                       (x # RMoveTo) 100 100
-                       x # Draw)
+                       x # draw
+                       (x # rMoveTo) 100 100
+                       x # draw)
              scribble
 
       -- call a rectangle specific function
        arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
-       arec # SetWidth $ 30
---       arec # SetRadius $ 40
-       arec # Draw
+       arec # setWidth $ 30
+--       arec # setRadius $ 40
+       arec # draw
