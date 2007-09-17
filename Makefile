@@ -79,10 +79,10 @@ all:
 #  Use "make test-all" to include C/C++/Hugs test cases.
 #
 
-test1: HList
-	${ghci}	-v0 ShapesAtGlance.hs < Main.in > Shapes.out
-	diff -b Shapes.out Shapes.ref
-#
+%.test:
+	${ghci}	-v0 $*.hs
+
+
 test:
 	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
 	diff -b SimpleIO.out SimpleIO.ref
