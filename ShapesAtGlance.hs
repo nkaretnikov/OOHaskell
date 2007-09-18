@@ -84,9 +84,9 @@ rectangle x y width height self
                       ls "\n"
         .*. super
 
-data GetWidth; getWidth = undefined::GetWidth
+data GetWidth;  getWidth = undefined::GetWidth
 data GetHeight; getHeight = undefined::GetHeight
-data SetWidth; setWidth = undefined::SetWidth
+data SetWidth;  setWidth = undefined::SetWidth
 data SetHeight; setHeight = undefined::SetHeight
 
 

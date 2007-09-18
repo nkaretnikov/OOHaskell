@@ -180,7 +180,7 @@ test3 = do
            --
            -- We can treat non-eating cows and herbivores the same.
            --
-	   let herbList3 = [aHerb .-. eat,aCow .-. eat]
+	   let herbList3 = [aCow .-. eat, aHerb .-. eat]
 --	   let herbList4 = narrow aCow : herbList3 -- no need for narrow
 	   mapM_ (\x -> do x # print; putStr "\n" ) herbList3
            --

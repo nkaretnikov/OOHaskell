@@ -1,0 +1,37 @@
+myFirstOOP
+03
+mySecondOOP
+42
+testPara
+132
+testConstr
+10122
+myNestedOOP
+12
+mySelfishOOP
+9
+myPolyPara
+33.5
+myPolyPrintable
+33.5
+myFirstClassOOP
+42myFirstClassOOP
+so far - 42color  - red
+myColoredOOP
+(5,"red")
+myOverridingOOP
+so far - 5color  - red
+myOverridingOOP'
+so far - 14.0color  - red
+myOverridingOOP''
+(5, red)
+myPolymorphicOOP
+14
+testVirtual
+799
+testVirtual'
+799
+testRestricted
+79
+testRestricted'
+79

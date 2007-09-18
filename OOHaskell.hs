@@ -20,6 +20,7 @@ module OOHaskell (
  module GhcSyntax,
  module GhcRecord,
  module GhcExperiments,
+ module MakeLabels,
  module Data.STRef,
  module Data.IORef,
  module Data.Dynamic,
@@ -49,6 +50,7 @@ import TypeEqBoolGeneric
 import TypeEqGeneric1
 import TypeCastGeneric1
 import Label4
+import MakeLabels
 import DeepNarrow
 import Nominal
 import Dynamic

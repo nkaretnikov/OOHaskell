@@ -84,8 +84,10 @@ all:
 
 
 test:
-	${ghci}	-v0 SimpleIO.hs < Main.in > SimpleIO.out
-	diff -b SimpleIO.out SimpleIO.ref
+	${ghci}	-v0 OCamlTutorial.hs < Main.in > OCamlTutorial.out
+	diff -b OCamlTutorial.out OCamlTutorial.ref
+	${ghci}	-v0 MultipleInheritance.hs < Main.in > MultipleInheritance.out
+	diff -b MultipleInheritance.out MultipleInheritance.ref
 	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
 	diff -b SimpleST.out SimpleST.ref
 	${ghci}	-v0 CircBuffer.hs < Main.in > CircBuffer.out
