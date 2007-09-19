@@ -134,10 +134,10 @@ point =
 
 myFirstOOP =
   do
-     p <- point -- no need for new!
-     p # getX >>= putStr . show
-     p # moveX $ 3
-     p # getX >>= putStr . show
+      p <- point
+      p # getX >>= putStrLn . show
+      p # moveX $ 3
+      p # getX >>= putStrLn . show
 
 -- The field varX is public and can be manipulated directly.
 
@@ -177,11 +177,12 @@ para_point x_init =
    do
       x <- newIORef x_init
       return
-        $  varX  .=. x
-       .*. getX      .=. readIORef x
-       .*. getOffset .=. queryIORef x (\v -> v - x_init)
+        $  varX       .=. x
+       .*. getX       .=. readIORef x
+       .*. getOffset  .=. queryIORef x (\v -> v - x_init)
        .*. moveX      .=. modifyIORef x . (+)
        .*. emptyRecord
+
 
 
 -- A shortcut for IORef processing. Is that somewhere in the libraries?
@@ -234,7 +235,7 @@ adjusted_point x_init =
       let origin = (x_init `div` 10) * 10
       x <- newIORef origin
       return
-        $  varX  .=. x
+        $  varX      .=. x
        .*. getX      .=. readIORef x
        .*. getOffset .=. queryIORef x (\v -> v - origin)
        .*. moveX     .=. modifyIORef x . (+)
@@ -289,18 +290,18 @@ incrementing_point =
            modifyIORef x0 (+1)
            x <- readIORef x0 >>= newIORef
            return
-             $  varX .=. x
-            .*. getX     .=. readIORef x
-            .*. moveX     .=. modifyIORef x . (+)
+             $  varX  .=. x
+            .*. getX  .=. readIORef x
+            .*. moveX .=. modifyIORef x . (+)
             .*. emptyRecord )
 
 
 myNestedOOP =
    do
-      localClass <- incrementing_point
-      p1 <- localClass;
+      classObject <- incrementing_point
+      p1 <- classObject;
       p1 # getX  >>= putStr . show
-      p2 <- localClass;
+      p2 <- classObject;
       p2 # getX  >>= putStr . show
 
 
@@ -358,7 +359,7 @@ printable_point x_init s =
 -- To be revealed later
 --     .*. print    .=. print_getX s
 --
-       .*. print .=. ((s # getX ) >>= putStr . show)
+       .*. print .=. ((s # getX) >>= putStr . show)
        .*. emptyRecord
 
 -- We can share this print_getX method across all the objects
@@ -440,14 +441,14 @@ immediately after the object has been built. Such code is written as
 an anonymous hidden method called an initializer. Therefore, is can
 access self and the instance variables.
 
-class initialized_point x_init =
+class initializable_point x_init =
    let origin = (x_init / 10) * 10 in
    object (self)
      val mutable varX = origin
-     method getX = varX
-     method moveX d = varX <- varX + d
-     method print = print_int self#getX
-     initializer print_string "new point at "; self#print;
+     method getX      = varX
+     method moveX d   = varX <- varX + d
+     method print     = print_int self#getX
+     initializer print_string "new point at "; self#print
    end;;
 
 -}
@@ -469,7 +470,7 @@ initializable_point x_init self =
        .*. getX        .=. readIORef x
        .*. moveX       .=. modifyIORef x . (+)
        .*. print       .=. ((self # getX ) >>= putStr . show)
-       .*. initializer .=. do putStr "new point at "; self # print
+       .*. initializer .=. do putStr "new point at "; self # print; putStrLn ""
        .*. emptyRecord
 
 
@@ -485,6 +486,33 @@ myInitializingOOP =
       p <- newAndInitialize (initializable_point 7)
       p # moveX $ 2
       p # print
+
+
+initializable_point' x_init self =
+   do
+      x <- newIORef x_init
+      return (
+            varX        .=. x
+       .*. getX        .=. readIORef x
+       .*. moveX       .=. modifyIORef x . (+)
+       .*. print       .=. ((self # getX ) >>= putStr . show)
+       .*. emptyRecord
+        , Just $ do putStr "new point at "; self # print; putStrLn "" )
+
+
+newAndInitialize' og =
+   do
+      (o,i) <- mfix (og . fst)
+      case i of Nothing -> return (); (Just i') -> i'
+      return o
+
+
+myInitializingOOP' =
+   do
+      p <- newAndInitialize' (initializable_point' 7)
+      p # moveX $ 2
+      p # print
+
 
 
 ------------------------------------------------------------------------
@@ -520,12 +548,12 @@ $(label "getColor")
 
 
 -- Inheritance is simple: just adding methods ...
-colored_point x_init (color::String) self =
+colored_point x_init (c::String) self =
    do
-        super <- printable_point x_init self
-        return
-            $  getColor .=. (returnIO color)
-           .*. super
+      super <- printable_point x_init self
+      return
+        $  getColor .=. returnIO c
+       .*. super
 
 
 myColoredOOP =
@@ -625,9 +653,9 @@ class printable_colored_point x_init c =
 -}
 
 
-printable_colored_point y c self =
+printable_colored_point x_init c self =
    do
-      super <- printable_point y self
+      super <- printable_point x_init self
       return
         $  print    .=. ( do 
                              putStr "("
@@ -963,6 +991,8 @@ main = do
           putStrLn "testPara"; testPara; putStrLn ""
           putStrLn "testConstr"; testConstr; putStrLn ""
           putStrLn "myNestedOOP"; myNestedOOP; putStrLn ""
+          putStrLn "myInitializingOOP"; myInitializingOOP; putStrLn ""
+          putStrLn "myInitializingOOP'"; myInitializingOOP'; putStrLn ""
           putStrLn "mySelfishOOP"; mySelfishOOP; putStrLn ""
           putStrLn "myPolyPara"; myPolyPara; putStrLn ""
           putStrLn "myPolyPrintable"; myPolyPrintable; putStrLn ""

@@ -1,5 +1,7 @@
 myFirstOOP
-03
+0
+3
+
 mySecondOOP
 42
 testPara
@@ -8,6 +10,12 @@ testConstr
 10122
 myNestedOOP
 12
+myInitializingOOP
+new point at 7
+9
+myInitializingOOP'
+new point at 7
+9
 mySelfishOOP
 9
 myPolyPara
