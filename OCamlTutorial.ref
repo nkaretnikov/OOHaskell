@@ -9,7 +9,9 @@ testPara
 testConstr
 10122
 myNestedOOP
-12
+1
+2
+
 myInitializingOOP
 new point at 7
 9
@@ -18,8 +20,10 @@ new point at 7
 9
 mySelfishOOP
 9
-myPolyPara
-33.5
+myBoundedGenericClassOOP
+3
+3.5
+
 myPolyPrintable
 33.5
 myFirstClassOOP
@@ -33,13 +37,27 @@ myOverridingOOP'
 so far - 14.0color  - red
 myOverridingOOP''
 (5, red)
-myPolymorphicOOP
+myGenericFunctionOOP
 14
+
+myGenericClassOOP
+2
+
+myGenericMethodOOP
+6
+1 2 3 
+myGenericMethodOOP'
+6
+myGenericMethodOOP''
+6
+1 2 3 
 testVirtual
 799
 testVirtual'
 799
-testRestricted
-79
-testRestricted'
+myPrivacyOOP
+7
+9
+
+myPrivacyOOP'
 79

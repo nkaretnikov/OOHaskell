@@ -198,14 +198,16 @@ testPara =
 
 
 -- We test the polymorphism of para_point
-myPolyPara =
+myBoundedGenericClassOOP =
    do
       p  <- para_point (1::Int)
       p' <- para_point (1::Double)
       p  # moveX $ 2
       p' # moveX $ 2.5
-      p  # getX >>= putStr . show
-      p' # getX >>= putStr . show
+      -- p  # moveX $ 2.5 -- type error!
+      p  # getX >>= putStrLn . show -- prints 3
+      p' # getX >>= putStrLn . show -- prints 3.5
+
 
 
 {- Ocaml Tutorial:
@@ -300,9 +302,9 @@ myNestedOOP =
    do
       classObject <- incrementing_point
       p1 <- classObject;
-      p1 # getX  >>= putStr . show
+      p1 # getX  >>= putStrLn . show
       p2 <- classObject;
-      p2 # getX  >>= putStr . show
+      p2 # getX  >>= putStrLn . show
 
 
 ------------------------------------------------------------------------
@@ -528,9 +530,9 @@ inherits from the class of points. This class has all instance
 variables and all methods of class point, plus a new instance variable
 c and a new method color.
 
-class colored_point x (c : string) =
+class colored_point x_init (c : string) =
    object
-     inherit point x
+     inherit point x_init
      val c = c
      method getColor = c
    end;;
@@ -610,13 +612,13 @@ val p' : colored_point = <obj>
 
 get_succ_x p = p # getX >>= (return . (+ 1))
 
-myPolymorphicOOP =
+myGenericFunctionOOP =
    do
       p  <- mfix (printable_point 7)
       p' <- mfix (colored_point 5 "red")
       x  <- get_succ_x p
       x' <- get_succ_x p'
-      putStr $ show (x+x') -- prints 14
+      putStrLn $ show (x+x') -- prints 14
 
 
 
@@ -710,10 +712,9 @@ class concrete_point x_init =
 
 -}
 
--- Note, compared with printable_point, we omitted the virtual methods.
--- That made abstract_point uninstantiatable!!!
+{-
 
--- This is an optional part in case we want to fix types of virtuals.
+-- One way to fix the type of an abstract method.
 
 abstract_point x_init self 
   | const False ( (narrow self) `asTypeOf` desired_type x_init )
@@ -724,15 +725,60 @@ abstract_point x_init self
 				:*: HNil )
  desired_type = undefined
 
+-}
+
+{-
+
+-- Another way to fix the type of an abstract method.
+
 abstract_point x_init self =
    do
       xRef <- newIORef x_init
-      returnIO $
-           varX  .=. xRef
-       .*. print     .=. (self # getX >>= putStr . show )
+      return 
+        $  varX  .=. xRef
+       .*. print .=. (self # getX >>= putStr . show)
+       .*. emptyRecord
+   where
+     _ = constrain x_init self
+     constrain :: ( HasField (Proxy GetX)  self (IO x_init)
+                  , HasField (Proxy MoveX) self (x_init -> IO ())
+                  ) => x_init -> self -> ()
+     constrain _ _ = ()
+
+-}
+
+-- Yet another way to fix the type of an abstract method.
+
+abstract_point x_init self =
+   do
+      xRef <- newIORef x_init
+      return 
+        $  varX  .=. xRef
+       .*. print .=. (self # getX >>= putStr . show)
+       .*. emptyRecord
+   where
+     _ = (self # getX) `asTypeOf` returnIO x_init
+     _ = (self # moveX) x_init `asTypeOf` returnIO ()
+
+
+{-
+
+-- Without enforcement
+
+abstract_point x_init self =
+   do
+      xRef <- newIORef x_init
+      return 
+        $  varX  .=. xRef
+       .*. print .=. (self # getX >>= putStr . show)
        .*. emptyRecord
 
- -- This is an optional part in case we want to fix types of virtuals.
+-}
+
+{-
+
+-- Another way to fix the type of an abstract method.
+
  where
   _ = narrow self `asTypeOf` desired_type x_init
 
@@ -740,6 +786,8 @@ abstract_point x_init self =
 				:*: MoveX :=: (a -> IO ())
 				:*: HNil )
   desired_type = undefined
+
+-}
 
 concrete_point x_init self
    = do
@@ -868,12 +916,12 @@ restricted_point x_init self =
        .*. bumpX    .=. moveX 2
        .*. emptyRecord
 
-testRestricted
+myPrivacyOOP
    =  do
        p <- mfix (restricted_point 7)
-       p # getX >>= putStr . show
+       p # getX >>= putStrLn . show -- prints 7
        p # bumpX
-       p # getX >>= putStr . show
+       p # getX >>= putStrLn . show -- prints 9
 
 
 -- Unlike the OCaml code, we can also remove a method from the interface.
@@ -887,7 +935,7 @@ bumping_point x_init self =
         $  bumpX .=. (self # moveX $ 2)
        .*. p
 
-testRestricted' = 
+myPrivacyOOP' = 
    do
       p  <- mfix (bumping_point 7)
       let p' = p .-. moveX
@@ -922,7 +970,7 @@ methods, however, cannot.
 -- Sec 3.10 Parameterized classes
 --
 
-{- Ocaml Tutorial: 3.10 Parameterized classes
+{- Ocaml Tutorial:
 
 Reference cells can be implemented as objects.
 The naive definition fails to typecheck:
@@ -982,7 +1030,231 @@ let r = new ref 1 in r#set 2; (r#get);;
 -- we see that our class is already polymorphic:
 -- (..., Num a, ...) =>  a -> ...
 
+$(label "var")
+$(label "get")
+$(label "set")
 
+ref init = 
+   do
+      varRef <- newIORef init
+      return
+        $  var .=. varRef
+       .*. get .=. readIORef varRef
+       .*. set .=. writeIORef varRef
+       .*. emptyRecord
+
+
+myGenericClassOOP =
+   do
+      r <- ref 1
+      r # set $ 2
+      r # get >>= putStrLn . show -- prints 2
+
+
+------------------------------------------------------------------------
+--
+-- OCaml Objects tutorial
+-- Sec 3.11 Polymorphic methods
+--
+
+{- Ocaml Tutorial:
+
+While parameterized classes may be polymorphic in their contents, they
+are not enough to allow polymorphism of method use.
+
+A classical example is defining an iterator.
+
+#List.fold_left;;
+- : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a = <fun>
+ 
+#class ['a] intlist (l : int list) =
+   object
+     method empty = (l = [])
+     method fold f (z : 'a) = List.fold_left f z l
+   end;;
+class ['a] intlist :
+  int list ->
+  object method empty : bool method fold : ('a -> int -> 'a) -> 'a -> 'a end
+
+At first look, we seem to have a polymorphic iterator, however this
+does not work in practice.
+
+#let l = new intlist [1; 2; 3];;
+val l : '_a intlist = <obj>
+ 
+#l#fold (fun x y -> x+y) 0;;
+- : int = 6
+ 
+#l;;
+- : int intlist = <obj>
+ 
+#l#fold (fun s x -> s ^ string_of_int x ^ " ") "";;
+This expression has type int but is here used with type string
+
+Our iterator works, as shows its first use for summation. However,
+since objects themselves are not polymorphic (only their constructors
+are), using the fold method fixes its type for this individual
+object. Our next attempt to use it as a string iterator fails.
+
+The problem here is that quantification was wrongly located: this is
+not the class we want to be polymorphic, but the fold method. This can
+be achieved by giving an explicitly polymorphic type in the method
+definition.
+
+#class intlist (l : int list) =
+   object
+     method empty = (l = [])
+     method fold : 'a. ('a -> int -> 'a) -> 'a -> 'a =
+       fun f z -> List.fold_left f z l
+   end;;
+class intlist :
+  int list ->
+  object method empty : bool method fold : ('a -> int -> 'a) -> 'a -> 'a end
+ 
+#let l = new intlist [1; 2; 3];;
+val l : intlist = <obj>
+ 
+#l#fold (fun x y -> x+y) 0;;
+- : int = 6
+ 
+#l#fold (fun s x -> s ^ string_of_int x ^ " ") "";;
+- : string = "1 2 3 "
+
+-}
+
+$(label "empty")
+$(label "fold")
+
+
+intlist (l::[Int]) = 
+                      empty .=. null l
+                  .*. fold    .=. (\f z -> foldl f z l)
+                  .*. emptyRecord
+
+
+myGenericMethodOOP =
+   do
+      let l = intlist [1,2,3]
+      putStrLn $ show $ (l # fold) (+) 0
+      putStrLn $ (l # fold) (\s x -> s ++ show x ++ " ") ""
+
+
+intlist' (l::[Int]) =
+   do
+      return 
+         $  empty .=. null l
+        .*. fold  .=. (\f z -> foldl f z l)
+        .*. emptyRecord
+
+myGenericMethodOOP' =
+   do
+      l <- intlist' [1,2,3]
+      putStrLn $ show $ (l # fold) (+) 0
+--      putStrLn $ (l # fold) (\s x -> s ++ show x ++ " ") ""
+
+
+intlist'' (l::[Int]) =
+   do
+      return 
+         $ empty .=. null l
+        .*. fold    .=. FoldMethod (\f z -> foldl f z l)
+        .*. emptyRecord
+
+
+newtype FoldMethod =
+        FoldMethod { foldMethod :: forall a. (a -> Int -> a) -> a -> a }
+
+
+myGenericMethodOOP'' =
+   do
+      l <- intlist'' [1,2,3]
+      putStrLn $ show $ foldMethod (l # fold) (+) 0
+      putStrLn $ foldMethod (l # fold) (\s x -> s ++ show x ++ " ") ""
+
+
+------------------------------------------------------------------------
+--
+-- OCaml Objects tutorial
+-- Sec 3.16  Binary methods
+--
+
+{- Ocaml Tutorial:
+
+A binary method is a method which takes an argument of the same type
+as self. The class comparable below is a template for classes with a
+binary method leq of type 'a -> bool where the type variable 'a is
+bound to the type of self. Therefore, #comparable expands to < leq :
+'a -> bool; .. > as 'a. We see here that the binder as also allows to
+write recursive types.
+
+#class virtual comparable = 
+   object (_ : 'a)
+     method virtual leq : 'a -> bool
+   end;;
+class virtual comparable : object ('a) method virtual leq : 'a -> bool end
+
+We then define a subclass money of comparable. The class money simply
+wraps floats as comparable objects. We will extend it below with more
+operations. There is a type constraint on the class parameter x as the
+primitive <= is a polymorphic comparison function in Objective
+Caml. The inherit clause ensures that the type of objects of this
+class is an instance of #comparable.
+
+#class money (x : float) =
+   object
+     inherit comparable
+     val repr = x
+     method value = repr
+     method leq p = repr <= p#value
+   end;;
+class money :
+  float ->
+  object ('a)
+    val repr : float
+    method leq : 'a -> bool
+    method value : float
+  end
+
+Note that the type money1 is not a subtype of type comparable, as the
+self type appears in contravariant position in the type of method
+leq. Indeed, an object m of class money has a method leq that expects
+an argument of type money since it accesses its value
+method. Considering m of type comparable would allow to call method
+leq on m with an argument that does not have a method value, which
+would be an error.
+
+-}
+
+
+$(label "leq")
+$(label "value")
+
+
+comparable self =
+   do
+        return emptyRecord
+   where
+     _ = (self # leq $ self) :: Bool
+
+
+money (x::Float) self =
+   do
+      super <- comparable self
+      return 
+        $  value .=. x
+       .*. leq .=. (\p -> self # value <= p # value)
+       .*. super
+
+{-
+
+-- Type checking runs into occurs check!
+
+myBinaryMethodOOP =
+   do
+        m <- mfix $ money 42.88
+        putStrLn $ show (m # value)
+
+-}
 
 
 main = do 
@@ -994,7 +1266,7 @@ main = do
           putStrLn "myInitializingOOP"; myInitializingOOP; putStrLn ""
           putStrLn "myInitializingOOP'"; myInitializingOOP'; putStrLn ""
           putStrLn "mySelfishOOP"; mySelfishOOP; putStrLn ""
-          putStrLn "myPolyPara"; myPolyPara; putStrLn ""
+          putStrLn "myBoundedGenericClassOOP"; myBoundedGenericClassOOP; putStrLn ""
           putStrLn "myPolyPrintable"; myPolyPrintable; putStrLn ""
           putStrLn "myFirstClassOOP"; myFirstClassOOP printable_point
           putStrLn "myFirstClassOOP"
@@ -1004,11 +1276,15 @@ main = do
           putStrLn "myOverridingOOP"; myOverridingOOP; putStrLn ""
           putStrLn "myOverridingOOP'"; myOverridingOOP'; putStrLn ""
           putStrLn "myOverridingOOP''"; myOverridingOOP''; putStrLn ""
-          putStrLn "myPolymorphicOOP"; myPolymorphicOOP; putStrLn ""
+          putStrLn "myGenericFunctionOOP"; myGenericFunctionOOP; putStrLn ""
+          putStrLn "myGenericClassOOP"; myGenericClassOOP; putStrLn ""
+          putStrLn "myGenericMethodOOP"; myGenericMethodOOP
+          putStrLn "myGenericMethodOOP'"; myGenericMethodOOP'
+          putStrLn "myGenericMethodOOP''"; myGenericMethodOOP''
           putStrLn "testVirtual"; testVirtual; putStrLn ""
           putStrLn "testVirtual'"; testVirtual'; putStrLn ""
-          putStrLn "testRestricted"; testRestricted; putStrLn ""
-          putStrLn "testRestricted'"; testRestricted'; putStrLn ""
+          putStrLn "myPrivacyOOP"; myPrivacyOOP; putStrLn ""
+          putStrLn "myPrivacyOOP'"; myPrivacyOOP'; putStrLn ""
 
 -- :t colored_point
 -- :t mfix $ colored_point (1::Int) "red"
