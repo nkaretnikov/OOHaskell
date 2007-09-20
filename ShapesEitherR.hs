@@ -19,6 +19,9 @@ work, we need to define a few new type-level functions. These new
 functions may eventually be moved to the HList or the OOHaskell
 libraries.
 
+Unlike ShapesEither.hs, we consider equivalence of records modulo
+field permutation. This gives a shallower union.
+
 -}
 
 module ShapesUnion where
@@ -52,9 +55,9 @@ main =
                        nilEither)))
 
        putStrLn "Union Depth for each member of scribble"
-       print $ map union_depth scribble -- withour account for record
+       print $ map union_depth scribble -- without account for record
 		                        -- equality modulo perm, 3
-
+	                                -- With this account, 2
        -- Iterate through the array
        -- and handle shapes polymorphically.
        mapM_ (\shape -> do
