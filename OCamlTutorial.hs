@@ -1229,6 +1229,9 @@ would be an error.
 $(label "leq")
 $(label "value")
 
+--
+-- A naive attempt that overlocks the need for recursive types
+--
 
 comparable self =
    do
@@ -1251,10 +1254,90 @@ money (x::Float) self =
 
 myBinaryMethodOOP =
    do
-        m <- mfix $ money 42.88
-        putStrLn $ show (m # value)
+        m <- mfix $ money 42.88 -- occurs check complains
+        m' <- mfix $ money 88.42 -- occurs check complains
+        putStrLn $ show (m # leq $ m') -- should print True
+        putStrLn $ show (m' # leq $ m) -- should print False
 
 -}
+
+
+
+--
+-- An option w/ an iso-recursive type, w/ tail polymorphism
+--
+
+newtype Comparable tail = 
+        Comparable { getComparableRecord :: ComparableRecord tail }
+
+
+type ComparableRecord tail = 
+     Record ( Leq :=: (Comparable tail -> Bool) :*: tail )
+
+
+instance HasField l (ComparableRecord tail) v
+      => HasField l (Comparable tail) v
+   where
+     hLookupByLabel l = hLookupByLabel l . getComparableRecord
+
+
+money' (x::Float) self =
+   do
+      return $ Comparable (
+                    leq   .=. (\p -> self # value <= p # value)
+                .*. value .=. x
+                .*. emptyRecord )
+
+
+myBinaryMethodOOP' =
+   do
+        m <- mfix $ money' 42.88
+        m' <- mfix $ money' 88.42
+        putStrLn $ show (m # leq $ m') -- prints True
+        putStrLn $ show (m' # leq $ m) -- prints False
+
+
+
+--
+-- An option w/ an iso-recursive type, w/o inheritance
+--
+
+
+newtype Money = 
+        Money { getMoneyRecord :: MoneyRecord }
+
+
+type MoneyRecord = Record (  Value :=: Float
+                         :*: Leq   :=: (Money -> Bool)
+                         :*: HNil )
+
+
+instance HasField l MoneyRecord v
+      => HasField l Money v
+ where
+  hLookupByLabel l = hLookupByLabel l . getMoneyRecord
+
+
+money'' (x::Float) self =
+   do
+      return $ Money (  value .=. x
+                    .*. leq   .=. (\p -> self # value <= p # value)
+                    .*. emptyRecord )
+
+      
+myBinaryMethodOOP'' =
+   do
+        m <- mfix $ money'' 42.88
+        m' <- mfix $ money'' 88.42
+        putStrLn $ show (m # leq $ m') -- prints True
+        putStrLn $ show (m' # leq $ m) -- prints False
+
+
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
 
 
 main = do 
@@ -1285,6 +1368,8 @@ main = do
           putStrLn "testVirtual'"; testVirtual'; putStrLn ""
           putStrLn "myPrivacyOOP"; myPrivacyOOP; putStrLn ""
           putStrLn "myPrivacyOOP'"; myPrivacyOOP'; putStrLn ""
+          putStrLn "myBinaryMethodOOP'"; myBinaryMethodOOP'
+          putStrLn "myBinaryMethodOOP''"; myBinaryMethodOOP''
 
 -- :t colored_point
 -- :t mfix $ colored_point (1::Int) "red"
