@@ -526,13 +526,13 @@ myInitializingOOP' =
 {- Ocaml Tutorial:
 
 We illustrate inheritance by defining a class of colored points that
-inherits from the class of points. This class has all instance
-variables and all methods of class point, plus a new instance variable
-c and a new method color.
+inherits from the class of printable points. This class has all
+instance variables and all methods of class point, plus a new instance
+variable c and a new method color.
 
 class colored_point x_init (c : string) =
    object
-     inherit point x_init
+     inherit printable_point x_init
      val c = c
      method getColor = c
    end;;
@@ -904,7 +904,7 @@ p#bump;;
 -- So they are not put into the record of an object.
 -- We could achieve sharing of methods between different objects via lets.
 
-$(label "bumpX")
+$(label "bump")
 
 restricted_point x_init self =
    do
@@ -913,14 +913,14 @@ restricted_point x_init self =
       return 
         $  varX .=. x
        .*. getX     .=. readIORef x
-       .*. bumpX    .=. moveX 2
+       .*. bump     .=. moveX 2
        .*. emptyRecord
 
 myPrivacyOOP
    =  do
        p <- mfix (restricted_point 7)
        p # getX >>= putStrLn . show -- prints 7
-       p # bumpX
+       p # bump
        p # getX >>= putStrLn . show -- prints 9
 
 
@@ -932,7 +932,7 @@ bumping_point x_init self =
    do
       p <- printable_point x_init self
       return
-        $  bumpX .=. (self # moveX $ 2)
+        $  bump .=. (self # moveX $ 2)
        .*. p
 
 myPrivacyOOP' = 
@@ -940,7 +940,7 @@ myPrivacyOOP' =
       p  <- mfix (bumping_point 7)
       let p' = p .-. moveX
       p' # print
-      p' # bumpX
+      p' # bump
       p' # print
       -- Attempting access to moveX would result in a type error.
 
@@ -1331,6 +1331,169 @@ myBinaryMethodOOP'' =
         m' <- mfix $ money'' 88.42
         putStrLn $ show (m # leq $ m') -- prints True
         putStrLn $ show (m' # leq $ m) -- prints False
+
+
+
+------------------------------------------------------------------------
+--
+-- OCaml Objects tutorial
+-- Sec 3.7 Class interfaces
+--
+
+{- Ocaml Tutorial:
+
+Class interfaces are inferred from class definitions. They may also be
+defined directly and used to restrict the type of a class. Like class
+declarations, they also define a new type abbreviation.
+
+#class type restricted_point_type = 
+   object
+     method get_x : int
+     method bump : unit
+ end;;
+class type restricted_point_type =
+  object method bump : unit method get_x : int end
+ 
+#fun (x : restricted_point_type) -> x;;
+- : restricted_point_type -> restricted_point_type = <fun>
+
+In addition to program documentation, class interfaces can be used to
+constrain the type of a class. Both concrete instance variables and
+concrete private methods can be hidden by a class type
+constraint. Public methods and virtual members, however, cannot.
+
+#class restricted_point' x = (restricted_point x : restricted_point_type);;
+class restricted_point' : int -> restricted_point_type
+
+Or, equivalently:
+
+#class restricted_point' = (restricted_point : int -> restricted_point_type);;
+class restricted_point' : int -> restricted_point_type
+
+-}
+
+type Restricted_point_type = 
+     Record (  GetX :=: IO Int
+           :*: Bump :=: IO ()
+           :*: HNil )
+
+
+doBump :: Restricted_point_type -> IO ()
+doBump x = x # bump
+
+
+restricted_point' :: Int -> IO Restricted_point_type
+restricted_point' x_init =
+   do
+      p <- mfix $ restricted_point x_init
+      return $ narrow p
+
+
+myTypedOOP =
+   do
+      p <- restricted_point' 42
+      doBump p
+      p # getX >>= putStrLn . show
+
+
+-- Try the polymorphic type
+type Restricted_point_type' x = 
+     Record (  GetX :=: IO x
+           :*: Bump :=: IO ()
+           :*: HNil )
+
+
+-- HasField constraint is still not met
+-- doBump' :: Num x => Restricted_point_type' x -> IO ()
+-- doBump' x = x # bump
+
+
+doBump' x = x # bump
+   where
+     _ = constrain $ narrow x 
+     constrain :: Restricted_point_type' t -> ()
+     constrain _ = ()
+
+
+myTypedOOP' =
+   do
+      p <- mfix $ restricted_point 42
+      doBump' p
+      p # getX >>= putStrLn . show
+
+
+
+------------------------------------------------------------------------
+--
+-- OCaml Objects tutorial
+-- Sec 3.12 Using coercions
+--
+
+{- Ocaml Tutorial:
+
+Subtyping is never implicit. There are, however, two ways to perform
+subtyping. The most general construction is fully explicit: both the
+domain and the codomain of the type coercion must be given.
+
+We have seen that points and colored points have incompatible
+types. For instance, they cannot be mixed in the same list. However, a
+colored point can be coerced to a point, hiding its color method:
+
+#let colored_point_to_point cp = (cp : colored_point :> point);;
+val colored_point_to_point : colored_point -> point = <fun>
+ 
+#let p = new point 3 and q = new colored_point 4 "blue";;
+val p : point = <obj>
+val q : colored_point = <obj>
+ 
+#let l = [p; (colored_point_to_point q)];;
+val l : point list = [<obj>; <obj>]
+
+An object of type t can be seen as an object of type t' only if t is a
+subtype of t'. For instance, a point cannot be seen as a colored
+point.
+
+#(p : point :> colored_point);;
+Type point = < get_offset : int; get_x : int; move : int -> unit >
+is not a subtype of type
+  colored_point =
+    < color : string; get_offset : int; get_x : int; move : int -> unit > 
+
+Indeed, narrowing coercions without runtime checks would be
+unsafe. Runtime type checks might raise exceptions, and they would
+require the presence of type information at runtime, which is not the
+case in the Objective Caml system. For these reasons, there is no such
+operation available in the language.
+
+Be aware that subtyping and inheritance are not related. Inheritance
+is a syntactic relation between classes while subtyping is a semantic
+relation between types. For instance, the class of colored points
+could have been defined directly, without inheriting from the class of
+points; the type of colored points would remain unchanged and thus
+still be a subtype of points.
+
+-}
+
+
+type Point x = 
+     Record (  GetX  :=: IO x
+           :*: MoveX :=: (x -> IO ())
+           :*: Print :=: IO ()
+           :*: HNil )
+
+to_point p = p'
+ where
+   p' = narrow p
+   _  = constrain p' 
+   constrain :: Point x -> ()
+   constrain _ = ()
+
+myCoercingOOP =
+   do
+      p  <- mfix $ printable_point 42
+      p' <- mfix $ colored_point 88 "red"
+      let l = [to_point p, to_point p']
+      (l!!1) # print
 
 
 

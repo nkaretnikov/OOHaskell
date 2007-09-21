@@ -12,7 +12,7 @@ not illustrate multiple inheritance per se; it does show the
 multiple heirs. Here is a challenging example of diamond inheritance
 -- and a conversion of the open recursion into the closed recursion --
 We implement the following diagram:
-\
+
 -}
 
 

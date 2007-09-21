@@ -39,14 +39,15 @@ module OOHaskell (
 
 import CommonMain hiding ( HDeleteMany
                          , hDeleteMany
-                         , TypeCast
-                         , typeCast
+                         , TypeCast -- no external uses are valid; see TypeEqGeneric1
+                         , typeCast -- no external uses are valid; see TypeEqGeneric1
                          )
 
 import GhcSyntax hiding (( .*. ), ( :=: ))
 import GhcRecord
 import GhcExperiments
 import TypeEqBoolGeneric
+import FakePrelude
 import TypeEqGeneric1
 import TypeCastGeneric1
 import Label4

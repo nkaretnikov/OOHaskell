@@ -88,6 +88,8 @@ test:
 	diff -b OCamlTutorial.out OCamlTutorial.ref
 	${ghci}	-v0 MultipleInheritance.hs < Main.in > MultipleInheritance.out
 	diff -b MultipleInheritance.out MultipleInheritance.ref
+	${ghci}	-v0 OoCopy.hs < Main.in > OoCopy.out
+	diff -b OoCopy.out OoCopy.ref
 	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
 	diff -b SimpleST.out SimpleST.ref
 	${ghci}	-v0 CircBuffer.hs < Main.in > CircBuffer.out
@@ -248,4 +250,4 @@ HList:
 
 commit:
 	darcs record -a -m "Committed from the Makefile"
-	darcs push
+	darcs push -a
