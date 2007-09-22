@@ -1381,6 +1381,12 @@ type Restricted_point_type =
 doBump :: Restricted_point_type -> IO ()
 doBump x = x # bump
 
+doBump' x = x # bump
+   where
+     _ = constrain $ narrow x 
+     constrain :: Restricted_point_type -> ()
+     constrain _ = ()
+
 
 restricted_point' :: Int -> IO Restricted_point_type
 restricted_point' x_init =
@@ -1394,21 +1400,24 @@ myTypedOOP =
       p <- restricted_point' 42
       doBump p
       p # getX >>= putStrLn . show
+      p' <- mfix $ restricted_point 42
+      doBump' p
+      p # getX >>= putStrLn . show
 
 
 -- Try the polymorphic type
-type Restricted_point_type' x = 
-     Record (  GetX :=: IO x
+type Restricted_point_type' t = 
+     Record (  GetX :=: IO t
            :*: Bump :=: IO ()
            :*: HNil )
 
 
 -- HasField constraint is still not met
--- doBump' :: Num x => Restricted_point_type' x -> IO ()
--- doBump' x = x # bump
+-- doBump'' :: Num x => Restricted_point_type' x -> IO ()
+-- doBump'' x = x # bump
 
 
-doBump' x = x # bump
+doBump'' x = x # bump
    where
      _ = constrain $ narrow x 
      constrain :: Restricted_point_type' t -> ()
@@ -1418,7 +1427,7 @@ doBump' x = x # bump
 myTypedOOP' =
    do
       p <- mfix $ restricted_point 42
-      doBump' p
+      doBump'' p
       p # getX >>= putStrLn . show
 
 
