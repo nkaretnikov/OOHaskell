@@ -33,7 +33,7 @@ data InsHead; insHead  = proxy::Proxy InsHead
 -- The interface of a recursive list
 
 type ListInterface a =
-     Record (     IsEmpty :=: IO Bool
+     Record (     IsEmpty :=: Bool
               :*: GetHead :=: IO a
               :*: GetTail :=: IO (ListObj a)
               :*: SetHead :=: (a -> IO ())
@@ -58,8 +58,8 @@ instance HasField l (ListInterface a) v =>
 -- The class for empty lists
 nilOO self | False = undefined :: IO (ListInterface a)
 nilOO self
- = returnIO
-     $  isEmpty  .=. returnIO True
+ = return
+     $  isEmpty  .=. True
     .*. getHead  .=. fail "No head!"
     .*. getTail  .=. fail "No tail!"
     .*. setHead  .=. const (fail "No head!")
@@ -72,7 +72,7 @@ nilOO self
 reusableInsHead list head
  = do 
       newCons <- mfix (consOO head list)
-      returnIO (ListObj newCons)
+      return (ListObj newCons)
 
 
 -- The class for nonempty lists
@@ -80,10 +80,10 @@ reusableInsHead list head
 consOO head tail self
  = do
       hRef <- newIORef head
-      returnIO
-        $  isEmpty .=. returnIO False
+      return
+        $  isEmpty .=. False
        .*. getHead .=. readIORef hRef
-       .*. getTail .=. returnIO (ListObj tail)
+       .*. getTail .=. return (ListObj tail)
        .*. setHead .=. writeIORef hRef
        .*. insHead .=. reusableInsHead self
        .*. emptyRecord
@@ -93,8 +93,7 @@ consOO head tail self
 
 printList aList
  = do
-      empty <- aList # isEmpty
-      if empty
+      if aList # isEmpty
         then putStrLn ""
         else do 
                 head <- aList # getHead

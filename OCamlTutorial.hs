@@ -186,7 +186,7 @@ para_point x_init =
 
 
 -- A shortcut for IORef processing. Is that somewhere in the libraries?
-queryIORef ref f = readIORef ref >>= returnIO . f
+queryIORef ref f = readIORef ref >>= return . f
 
 testPara =
    do
@@ -374,7 +374,7 @@ print_getX self = ((self # getX ) >>= putStr . show)
 -- Note that 'mfix' plays the role of 'new' in the OCaml code...
 mySelfishOOP =
    do
-      p <- mfix (printable_point 7)
+      p <- mfix $ printable_point 7
       p # moveX $ 2
       p # print
 
@@ -537,10 +537,10 @@ class colored_point x_init (c : string) =
      method getColor = c
    end;;
 
-let p' = new colored_point 5 "red";;
-val p' : colored_point = <obj>
+let p = new colored_point 5 "red";;
+val p : colored_point = <obj>
  
-p'#getX, p'#getColor;;
+p#getX, p#getColor;;
 - : int * string = (5, "red")
 
 -}
@@ -554,15 +554,15 @@ colored_point x_init (c::String) self =
    do
       super <- printable_point x_init self
       return
-        $  getColor .=. returnIO c
+        $  getColor .=. c
        .*. super
 
 
 myColoredOOP =
    do
-      p' <- mfix (colored_point 5 "red")
-      x  <- p' # getX
-      c  <- p' # getColor
+      p <- mfix (colored_point 5 "red")
+      x  <- p # getX
+      let c = p # getColor
       putStr $ show (x,c)
 
 
@@ -610,7 +610,7 @@ val p' : colored_point = <obj>
 -}
 
 
-get_succ_x p = p # getX >>= (return . (+ 1))
+get_succ_x p = p # getX >>= return . (+ 1)
 
 myGenericFunctionOOP =
    do
@@ -663,9 +663,9 @@ printable_colored_point x_init c self =
                              putStr "("
                              super # print
                              putStr ", "
-                             self # getColor >>= putStr
+                             putStr $ self # getColor
                              putStr ")" )
-       .<. getColor .=. return c 
+       .<. getColor .=. c 
        .*. super
 
 myOverridingOOP'' =
@@ -757,8 +757,8 @@ abstract_point x_init self =
        .*. print .=. (self # getX >>= putStr . show)
        .*. emptyRecord
    where
-     _ = (self # getX) `asTypeOf` returnIO x_init
-     _ = (self # moveX) x_init `asTypeOf` returnIO ()
+     _ = (self # getX) `asTypeOf` return x_init
+     _ = (self # moveX) x_init `asTypeOf` return ()
 
 
 {-
@@ -792,7 +792,7 @@ abstract_point x_init self =
 concrete_point x_init self
    = do
         p <- abstract_point x_init self -- inherit ...
-        returnIO
+        return
         -- add the missing (pure virtual) methods
           $  getX  .=. readIORef (self # varX)
          .*. moveX .=. (\d -> modifyIORef (self # varX) (+d))
@@ -818,7 +818,7 @@ testVirtual
 abstract_point' x_init self
   = do
       x <- newIORef x_init
-      returnIO $
+      return $
 	   varX  .=. x
        .*. getX  .=. (proxy::Proxy (IO Int))
        .*. moveX .=. (proxy::Proxy (Int -> IO ()))
@@ -834,7 +834,7 @@ data MyLabel; myLabel = proxy::Proxy MyLabel
 concrete_point' x_init self
    = do
         p <- abstract_point' x_init self -- inherit ...
-        returnIO
+        return
         -- use disciplined record update
            $  getX    .=. readIORef (self # varX)
           .^. moveX   .=. modifyIORef (self # varX) . (+)
@@ -928,20 +928,19 @@ myPrivacyOOP
 -- This allows us to make methods private for existing objects.
 -- We first add the bump method that uses the private method moveX.
 
-bumping_point x_init self =
+bumping_point x_init =
    do
-      p <- printable_point x_init self
+      p <- mfix $ printable_point x_init
       return
-        $  bump .=. (self # moveX $ 2)
-       .*. p
+        $  bump .=. (p # moveX $ 2)
+       .*. (p .-. moveX)
 
 myPrivacyOOP' = 
    do
-      p  <- mfix (bumping_point 7)
-      let p' = p .-. moveX
-      p' # print
-      p' # bump
-      p' # print
+      p  <- bumping_point 7
+      p # print
+      p # bump
+      p # print
       -- Attempting access to moveX would result in a type error.
 
 
@@ -1484,7 +1483,7 @@ still be a subtype of points.
 -}
 
 
-type Point x = 
+type Printable_point x = 
      Record (  GetX  :=: IO x
            :*: MoveX :=: (x -> IO ())
            :*: Print :=: IO ()
@@ -1494,7 +1493,7 @@ to_point p = p'
    where
      p' = narrow p
      _  = constrain p' 
-     constrain :: Point x -> ()
+     constrain :: Printable_point x -> ()
      constrain _ = ()
 
 myCoercingOOP =
