@@ -1491,11 +1491,11 @@ type Point x =
            :*: HNil )
 
 to_point p = p'
- where
-   p' = narrow p
-   _  = constrain p' 
-   constrain :: Point x -> ()
-   constrain _ = ()
+   where
+     p' = narrow p
+     _  = constrain p' 
+     constrain :: Point x -> ()
+     constrain _ = ()
 
 myCoercingOOP =
    do

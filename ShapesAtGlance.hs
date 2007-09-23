@@ -1,6 +1,7 @@
 {-# OPTIONS -fglasgow-exts #-}
 {-# OPTIONS -fallow-undecidable-instances #-}
 {-# OPTIONS -fallow-overlapping-instances #-}
+{-# OPTIONS -fth #-}
 
 {-
 
@@ -17,19 +18,18 @@ OOHaskell (C) 2004--2007, Oleg Kiselyov, Ralf Laemmel
 module ShapesAtGlance where
 
 import OOHaskell
-import Label5
 
 -- The class Shape
 
 -- First, declare the labels.
 
-data GetX;    getX =    undefined::GetX
-data GetY;    getY =    undefined::GetY
-data SetX;    setX =    undefined::SetX
-data SetY;    setY =    undefined::SetY
-data MoveTo;  moveTo =  undefined::MoveTo
-data RMoveTo; rMoveTo = undefined::RMoveTo
-data Draw;    draw =    undefined::Draw -- Needed in concrete subclasses
+$(label "getX")
+$(label "getY")
+$(label "setX")
+$(label "setY")
+$(label "moveTo")
+$(label "rMoveTo")
+$(label "draw")
 
 
 -- Note that unlike C++ version, our class is polymorphic in x and y.
@@ -64,6 +64,14 @@ ls = return . LS
 instance Show LS where show (LS x) = x
 
 
+-- More labels
+
+$(label "getWidth")
+$(label "getHeight")
+$(label "setWidth")
+$(label "setHeight")
+
+
 -- Rectange: inherits from Shape
 
 rectangle x y width height self
@@ -84,10 +92,11 @@ rectangle x y width height self
                       ls "\n"
         .*. super
 
-data GetWidth;  getWidth = undefined::GetWidth
-data GetHeight; getHeight = undefined::GetHeight
-data SetWidth;  setWidth = undefined::SetWidth
-data SetHeight; setHeight = undefined::SetHeight
+
+-- More labels
+
+$(label "getRadius")
+$(label "setRadius")
 
 
 -- Circle: inherits from Shape
@@ -106,8 +115,6 @@ circle x y radius self
                       ls "\n"
         .*. super
 
-data GetRadius; getRadius = undefined::GetRadius
-data SetRadius; setRadius = undefined::SetRadius
 
 -- Weirich's / Rathman's test case
 
