@@ -51,35 +51,25 @@ narrowToShape s = s { setX      = narrowToShape . setX s
 
 -- Weirich's / Rathman's test case
 
-main' =
-      do
-
+main' = do
          -- Handle the shapes polymorphically
          let scribble = [ upCastToShape (rectangle 10 20 5 6)
                         , upCastToShape (circle 15 25 8)
                         ]
-         mapM_ ( \x -> 
-                   do
-                      draw x
-                      draw (rMoveTo x 100 100)
-               )
+         mapM_ (\x ->  do draw x
+                          draw (rMoveTo x 100 100))
                scribble
 
          -- Handle rectangle-specific instance
          draw (setWidth (rectangle 0 0 15 15) 30)
 
-main =
-      do
-
+main = do
          -- Handle the shapes polymorphically
          let scribble = [ narrowToShape (rectangle 10 20 5 6)
                         , narrowToShape (circle 15 25 8)
                         ]
-         mapM_ ( \x -> 
-                   do
-                      draw x
-                      draw (rMoveTo x 100 100)
-               )
+         mapM_ (\x ->  do draw x
+                          draw (rMoveTo x 100 100))
                scribble
 
          -- Handle rectangle-specific instance

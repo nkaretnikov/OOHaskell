@@ -1,5 +1,5 @@
 
--- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
+-- (C) 2004-2007, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
 module Shape where
@@ -20,14 +20,12 @@ shape x y = ShapeData { xData = x
 
 -- The shape interface
 
-class Shape s
- where
+class Shape s where
   moveTo     :: Int -> Int -> s -> s
   rMoveTo    :: Int -> Int -> s -> s
   draw       :: s -> IO ()
 
 moveTo' x y s = shape x y 
 rMoveTo' dx dy s = moveTo' x y s
-  where
-    x = xData s + dx
-    y = yData s + dy
+  where x = xData s + dx
+	y = yData s + dy

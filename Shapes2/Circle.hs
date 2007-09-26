@@ -34,12 +34,8 @@ setRadius i s = s { shapeTail = (shapeTail s) { getRadius = i } }
 
 -- Implement abstract draw method
 
-instance Draw (CircleDelta w)
- where
+instance Draw (CircleDelta w) where
   draw s
-    =  putStrLn ("Drawing a Circle at:("
-    ++ (show (getX s))
-    ++ ","
-    ++ (show (getY s))
-    ++ "), radius "
-    ++ (show (getRadius (shapeTail s))))
+    =  putStrLn $ concat ["Drawing a Circle at:", show (getX s,getY s), 
+                          ", radius ", show (getRadius (shapeTail s))]
+

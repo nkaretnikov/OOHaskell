@@ -52,6 +52,5 @@ updData s f = s { getData = f (getData s) }
 
 moveTo' x y s = ShapeData x y 
 rMoveTo' dx dy s = moveTo' x y s
-  where
-    x = xData s + dx
-    y = yData s + dy
+  where x = xData s + dx
+	y = yData s + dy

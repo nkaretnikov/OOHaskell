@@ -36,8 +36,7 @@ shape x y draw tail self
                  , setY      = writeIORef yRef
                  , moveTo    = \x y -> do { setX self x; setY self y }
                  , rMoveTo   = \dx dy -> 
-                                 do
-                                    x <- getX self
+                                 do x <- getX self
                                     y <- getY self
                                     moveTo self (x+dx) (y+dy)
                  , draw      = draw self
@@ -58,8 +57,7 @@ shape' x y tail self
                  , setY      = \y' -> writeIORef yRef y'
                  , moveTo    = \x' y' -> do { setX self x'; setY self y' }
                  , rMoveTo   = \deltax deltay -> 
-                                 do
-                                    x <- getX self
+                                 do x <- getX self
                                     y <- getY self
                                     moveTo self (x+deltax) (y+deltay)
                  , draw      = putStrLn "Nothing to draw"
@@ -77,6 +75,5 @@ newtype LS = LS String
 ls :: Monad m => String -> m LS
 ls = return . LS
 
-instance Show LS
- where
+instance Show LS where
   show (LS x) = x

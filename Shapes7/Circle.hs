@@ -22,22 +22,17 @@ circle x y r = CircleData { shapeData  = shape x y
 
 -- A circle is a shape
 
-instance Shape CircleData
- where
+instance Shape CircleData where
   moveTo x y s = s { shapeData = moveTo' x y (shapeData s) }
   rMoveTo dx dy s = s { shapeData = rMoveTo' dx dy (shapeData s) }
   draw s
-    =  putStrLn ("Drawing a Circle at:("
-    ++ (show (xData (shapeData s)))
-    ++ ","
-    ++ (show (yData (shapeData s)))
-    ++ "), radius "
-    ++ (show (radiusData s)))
+    =  putStrLn $ concat ["Drawing a Circle at:", 
+			  show (xData (shapeData s),yData (shapeData s)),
+                          ", radius ", show (radiusData s)]
 
 
 -- An interface in case more kinds of circles show up
 
-class Shape s => Circle s
- where
+class Shape s => Circle s where
   getRadius :: s -> Int
   setRadius :: Int -> s -> s

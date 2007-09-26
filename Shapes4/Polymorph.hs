@@ -19,21 +19,16 @@ narrowToShape s = s { shapeTail = () }
 
 -- Weirich's / Rathman's test case
 
-main =
-      do
-
+main = do
          -- Handle the shapes polymorphically
          s1 <- mfix $ rectangle 10 20 5 6
          s2 <- mfix $ circle 15 25 8
          let scribble = [ narrowToShape s1
                         , narrowToShape s2
                         ]
-         mapM_ ( \s -> 
-                   do
-                      draw s
-                      rMoveTo s 100 100
-                      draw s
-               )
+         mapM_ (\s -> do draw s
+                         rMoveTo s 100 100
+                         draw s)
                scribble
 
          -- Handle rectangle-specific instance
@@ -44,10 +39,8 @@ main =
 
 -- Test overriding
 
-main' =
-      do
-         l <- newIORef 0
-         c <- mfix $ circle' 15 25 8 l
-         draw c
-         t <- readIORef l
-         print t
+main' = do l <- newIORef 0
+	   c <- mfix $ circle' 15 25 8 l
+	   draw c
+	   t <- readIORef l
+	   print t

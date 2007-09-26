@@ -11,15 +11,12 @@ import Rectangle
 
 -- Weirich's / Rathman's test case
 
-main =
-      do
+main = do
          -- Handle the shapes polymorphically
          let scribble = [ ShapeA (rectangle 10 20 5 6)
                         , ShapeA (circle 15 25 8) ]
-         mapM_ ( \x -> 
-                   do
-                      draw x
-                      draw (rMoveTo 100 100 x) )
+         mapM_ (\x -> do draw x
+                         draw (rMoveTo 100 100 x) )
                scribble
 
          -- Handle rectangle-specific instance

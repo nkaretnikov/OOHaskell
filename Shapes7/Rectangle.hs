@@ -32,11 +32,7 @@ instance Shape RectangleData
   moveTo x y s = s { shapeData = moveTo' x y (shapeData s) }
   rMoveTo dx dy s = s { shapeData = rMoveTo' dx dy (shapeData s) }
   draw s
-    =   putStrLn ("Drawing a Rectangle at:("
-    ++ (show (xData (shapeData s)))
-    ++ ","
-    ++ (show (yData (shapeData s)))
-    ++ "), width "
-    ++ (show (widthData s))
-    ++ ", height "
-    ++ (show (heightData s)))
+    =  putStrLn $ concat ["Drawing a Rectangle at:", 
+			  show (xData (shapeData s),yData (shapeData s)),
+                          ", width ",  show (widthData s), 
+                          ", height ", show (heightData s)]

@@ -29,17 +29,10 @@ rectangle x y w h
   = shape x y drawRectangle shapeTail
 
  where
-
   drawRectangle x y
-    =  putStrLn ("Drawing a Rectangle at:("
-    ++ (show x)
-    ++ ","
-    ++ (show y)
-    ++ "), width "
-    ++ (show w)
-    ++ ", height "
-    ++ (show h) )
-
+    =  putStrLn $ concat ["Drawing a Rectangle at:", show (x,y), 
+                          ", width ",  show w, 
+                          ", height ", show h]
   shapeTail 
     = RectangleDelta { getWidth'     = w 
                      , getHeight'    = h

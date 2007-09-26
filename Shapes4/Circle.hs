@@ -6,7 +6,7 @@ module Circle where
 
 import Data.IORef
 import Shape
-
+import Control.Monad (liftM, liftM2)
 
 -- The delta of circles
 
@@ -25,12 +25,13 @@ type Circle w = Shape (CircleDelta w)
 
 circle x y radius = shape x y draw tail
   where
-    draw self = putStr "Drawing a Circle at:("
-                              << getX self << ls "," << getY self 
-                              << ls "), radius " << getRadius self
-                              << ls "\n"
-    tail = do 
-              rRef <- newIORef radius
+    draw self 
+	 =  do putStr "Drawing a Circle at:"
+	       liftM show (liftM2 (,) (getX self) (getY self)) >>= putStr
+	       putStr ", radius "
+	       getRadius self >>= return.show >>= putStrLn
+
+    tail = do rRef <- newIORef radius
               return ( \self -> 
                 CircleDelta { getRadius' = readIORef rRef
                             , setRadius' = writeIORef rRef
@@ -46,8 +47,7 @@ setRadius = setRadius'  . shapeTail
 -- A variation on circle with logging facilities
 
 circle' x y radius counter self 
-  = do
-       super <- circle x y radius self
+  = do super <- circle x y radius self
        return super
          { getX = do { tick; getX super }
          , getY = do { tick; getY super } }

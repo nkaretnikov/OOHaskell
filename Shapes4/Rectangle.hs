@@ -32,16 +32,14 @@ rectangle x y w h
  where
 
   drawRectangle self
-    =  
-       putStr "Drawing a Rectangle at:(" <<
+    =  putStr "Drawing a Rectangle at:(" <<
        getX self << ls "," << getY self <<
        ls "), width " << getWidth self <<
        ls ", height " << getHeight self <<
        ls "\n"
 
   shapeTail
-    = do 
-         wRef <- newIORef w
+    = do wRef <- newIORef w
          hRef <- newIORef h
          return ( \self -> 
             RectangleDelta
@@ -56,22 +54,19 @@ rectangle x y w h
 -- An alternative constructor for rectangles
 
 rectangle' x y w h self
-  = do 
-       super <- shape' x y shapeTail self
+  = do super <- shape' x y shapeTail self
        returnIO super { draw = drawRectangle self }
  where
 
   drawRectangle self
-    =  
-       putStr "Drawing a Rectangle at:(" <<
+    =  putStr "Drawing a Rectangle at:(" <<
        getX self << ls "," << getY self <<
        ls "), width " << getWidth self <<
        ls ", height " << getHeight self <<
        ls "\n"
 
   shapeTail
-    = do 
-         wRef <- newIORef w
+    = do wRef <- newIORef w
          hRef <- newIORef h
          return ( \self -> 
             RectangleDelta

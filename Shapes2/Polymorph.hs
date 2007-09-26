@@ -16,16 +16,13 @@ type AnyShape w = Shape (Either (RectangleDelta w) (CircleDelta w))
 
 -- Define overloaded embedding into union
 
-class UpCastToShape w
- where
+class UpCastToShape w where
   upCastToShape :: Shape (w w') -> AnyShape w'
 
-instance UpCastToShape RectangleDelta
- where
+instance UpCastToShape RectangleDelta where
   upCastToShape = tagShape Left
 
-instance UpCastToShape CircleDelta
- where
+instance UpCastToShape CircleDelta where
   upCastToShape = tagShape Right
 
 
@@ -37,8 +34,7 @@ tagShape f s = s { shapeTail = f (shapeTail s) }
 
 -- Define draw for tagged shapes
 
-instance (Draw a, Draw b) => Draw (Either a b)
- where
+instance (Draw a, Draw b) => Draw (Either a b) where
   draw = eitherShape draw draw
 
 
@@ -53,16 +49,13 @@ eitherShape f g s
 
 -- Weirich's / Rathman's test case
 
-main =
-      do
+main = do
          -- Handle the shapes polymorphically
          let scribble = [ upCastToShape (rectangle 10 20 5 6)
                         , upCastToShape (circle 15 25 8)
                         ]
-         mapM_ ( \x -> 
-                   do
-                      draw x
-                      draw (rMoveTo 100 100 x))
+         mapM_ (\x ->  do draw x
+                          draw (rMoveTo 100 100 x))
                scribble
 
          -- Handle rectangle-specific instance

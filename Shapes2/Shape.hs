@@ -22,25 +22,19 @@ shape x y tail = Shape { getX = x
 -- Reusable functionality on shapes
 -- (These cannot be overridden.)
 
-setX :: Int -> Shape w -> Shape w
+setX, setY :: Int -> Shape w -> Shape w
 setX i s = s { getX = i }
-
-setY :: Int -> Shape w -> Shape w
 setY i s = s { getY = i }
 
-moveTo :: Int -> Int -> Shape w -> Shape w
+moveTo, rMoveTo :: Int -> Int -> Shape w -> Shape w
 moveTo x y = setY y . setX x 
-
-rMoveTo :: Int -> Int -> Shape w -> Shape w
 rMoveTo deltax deltay s = moveTo x y s
-  where
-    x = getX s + deltax
-    y = getY s + deltay
+  where x = getX s + deltax
+	y = getY s + deltay
 
 
 -- A class for type-specific drawing
 -- (Virtual methods are generally mapped to such classes.)
 
-class Draw w
- where
+class Draw w where
   draw :: Shape w -> IO ()

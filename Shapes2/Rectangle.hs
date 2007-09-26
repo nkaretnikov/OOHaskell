@@ -40,14 +40,8 @@ setWidth i s = s { shapeTail = (shapeTail s) { getWidth = i } }
 
 -- Implement abstract draw method
 
-instance Draw (RectangleDelta w)
- where
+instance Draw (RectangleDelta w) where
   draw s
-    =   putStrLn ("Drawing a Rectangle at:("
-    ++ (show (getX s))
-    ++ ","
-    ++ (show (getY s))
-    ++ "), width "
-    ++ (show (getWidth (shapeTail s)))
-    ++ ", height "
-    ++ (show (getHeight (shapeTail s))))
+    =  putStrLn $ concat ["Drawing a Rectangle at:", show (getX s,getY s), 
+                          ", width ",  show (getWidth (shapeTail s)), 
+                          ", height ", show (getHeight (shapeTail s))]

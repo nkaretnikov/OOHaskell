@@ -24,12 +24,9 @@ type Circle w = Shape (CircleDelta w)
 -- Closed constructor for circles
 circle x y radius = shape x y draw tail
   where
-    draw x y =  putStrLn ("Drawing a Circle at:("
-                   ++ (show x)
-                   ++ ","
-                   ++ (show y)
-                   ++ "), radius "
-                   ++ (show radius) )
+    draw x y
+	 =  putStrLn $ concat ["Drawing a Circle at:", show (x,y), 
+                               ", radius ", show radius]
 
     tail = CircleDelta { getRadius' = radius
                        , setRadius' = \radius -> circle x y radius

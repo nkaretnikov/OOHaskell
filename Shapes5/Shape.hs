@@ -1,5 +1,5 @@
 
--- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
+-- (C) 2004-2007, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
 module Shape where
@@ -20,23 +20,19 @@ shape x y = ShapeData { valX = x
 
 -- The shape interface
 
-class Shape s
- where
+class Shape s where
   readShape  :: (ShapeData -> t)         -> s -> t
   writeShape :: (ShapeData -> ShapeData) -> s -> s
-  getX       :: s -> Int
+  getX, getY :: s -> Int
   getX       =  readShape valX
-  setX       :: Int -> s -> s
-  setX i     =  writeShape (\s -> s  { valX = i })
-  getY       :: s -> Int
   getY       =  readShape valY
-  setY       :: Int -> s -> s
+  setX, setY :: Int -> s -> s
+  setX i     =  writeShape (\s -> s  { valX = i })
   setY i     =  writeShape (\s -> s  { valY = i })
   moveTo     :: Int -> Int -> s -> s
   moveTo x y =  setY y . setX x 
   rMoveTo    :: Int -> Int -> s -> s
   rMoveTo deltax deltay s = moveTo x y s
-   where
-     x = getX s + deltax
-     y = getY s + deltay
+   where x = getX s + deltax
+	 y = getY s + deltay
   draw       :: s -> IO ()

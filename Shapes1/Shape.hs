@@ -48,9 +48,8 @@ moveTo x y = setY y . setX x
 
 rMoveTo :: Int -> Int -> Shape -> Shape
 rMoveTo deltax deltay s = moveTo x y s
- where
-  x = getX s + deltax
-  y = getY s + deltay
+ where x = getX s + deltax
+       y = getY s + deltay
 
 
 -- A function for drawing shapes
@@ -58,17 +57,10 @@ rMoveTo deltax deltay s = moveTo x y s
 draw :: Shape -> IO ()
 
 draw s@(Rectangle _ _ _ _)
-         =  putStrLn ("Drawing a Rectangle at:("
-         ++ (show (getX s))
-         ++ ","
-         ++ (show (getY s))
-         ++ "), width " ++ (show (getWidth s))
-         ++ ", height " ++ (show (getHeight s)))
+    =  putStrLn $ concat ["Drawing a Rectangle at:", show (getX s,getY s), 
+			  ", width ",  show (getWidth s), 
+			  ", height ", show (getHeight s)]
 
 draw s@(Circle _ _ _)
-         =  putStrLn ("Drawing a Circle at:("
-         ++ (show (getX s))
-         ++ ","
-         ++ (show (getY s))
-         ++ "), radius "
-         ++ (show (getRadius s)))
+    =  putStrLn $ concat ["Drawing a Circle at:", show (getX s,getY s), 
+			  ", radius ", show (getRadius s)]
