@@ -1,5 +1,6 @@
 {-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# OPTIONS -fallow-undecidable-instances #-}
+-- {-# OPTIONS -fallow-overlapping-instances #-}
 {-# OPTIONS -fth #-}
 
 
@@ -9,9 +10,11 @@ OOHaskell (C) 2004 -- 2007, Oleg Kiselyov, Ralf Laemmel
 
 OOHaskell implementations of some excerpts from the OCaml Tutorial
 
-@misc{OCaml,
- author = "Xavier Leroy and others",
- title  = "{The Objective Caml system, release 3.10, Documentation and user's manual}",
+@misc{OCaml-objects,
+ author = "J{\'e}r{\^o}me Vouillon, Didier R{\'e}my and Jacques Garrigue",
+ title  = "Chapter 3.  Objects in Caml",
+ booktitle  = "{The Objective Caml system, release 3.10, Documentation 
+                and user's manual}",
  year   = 2007,
  month  = "16~" # may,
  note   = "\url{http://caml.inria.fr/pub/docs/manual-ocaml/index.html}",
@@ -96,14 +99,13 @@ $(label "moveX")
 -- Note, here the field 'x' here is intentionally public -- just as in the
 -- Ocaml code above
 
-point = 
-   do
-      x <- newIORef 0
-      return
-        $  varX  .=. x
-       .*. getX  .=. readIORef x
-       .*. moveX .=. modifyIORef x . (+)
-       .*. emptyRecord
+point = do
+   x <- newIORef 0
+   return
+     $  varX  .=. x
+    .*. getX  .=. readIORef x
+    .*. moveX .=. modifyIORef x . (+)
+    .*. emptyRecord
 
 
 {- Ocaml Tutorial:
@@ -128,24 +130,22 @@ point =
 
 -}
 
--- Note how the code below mimics the Ocaml code above.
+-- Note how the code below mimics the OCaml code above.
 -- The only notable difference is the use of the monad, needed for mutables.
 -- Note: no `new' necessary. But see the case with open rec.
 
-myFirstOOP =
-  do
-      p <- point
-      p # getX >>= putStrLn . show
-      p # moveX $ 3
-      p # getX >>= putStrLn . show
+myFirstOOP = do
+   p <- point
+   p # getX >>= putStrLn . show
+   p # moveX $ 3
+   p # getX >>= putStrLn . show
 
 -- The field varX is public and can be manipulated directly.
 
-mySecondOOP =
-  do 
-     p <- point
-     writeIORef (p # varX) 42
-     p # getX >>= putStr . show
+mySecondOOP = do 
+   p <- point
+   writeIORef (p # varX) 42
+   p # getX >>= putStr . show
 
 
 
@@ -173,40 +173,37 @@ $(label "getOffset")
 
 
 -- OCaml's parameterised class is nothing but a function.
-para_point x_init =
-   do
-      x <- newIORef x_init
-      return
-        $  varX       .=. x
-       .*. getX       .=. readIORef x
-       .*. getOffset  .=. queryIORef x (\v -> v - x_init)
-       .*. moveX      .=. modifyIORef x . (+)
-       .*. emptyRecord
+para_point x_init = do
+   x <- newIORef x_init
+   return
+     $  varX       .=. x
+    .*. getX       .=. readIORef x
+    .*. getOffset  .=. queryIORef x (\v -> v - x_init)
+    .*. moveX      .=. modifyIORef x . (+)
+    .*. emptyRecord
 
 
 
 -- A shortcut for IORef processing. Is that somewhere in the libraries?
 queryIORef ref f = readIORef ref >>= return . f
 
-testPara =
-   do
-      p <- para_point 1
-      p # getX >>= putStr . show
-      p # moveX $ 2
-      p # getX >>= putStr . show
-      p # getOffset >>= putStr . show
+testPara = do
+   p <- para_point 1
+   p # getX >>= putStr . show
+   p # moveX $ 2
+   p # getX >>= putStr . show
+   p # getOffset >>= putStr . show
 
 
 -- We test the polymorphism of para_point
-myBoundedGenericClassOOP =
-   do
-      p  <- para_point (1::Int)
-      p' <- para_point (1::Double)
-      p  # moveX $ 2
-      p' # moveX $ 2.5
-      -- p  # moveX $ 2.5 -- type error!
-      p  # getX >>= putStrLn . show -- prints 3
-      p' # getX >>= putStrLn . show -- prints 3.5
+myBoundedGenericClassOOP = do
+   p  <- para_point (1::Int)
+   p' <- para_point (1::Double)
+   p  # moveX $ 2
+   p' # moveX $ 2.5
+   -- p  # moveX $ 2.5 -- type error!
+   p  # getX >>= putStrLn . show -- prints 3
+   p' # getX >>= putStrLn . show -- prints 3.5
 
 
 
@@ -232,24 +229,22 @@ initializers, as decribed below in section 3.3.
 
 -}
 
-adjusted_point x_init =
-   do
-      let origin = (x_init `div` 10) * 10
-      x <- newIORef origin
-      return
-        $  varX      .=. x
-       .*. getX      .=. readIORef x
-       .*. getOffset .=. queryIORef x (\v -> v - origin)
-       .*. moveX     .=. modifyIORef x . (+)
-       .*. emptyRecord
+adjusted_point x_init = do
+   let origin = (x_init `div` 10) * 10
+   x <- newIORef origin
+   return
+     $  varX      .=. x
+    .*. getX      .=. readIORef x
+    .*. getOffset .=. queryIORef x (\v -> v - origin)
+    .*. moveX     .=. modifyIORef x . (+)
+    .*. emptyRecord
 
-testConstr =
-   do
-      p <- adjusted_point 11
-      p # getX >>= putStr . show
-      p # moveX $ 2
-      p # getX >>= putStr . show
-      p # getOffset >>= putStr . show
+testConstr = do
+   p <- adjusted_point 11
+   p # getX >>= putStr . show
+   p # moveX $ 2
+   p # getX >>= putStr . show
+   p # getOffset >>= putStr . show
 
 
 
@@ -284,27 +279,24 @@ new incrementing_point#getX;;
 -- increment through all object creations. We also re-use the labels
 -- that we declared earlier.
 
-incrementing_point = 
-   do 
-      x0 <- newIORef 0
-      return (
-        do
-           modifyIORef x0 (+1)
-           x <- readIORef x0 >>= newIORef
-           return
-             $  varX  .=. x
-            .*. getX  .=. readIORef x
-            .*. moveX .=. modifyIORef x . (+)
-            .*. emptyRecord )
+incrementing_point = do 
+   x0 <- newIORef 0
+   return (do
+       modifyIORef x0 (+1)
+       x <- readIORef x0 >>= newIORef
+       return
+         $  varX  .=. x
+        .*. getX  .=. readIORef x
+        .*. moveX .=. modifyIORef x . (+)
+        .*. emptyRecord )
 
 
-myNestedOOP =
-   do
-      classObject <- incrementing_point
-      p1 <- classObject;
-      p1 # getX  >>= putStrLn . show
-      p2 <- classObject;
-      p2 # getX  >>= putStrLn . show
+myNestedOOP = do
+   classObject <- incrementing_point
+   p1 <- classObject;
+   p1 # getX  >>= putStrLn . show
+   p2 <- classObject;
+   p2 # getX  >>= putStrLn . show
 
 
 ------------------------------------------------------------------------
@@ -350,19 +342,18 @@ s will be correctly bound to the object of the subclass.
 -}
 
 
-printable_point x_init s =
-   do
-      x <- newIORef x_init
-      return
-        $  varX  .=. x
-       .*. getX  .=. readIORef x
-       .*. moveX .=. modifyIORef x . (+)
+printable_point x_init s = do
+   x <- newIORef x_init
+   return
+     $  varX  .=. x
+    .*. getX  .=. readIORef x
+    .*. moveX .=. modifyIORef x . (+)
 --
 -- To be revealed later
 --     .*. print    .=. print_getX s
 --
-       .*. print .=. ((s # getX) >>= putStr . show)
-       .*. emptyRecord
+    .*. print .=. ((s # getX) >>= putStr . show)
+    .*. emptyRecord
 
 -- We can share this print_getX method across all the objects
 -- that have at least the method getX of type (Show a ) => IO a
@@ -372,60 +363,53 @@ printable_point x_init s =
 print_getX self = ((self # getX ) >>= putStr . show)
 
 -- Note that 'mfix' plays the role of 'new' in the OCaml code...
-mySelfishOOP =
-   do
-      p <- mfix $ printable_point 7
-      p # moveX $ 2
-      p # print
+mySelfishOOP = do
+   p <- mfix $ printable_point 7
+   p # moveX $ 2
+   p # print
 
 
-concrete_printable_point x_init 
-  = concrete $ printable_point x_init
+concrete_printable_point x_init = concrete $ printable_point x_init
 
 
 -- We test the polymorphism of printable_point
-myPolyPrintable =
-   do
-      p  <- mfix (printable_point (1::Int))
-      p' <- mfix (printable_point (1::Double))
-      p  # moveX $ 2
-      p' # moveX $ 2.5
-      p  # print
-      p' # print
+myPolyPrintable = do
+   p  <- mfix (printable_point (1::Int))
+   p' <- mfix (printable_point (1::Double))
+   p  # moveX $ 2
+   p' # moveX $ 2.5
+   p  # print
+   p' # print
 
 -- We test the first-class status of classes
-myFirstClassOOP point_class =
-   do
-      p <- mfix (point_class 7)
-      p # moveX $ 35
-      p # print
+myFirstClassOOP point_class = do
+   p <- mfix (point_class 7)
+   p # moveX $ 35
+   p # print
 
 -- We notice something that was not available in Ocaml. In Ocaml's example,
 -- x_init was of the type 'int' -- because operation (+) in Ocaml can operate
 -- on integer only. Our point is in contrast, polymorphic. Here's an example
 -- to illustrate it:
 
-testPointInt point_class =
-    do
-      p <- mfix (point_class 7)
-      p # moveX $ (2::Int)
-      -- Uncomment the following to see the type error. We do statically
-      -- track the type of items in our collection.
-      -- p # moveX $ (2.0::Double)
-      p # print
+testPointInt point_class = do
+   p <- mfix (point_class 7)
+   p # moveX $ (2::Int)
+   -- Uncomment the following to see the type error. We do statically
+   -- track the type of items in our collection.
+   -- p # moveX $ (2.0::Double)
+   p # print
 
 -- Note something else: our class is first-class.
 
-testPointDouble point_class =
-    do
-      p <- mfix (point_class 11.0)
-      p # moveX $ 3.0
-      p # print
+testPointDouble point_class = do
+   p <- mfix (point_class 11.0)
+   p # moveX $ 3.0
+   p # print
 
-testPolyPoints = 
-    do
-    testPointInt printable_point
-    testPointDouble printable_point
+testPolyPoints = do
+   testPointInt printable_point
+   testPointDouble printable_point
 
 
 
@@ -464,56 +448,50 @@ class initializable_point x_init =
 
 $(label "initializer")
 
-initializable_point x_init self =
-   do
-      x <- newIORef x_init
-      return
-        $  varX        .=. x
-       .*. getX        .=. readIORef x
-       .*. moveX       .=. modifyIORef x . (+)
-       .*. print       .=. ((self # getX ) >>= putStr . show)
-       .*. initializer .=. do putStr "new point at "; self # print; putStrLn ""
-       .*. emptyRecord
+initializable_point x_init self = do
+   x <- newIORef x_init
+   return
+     $  varX        .=. x
+    .*. getX        .=. readIORef x
+    .*. moveX       .=. modifyIORef x . (+)
+    .*. print       .=. ((self # getX ) >>= putStr . show)
+    .*. initializer .=. do putStr "new point at "; self # print; putStrLn ""
+    .*. emptyRecord
 
 
-newAndInitialize og =
-   do
-      o <- mfix og
-      o # initializer
-      return $ o .-. initializer 
+newAndInitialize og = do
+   o <- mfix og
+   o # initializer
+   return $ o .-. initializer 
 
 
-myInitializingOOP =
-   do
-      p <- newAndInitialize (initializable_point 7)
-      p # moveX $ 2
-      p # print
+myInitializingOOP = do
+   p <- newAndInitialize (initializable_point 7)
+   p # moveX $ 2
+   p # print
 
 
-initializable_point' x_init self =
-   do
-      x <- newIORef x_init
-      return (
-            varX        .=. x
-       .*. getX        .=. readIORef x
-       .*. moveX       .=. modifyIORef x . (+)
-       .*. print       .=. ((self # getX ) >>= putStr . show)
-       .*. emptyRecord
-        , Just $ do putStr "new point at "; self # print; putStrLn "" )
+initializable_point' x_init self = do
+   x <- newIORef x_init
+   return (
+        varX        .=. x
+    .*. getX        .=. readIORef x
+    .*. moveX       .=. modifyIORef x . (+)
+    .*. print       .=. ((self # getX ) >>= putStr . show)
+    .*. emptyRecord
+     , Just $ do putStr "new point at "; self # print; putStrLn "" )
 
 
-newAndInitialize' og =
-   do
-      (o,i) <- mfix (og . fst)
-      case i of Nothing -> return (); (Just i') -> i'
-      return o
+newAndInitialize' og = do
+   (o,i) <- mfix (og . fst)
+   case i of Nothing -> return (); (Just i') -> i'
+   return o
 
 
-myInitializingOOP' =
-   do
-      p <- newAndInitialize' (initializable_point' 7)
-      p # moveX $ 2
-      p # print
+myInitializingOOP' = do
+   p <- newAndInitialize' (initializable_point' 7)
+   p # moveX $ 2
+   p # print
 
 
 
@@ -550,37 +528,33 @@ $(label "getColor")
 
 
 -- Inheritance is simple: just adding methods ...
-colored_point x_init (c::String) self =
-   do
-      super <- printable_point x_init self
-      return
-        $  getColor .=. c
-       .*. super
+colored_point x_init (c::String) self = do
+   super <- printable_point x_init self
+   return
+     $  getColor .=. c
+    .*. super
 
 
-myColoredOOP =
-   do
-      p <- mfix (colored_point 5 "red")
-      x  <- p # getX
-      let c = p # getColor
-      putStr $ show (x,c)
+myColoredOOP = do
+   p <- mfix (colored_point 5 "red")
+   x  <- p # getX
+   let c = p # getColor
+   putStr $ show (x,c)
 
 
 -- We derive a better class of colored points, which prints more accurately.
 -- To this end, we access the overriden method akin to the OCaml super.
 
-colored_point' x_init (color::String) self =
-   do
-      super <- colored_point x_init color self
-      return $  print .=. (
-                  do  putStr "so far - "; super # print
-                      putStr "color  - "; putStr color )
-            .<. super
+colored_point' x_init (color::String) self = do
+   super <- colored_point x_init color self
+   return $  print .=. (do 
+                   putStr "so far - "; super # print
+                   putStr "color  - "; putStr color )
+         .<. super
 
-myOverridingOOP =
-   do
-      p  <- mfix (colored_point' 5 "red")
-      p  # print
+myOverridingOOP = do
+   p  <- mfix (colored_point' 5 "red")
+   p  # print
 
 
 
@@ -612,14 +586,12 @@ val p' : colored_point = <obj>
 
 get_succ_x p = p # getX >>= return . (+ 1)
 
-myGenericFunctionOOP =
-   do
-      p  <- mfix (printable_point 7)
-      p' <- mfix (colored_point 5 "red")
-      x  <- get_succ_x p
-      x' <- get_succ_x p'
-      putStrLn $ show (x+x') -- prints 14
-
+myGenericFunctionOOP = do
+   p  <- mfix (printable_point 7)
+   p' <- mfix (colored_point 5 "red")
+   x  <- get_succ_x p
+   x' <- get_succ_x p'
+   putStrLn $ show (x+x') -- prints 14
 
 
 
@@ -655,23 +627,21 @@ class printable_colored_point x_init c =
 -}
 
 
-printable_colored_point x_init c self =
-   do
-      super <- printable_point x_init self
-      return
-        $  print    .=. ( do 
-                             putStr "("
-                             super # print
-                             putStr ", "
-                             putStr $ self # getColor
-                             putStr ")" )
-       .<. getColor .=. c 
-       .*. super
+printable_colored_point x_init c self = do
+   super <- printable_point x_init self
+   return
+     $  print    .=. (do 
+                        putStr "("
+                        super # print
+                        putStr ", "
+                        putStr $ self # getColor
+                        putStr ")" )
+    .<. getColor .=. c 
+    .*. super
 
-myOverridingOOP'' =
-   do
-      p <- mfix (printable_colored_point 5 "red")
-      p # print
+myOverridingOOP'' = do
+   p <- mfix (printable_colored_point 5 "red")
+   p # print
 
 
 
@@ -749,16 +719,15 @@ abstract_point x_init self =
 
 -- Yet another way to fix the type of an abstract method.
 
-abstract_point x_init self =
-   do
-      xRef <- newIORef x_init
-      return 
-        $  varX  .=. xRef
-       .*. print .=. (self # getX >>= putStr . show)
-       .*. emptyRecord
-   where
-     _ = (self # getX) `asTypeOf` return x_init
-     _ = (self # moveX) x_init `asTypeOf` return ()
+abstract_point x_init self = do
+   xRef <- newIORef x_init
+   return 
+     $  varX  .=. xRef
+    .*. print .=. (self # getX >>= putStr . show)
+    .*. emptyRecord
+ where
+   _ = (self # getX) `asTypeOf` return x_init
+   _ = (self # moveX) x_init `asTypeOf` return ()
 
 
 {-
@@ -789,41 +758,37 @@ abstract_point x_init self =
 
 -}
 
-concrete_point x_init self
-   = do
-        p <- abstract_point x_init self -- inherit ...
-        return
-        -- add the missing (pure virtual) methods
-          $  getX  .=. readIORef (self # varX)
-         .*. moveX .=. (\d -> modifyIORef (self # varX) (+d))
-         .*. p
+concrete_point x_init self = do
+   p <- abstract_point x_init self -- inherit ...
+   return
+     -- add the missing (pure virtual) methods
+     $  getX  .=. readIORef (self # varX)
+    .*. moveX .=. (\d -> modifyIORef (self # varX) (+d))
+    .*. p
 
-testVirtual
-   = do
-        p  <- mfix (concrete_point 7)
-        --
-        -- Note, if the latter is uncommented
-        -- p' <- mfix (abstract_point 7)
-        -- we see an error that means "field getX missing"
-        -- which reads as follows:
-        -- (HasField (Proxy GetX) HNil (IO a))
-        p # getX >>= putStr . show
-        p # moveX $ 2
-        p # getX >>= putStr . show
-        p # print
+testVirtual = do
+   p  <- mfix (concrete_point 7)
+   --
+   -- Note, if the latter is uncommented
+   -- p' <- mfix (abstract_point 7)
+   -- we see an error that means "field getX missing", which reads as follows:
+   -- (HasField (Proxy GetX) HNil (IO a))
+   p # getX >>= putStr . show
+   p # moveX $ 2
+   p # getX >>= putStr . show
+   p # print
 
 
 -- This abstract point class mentions the type of the virtual methods.
 
-abstract_point' x_init self
-  = do
-      x <- newIORef x_init
-      return $
-	   varX  .=. x
-       .*. getX  .=. (proxy::Proxy (IO Int))
-       .*. moveX .=. (proxy::Proxy (Int -> IO ()))
-       .*. print .=. print_getX self -- now we reuse this function
-       .*. emptyRecord
+abstract_point' x_init self = do
+   x <- newIORef x_init
+   return 
+     $ varX  .=. x
+    .*. getX  .=. (proxy::Proxy (IO Int))
+    .*. moveX .=. (proxy::Proxy (Int -> IO ()))
+    .*. print .=. print_getX self -- now we reuse this function
+    .*. emptyRecord
 
 
 -- Another label for testing purposes
@@ -831,16 +796,15 @@ data MyLabel; myLabel = proxy::Proxy MyLabel
 
 
 -- This concrete class implements all virtual methods
-concrete_point' x_init self
-   = do
-        p <- abstract_point' x_init self -- inherit ...
-        return
-        -- use disciplined record update
-           $  getX    .=. readIORef (self # varX)
-          .^. moveX   .=. modifyIORef (self # varX) . (+)
-          .^. myLabel .=. ()                -- This line could be activated.
---        .^. myLabel .=. (proxy::Proxy ()) -- A proxy that disables mnew.
-          .*. p
+concrete_point' x_init self = do
+   p <- abstract_point' x_init self -- inherit ...
+   return
+     -- use disciplined record update
+     $  getX    .=. readIORef (self # varX)
+    .^. moveX   .=. modifyIORef (self # varX) . (+)
+    .^. myLabel .=. ()                -- This line could be activated.
+--  .^. myLabel .=. (proxy::Proxy ()) -- A proxy that disables mnew.
+    .*. p
 
 -- We introduce a constrained new method to refuse proxy fields in records.
 mnew f = mfix f
@@ -849,13 +813,12 @@ mnew f = mfix f
   get_class_type:: (a->m a) -> a
   get_class_type = undefined
 
-testVirtual'
-   = do
-        p <- mnew (concrete_point' 7)
-        p # getX >>= putStr . show
-        p # moveX $ 2
-        p # getX >>= putStr . show
-        p # print
+testVirtual' = do
+   p <- mnew (concrete_point' 7)
+   p # getX >>= putStr . show
+   p # moveX $ 2
+   p # getX >>= putStr . show
+   p # print
 
 
 ------------------------------------------------------------------------
@@ -906,42 +869,38 @@ p#bump;;
 
 $(label "bump")
 
-restricted_point x_init self =
-   do
-      x <- newIORef x_init
-      let moveX = modifyIORef x . (+)
-      return 
-        $  varX .=. x
-       .*. getX     .=. readIORef x
-       .*. bump     .=. moveX 2
-       .*. emptyRecord
+restricted_point x_init self = do
+   x <- newIORef x_init
+   let moveX = modifyIORef x . (+)
+   return 
+     $  varX .=. x
+    .*. getX     .=. readIORef x
+    .*. bump     .=. moveX 2
+    .*. emptyRecord
 
-myPrivacyOOP
-   =  do
-       p <- mfix (restricted_point 7)
-       p # getX >>= putStrLn . show -- prints 7
-       p # bump
-       p # getX >>= putStrLn . show -- prints 9
+myPrivacyOOP =  do
+   p <- mfix (restricted_point 7)
+   p # getX >>= putStrLn . show -- prints 7
+   p # bump
+   p # getX >>= putStrLn . show -- prints 9
 
 
 -- Unlike the OCaml code, we can also remove a method from the interface.
 -- This allows us to make methods private for existing objects.
 -- We first add the bump method that uses the private method moveX.
 
-bumping_point x_init =
-   do
-      p <- mfix $ printable_point x_init
-      return
-        $  bump .=. (p # moveX $ 2)
-       .*. (p .-. moveX)
+bumping_point x_init = do
+   p <- mfix $ printable_point x_init
+   return
+     $  bump .=. (p # moveX $ 2)
+    .*. (p .-. moveX)
 
-myPrivacyOOP' = 
-   do
-      p  <- bumping_point 7
-      p # print
-      p # bump
-      p # print
-      -- Attempting access to moveX would result in a type error.
+myPrivacyOOP' = do
+   p  <- bumping_point 7
+   p # print
+   p # bump
+   p # print
+   -- Attempting access to moveX would result in a type error.
 
 
 
@@ -1033,21 +992,19 @@ $(label "var")
 $(label "get")
 $(label "set")
 
-ref init = 
-   do
-      varRef <- newIORef init
-      return
-        $  var .=. varRef
-       .*. get .=. readIORef varRef
-       .*. set .=. writeIORef varRef
-       .*. emptyRecord
+ref init = do
+   varRef <- newIORef init
+   return
+     $  var .=. varRef
+    .*. get .=. readIORef varRef
+    .*. set .=. writeIORef varRef
+    .*. emptyRecord
 
 
-myGenericClassOOP =
-   do
-      r <- ref 1
-      r # set $ 2
-      r # get >>= putStrLn . show -- prints 2
+myGenericClassOOP = do
+   r <- ref 1
+   r # set $ 2
+   r # get >>= putStrLn . show -- prints 2
 
 
 ------------------------------------------------------------------------
@@ -1125,50 +1082,44 @@ $(label "empty")
 $(label "fold")
 
 
-intlist (l::[Int]) = 
-                      empty .=. null l
-                  .*. fold    .=. (\f z -> foldl f z l)
+intlist (l::[Int]) =  empty .=. null l
+                  .*. fold  .=. (\f z -> foldl f z l)
                   .*. emptyRecord
 
 
-myGenericMethodOOP =
-   do
-      let l = intlist [1,2,3]
-      putStrLn $ show $ (l # fold) (+) 0
-      putStrLn $ (l # fold) (\s x -> s ++ show x ++ " ") ""
+myGenericMethodOOP = do
+   let l = intlist [1,2,3]
+   putStrLn $ show $ (l # fold) (+) 0
+   putStrLn $ (l # fold) (\s x -> s ++ show x ++ " ") ""
 
 
-intlist' (l::[Int]) =
-   do
-      return 
-         $  empty .=. null l
-        .*. fold  .=. (\f z -> foldl f z l)
-        .*. emptyRecord
+intlist' (l::[Int]) = do
+   return 
+     $  empty .=. null l
+    .*. fold  .=. (\f z -> foldl f z l)
+    .*. emptyRecord
 
-myGenericMethodOOP' =
-   do
-      l <- intlist' [1,2,3]
-      putStrLn $ show $ (l # fold) (+) 0
---      putStrLn $ (l # fold) (\s x -> s ++ show x ++ " ") ""
+myGenericMethodOOP' = do
+   l <- intlist' [1,2,3]
+   putStrLn $ show $ (l # fold) (+) 0
+-- putStrLn $ (l # fold) (\s x -> s ++ show x ++ " ") ""
 
 
-intlist'' (l::[Int]) =
-   do
-      return 
-         $ empty .=. null l
-        .*. fold    .=. FoldMethod (\f z -> foldl f z l)
-        .*. emptyRecord
+intlist'' (l::[Int]) = do
+   return 
+     $ empty .=. null l
+    .*. fold    .=. FoldMethod (\f z -> foldl f z l)
+    .*. emptyRecord
 
 
 newtype FoldMethod =
         FoldMethod { foldMethod :: forall a. (a -> Int -> a) -> a -> a }
 
 
-myGenericMethodOOP'' =
-   do
-      l <- intlist'' [1,2,3]
-      putStrLn $ show $ foldMethod (l # fold) (+) 0
-      putStrLn $ foldMethod (l # fold) (\s x -> s ++ show x ++ " ") ""
+myGenericMethodOOP'' = do
+   l <- intlist'' [1,2,3]
+   putStrLn $ show $ foldMethod (l # fold) (+) 0
+   putStrLn $ foldMethod (l # fold) (\s x -> s ++ show x ++ " ") ""
 
 
 ------------------------------------------------------------------------
@@ -1232,20 +1183,18 @@ $(label "value")
 -- A naive attempt that overlocks the need for recursive types
 --
 
-comparable self =
-   do
-        return emptyRecord
-   where
-     _ = (self # leq $ self) :: Bool
+comparable self = do
+   return emptyRecord
+ where
+   _ = (self # leq $ self) :: Bool
 
 
-money (x::Float) self =
-   do
-      super <- comparable self
-      return 
-        $  value .=. x
-       .*. leq .=. (\p -> self # value <= p # value)
-       .*. super
+money (x::Float) self = do
+   super <- comparable self
+   return 
+     $  value .=. x
+    .*. leq .=. (\p -> self # value <= p # value)
+    .*. super
 
 {-
 
@@ -1275,26 +1224,22 @@ type ComparableRecord tail =
 
 
 instance HasField l (ComparableRecord tail) v
-      => HasField l (Comparable tail) v
-   where
-     hLookupByLabel l = hLookupByLabel l . getComparableRecord
+      => HasField l (Comparable tail) v where
+   hLookupByLabel l = hLookupByLabel l . getComparableRecord
 
 
-money' (x::Float) self =
-   do
-      return $ Comparable (
+money' (x::Float) self = do
+   return $ Comparable (
                     leq   .=. (\p -> self # value <= p # value)
                 .*. value .=. x
                 .*. emptyRecord )
 
 
-myBinaryMethodOOP' =
-   do
-        m <- mfix $ money' 42.88
-        m' <- mfix $ money' 88.42
-        putStrLn $ show (m # leq $ m') -- prints True
-        putStrLn $ show (m' # leq $ m) -- prints False
-
+myBinaryMethodOOP' = do
+   m <- mfix $ money' 42.88
+   m' <- mfix $ money' 88.42
+   putStrLn $ show (m # leq $ m') -- prints True
+   putStrLn $ show (m' # leq $ m) -- prints False
 
 
 --
@@ -1312,25 +1257,21 @@ type MoneyRecord = Record (  Value :=: Float
 
 
 instance HasField l MoneyRecord v
-      => HasField l Money v
- where
+      => HasField l Money v where
   hLookupByLabel l = hLookupByLabel l . getMoneyRecord
 
 
-money'' (x::Float) self =
-   do
-      return $ Money (  value .=. x
-                    .*. leq   .=. (\p -> self # value <= p # value)
-                    .*. emptyRecord )
+money'' (x::Float) self = do
+   return $ Money ( value .=. x
+                .*. leq   .=. (\p -> self # value <= p # value)
+                .*. emptyRecord )
 
       
-myBinaryMethodOOP'' =
-   do
-        m <- mfix $ money'' 42.88
-        m' <- mfix $ money'' 88.42
-        putStrLn $ show (m # leq $ m') -- prints True
-        putStrLn $ show (m' # leq $ m) -- prints False
-
+myBinaryMethodOOP'' = do
+   m <- mfix $ money'' 42.88
+   m' <- mfix $ money'' 88.42
+   putStrLn $ show (m # leq $ m') -- prints True
+   putStrLn $ show (m' # leq $ m) -- prints False
 
 
 ------------------------------------------------------------------------
@@ -1381,27 +1322,25 @@ doBump :: Restricted_point_type -> IO ()
 doBump x = x # bump
 
 doBump' x = x # bump
-   where
-     _ = constrain $ narrow x 
-     constrain :: Restricted_point_type -> ()
-     constrain _ = ()
+ where
+   _ = constrain $ narrow x 
+   constrain :: Restricted_point_type -> ()
+   constrain _ = ()
 
 
 restricted_point' :: Int -> IO Restricted_point_type
-restricted_point' x_init =
-   do
-      p <- mfix $ restricted_point x_init
-      return $ narrow p
+restricted_point' x_init = do
+   p <- mfix $ restricted_point x_init
+   return $ narrow p
 
 
-myTypedOOP =
-   do
-      p <- restricted_point' 42
-      doBump p
-      p # getX >>= putStrLn . show
-      p' <- mfix $ restricted_point 42
-      doBump' p
-      p # getX >>= putStrLn . show
+myTypedOOP = do
+   p <- restricted_point' 42
+   doBump p
+   p # getX >>= putStrLn . show
+   p' <- mfix $ restricted_point 42
+   doBump' p
+   p # getX >>= putStrLn . show
 
 
 -- Try the polymorphic type
@@ -1417,17 +1356,16 @@ type Restricted_point_type' t =
 
 
 doBump'' x = x # bump
-   where
-     _ = constrain $ narrow x 
-     constrain :: Restricted_point_type' t -> ()
-     constrain _ = ()
+ where
+  _ = constrain $ narrow x 
+  constrain :: Restricted_point_type' t -> ()
+  constrain _ = ()
 
 
-myTypedOOP' =
-   do
-      p <- mfix $ restricted_point 42
-      doBump'' p
-      p # getX >>= putStrLn . show
+myTypedOOP' = do
+   p <- mfix $ restricted_point 42
+   doBump'' p
+   p # getX >>= putStrLn . show
 
 
 
@@ -1490,18 +1428,17 @@ type Printable_point x =
            :*: HNil )
 
 to_point p = p'
-   where
-     p' = narrow p
-     _  = constrain p' 
-     constrain :: Printable_point x -> ()
-     constrain _ = ()
+ where
+   p' = narrow p
+   _  = constrain p' 
+   constrain :: Printable_point x -> ()
+   constrain _ = ()
 
-myCoercingOOP =
-   do
-      p  <- mfix $ printable_point 42
-      p' <- mfix $ colored_point 88 "red"
-      let l = [to_point p, to_point p']
-      (l!!1) # print
+myCoercingOOP = do
+   p  <- mfix $ printable_point 42
+   p' <- mfix $ colored_point 88 "red"
+   let l = [to_point p, to_point p']
+   (l!!1) # print
 
 
 
@@ -1512,35 +1449,35 @@ myCoercingOOP =
 
 
 main = do 
-          putStrLn "myFirstOOP"; myFirstOOP; putStrLn ""
-          putStrLn "mySecondOOP"; mySecondOOP; putStrLn ""
-          putStrLn "testPara"; testPara; putStrLn ""
-          putStrLn "testConstr"; testConstr; putStrLn ""
-          putStrLn "myNestedOOP"; myNestedOOP; putStrLn ""
-          putStrLn "myInitializingOOP"; myInitializingOOP; putStrLn ""
-          putStrLn "myInitializingOOP'"; myInitializingOOP'; putStrLn ""
-          putStrLn "mySelfishOOP"; mySelfishOOP; putStrLn ""
-          putStrLn "myBoundedGenericClassOOP"; myBoundedGenericClassOOP; putStrLn ""
-          putStrLn "myPolyPrintable"; myPolyPrintable; putStrLn ""
-          putStrLn "myFirstClassOOP"; myFirstClassOOP printable_point
-          putStrLn "myFirstClassOOP"
-          myFirstClassOOP $ flip colored_point' "red"
-          putStrLn ""
-          putStrLn "myColoredOOP"; myColoredOOP; putStrLn ""
-          putStrLn "myOverridingOOP"; myOverridingOOP; putStrLn ""
-          putStrLn "myOverridingOOP'"; myOverridingOOP'; putStrLn ""
-          putStrLn "myOverridingOOP''"; myOverridingOOP''; putStrLn ""
-          putStrLn "myGenericFunctionOOP"; myGenericFunctionOOP; putStrLn ""
-          putStrLn "myGenericClassOOP"; myGenericClassOOP; putStrLn ""
-          putStrLn "myGenericMethodOOP"; myGenericMethodOOP
-          putStrLn "myGenericMethodOOP'"; myGenericMethodOOP'
-          putStrLn "myGenericMethodOOP''"; myGenericMethodOOP''
-          putStrLn "testVirtual"; testVirtual; putStrLn ""
-          putStrLn "testVirtual'"; testVirtual'; putStrLn ""
-          putStrLn "myPrivacyOOP"; myPrivacyOOP; putStrLn ""
-          putStrLn "myPrivacyOOP'"; myPrivacyOOP'; putStrLn ""
-          putStrLn "myBinaryMethodOOP'"; myBinaryMethodOOP'
-          putStrLn "myBinaryMethodOOP''"; myBinaryMethodOOP''
+   putStrLn "myFirstOOP"; myFirstOOP; putStrLn ""
+   putStrLn "mySecondOOP"; mySecondOOP; putStrLn ""
+   putStrLn "testPara"; testPara; putStrLn ""
+   putStrLn "testConstr"; testConstr; putStrLn ""
+   putStrLn "myNestedOOP"; myNestedOOP; putStrLn ""
+   putStrLn "myInitializingOOP"; myInitializingOOP; putStrLn ""
+   putStrLn "myInitializingOOP'"; myInitializingOOP'; putStrLn ""
+   putStrLn "mySelfishOOP"; mySelfishOOP; putStrLn ""
+   putStrLn "myBoundedGenericClassOOP"; myBoundedGenericClassOOP; putStrLn ""
+   putStrLn "myPolyPrintable"; myPolyPrintable; putStrLn ""
+   putStrLn "myFirstClassOOP"; myFirstClassOOP printable_point
+   putStrLn "myFirstClassOOP"
+   myFirstClassOOP $ flip colored_point' "red"
+   putStrLn ""
+   putStrLn "myColoredOOP"; myColoredOOP; putStrLn ""
+   putStrLn "myOverridingOOP"; myOverridingOOP; putStrLn ""
+   putStrLn "myOverridingOOP'"; myOverridingOOP'; putStrLn ""
+   putStrLn "myOverridingOOP''"; myOverridingOOP''; putStrLn ""
+   putStrLn "myGenericFunctionOOP"; myGenericFunctionOOP; putStrLn ""
+   putStrLn "myGenericClassOOP"; myGenericClassOOP; putStrLn ""
+   putStrLn "myGenericMethodOOP"; myGenericMethodOOP
+   putStrLn "myGenericMethodOOP'"; myGenericMethodOOP'
+   putStrLn "myGenericMethodOOP''"; myGenericMethodOOP''
+   putStrLn "testVirtual"; testVirtual; putStrLn ""
+   putStrLn "testVirtual'"; testVirtual'; putStrLn ""
+   putStrLn "myPrivacyOOP"; myPrivacyOOP; putStrLn ""
+   putStrLn "myPrivacyOOP'"; myPrivacyOOP'; putStrLn ""
+   putStrLn "myBinaryMethodOOP'"; myBinaryMethodOOP'
+   putStrLn "myBinaryMethodOOP''"; myBinaryMethodOOP''
 
 -- :t colored_point
 -- :t mfix $ colored_point (1::Int) "red"
