@@ -440,7 +440,9 @@ class initializable_point x_init =
 -- will locate the label `initializer' and run the corresponding action.
 -- The anonymity of the initializer is achieved by removing it at the
 -- end of the new sequence.
-
+-- This function `new' is backwards-compatible with mfix: if the
+-- object to instantiate does not have the field `initializer',
+-- new is the same as mfix.
 
 $(label "initializer")
 
@@ -455,40 +457,30 @@ initializable_point x_init self = do
     .*. emptyRecord
 
 
+-- An auxiliary typecase: apply the initializer only if it is present
+data ApplyInitializerM = ApplyInitializerM
+
+instance Apply ApplyInitializerM (Record HNil) (IO ()) where
+    apply _ _ = return ()
+
+instance (HasField (Proxy Initializer) (Record (HCons a b)) (IO ())) 
+    => Apply ApplyInitializerM (Record (HCons a b)) (IO ()) where
+    apply _ o = o # initializer
+
 newAndInitialize og = do
    o <- mfix og
-   o # initializer
-   return $ o .-. initializer 
-
+   -- separate the object into the initializer and the rest
+   let (rin, rout) = hProjectByLabels2 (HCons initializer HNil) o
+   apply ApplyInitializerM rin
+   return rout
 
 myInitializingOOP = do
-   p <- newAndInitialize (initializable_point 7)
-   p # moveX $ 2
-   p # print
-
-
-initializable_point' x_init self = do
-   x <- newIORef x_init
-   return (
-        varX        .=. x
-    .*. getX        .=. readIORef x
-    .*. moveX       .=. modifyIORef x . (+)
-    .*. print       .=. ((self # getX ) >>= putStr . show)
-    .*. emptyRecord
-     , Just $ do putStr "new point at "; self # print; putStrLn "" )
-
-
-newAndInitialize' og = do
-   (o,i) <- mfix (og . fst)
-   case i of Nothing -> return (); (Just i') -> i'
-   return o
-
-
-myInitializingOOP' = do
-   p <- newAndInitialize' (initializable_point' 7)
-   p # moveX $ 2
-   p # print
-
+   p0 <- newAndInitialize (printable_point (7::Int)) -- no initializer
+   p  <- newAndInitialize (initializable_point 7)    -- initializer
+   p0 # moveX $ 2
+   p  # moveX $ 2
+   p0 # print; putStrLn ""
+   p  # print
 
 
 ------------------------------------------------------------------------
@@ -1451,7 +1443,6 @@ main = do
    putStrLn "testConstr"; testConstr; putStrLn ""
    putStrLn "myNestedOOP"; myNestedOOP; putStrLn ""
    putStrLn "myInitializingOOP"; myInitializingOOP; putStrLn ""
-   putStrLn "myInitializingOOP'"; myInitializingOOP'; putStrLn ""
    putStrLn "mySelfishOOP"; mySelfishOOP; putStrLn ""
    putStrLn "myBoundedGenericClassOOP"; myBoundedGenericClassOOP; putStrLn ""
    putStrLn "myPolyPrintable"; myPolyPrintable; putStrLn ""
