@@ -178,14 +178,10 @@ para_point x_init = do
    return
      $  varX       .=. x
     .*. getX       .=. readIORef x
-    .*. getOffset  .=. queryIORef x (\v -> v - x_init)
+    .*. getOffset  .=. fmap (\v -> v - x_init) (readIORef x)
     .*. moveX      .=. modifyIORef x . (+)
     .*. emptyRecord
 
-
-
--- A shortcut for IORef processing. Is that somewhere in the libraries?
-queryIORef ref f = readIORef ref >>= return . f
 
 testPara = do
    p <- para_point 1
@@ -235,7 +231,7 @@ adjusted_point x_init = do
    return
      $  varX      .=. x
     .*. getX      .=. readIORef x
-    .*. getOffset .=. queryIORef x (\v -> v - origin)
+    .*. getOffset .=. fmap (\v -> v - origin) (readIORef x)
     .*. moveX     .=. modifyIORef x . (+)
     .*. emptyRecord
 
