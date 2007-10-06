@@ -12,9 +12,8 @@ OOHaskell implementations of some excerpts from the OCaml Tutorial
 
 @misc{OCaml-objects,
  author = "J{\'e}r{\^o}me Vouillon, Didier R{\'e}my and Jacques Garrigue",
- title  = "Chapter 3.  Objects in Caml",
- booktitle  = "{The Objective Caml system, release 3.10, Documentation 
-                and user's manual}",
+ title  = "{The Objective Caml system, release 3.10, Documentation 
+                and user's manual, Chapter 3. Objects in Caml}",
  year   = 2007,
  month  = "16~" # may,
  note   = "\url{http://caml.inria.fr/pub/docs/manual-ocaml/index.html}",
