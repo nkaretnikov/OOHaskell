@@ -1160,6 +1160,33 @@ method. Considering m of type comparable would allow to call method
 leq on m with an argument that does not have a method value, which
 would be an error.
 
+-- end of quotation
+
+We should note that binary methods do seem to break subtyping. 
+For example, we no longer can place money and the object of the derived class
+into the same list:
+
+class money2 (x : float) (y : float) =
+   object
+     inherit money x
+     val repr2 = y
+     method value2 = repr2
+     method leq p = repr <= p#value || 
+                    (repr = p#value && repr2 <= p#value2)
+   end;;
+
+let t1 = (new money 1.0) # leq (new money 2.0);;
+let t2 = (new money2 1.0 2.0) # leq (new money2 2.0 3.0);;
+
+let ls = [new money 1.0; ((new money2 2.0 3.0) :> money)];;
+ This expression cannot be coerced to type
+  money = < leq : money -> bool; value : float >;
+it has type money2 = < leq : money2 -> bool; value : float; value2 : float >
+but is here used with type < leq : money -> bool; value : float; .. >
+Type money2 = < leq : money2 -> bool; value : float; value2 : float >
+is not compatible with type money = < leq : money -> bool; value : float > 
+Only the first object type has a method value2
+
 -}
 
 
@@ -1259,6 +1286,27 @@ myBinaryMethodOOP'' = do
    m' <- mfix $ money'' 88.42
    putStrLn $ show (m # leq $ m') -- prints True
    putStrLn $ show (m' # leq $ m) -- prints False
+
+
+
+{-
+$(label "leq_money")
+
+
+money1 (x::Float) self = do
+   -- super <- comparable self
+   return 
+     $  value .=. x
+    .*. leq .=. (\p -> self # value <= p # value)
+    .*. emptyRecord -- super
+
+myBinaryMethodOOP1 =
+   do
+        m <- mfix $ money1 42.88 -- occurs check complains
+        m' <- mfix $ money1 88.42 -- occurs check complains
+        putStrLn $ show (m # leq $ m') -- should print True
+--        putStrLn $ show (m' # leq $ m) -- should print False
+-}
 
 
 ------------------------------------------------------------------------
