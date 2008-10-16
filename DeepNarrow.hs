@@ -20,8 +20,8 @@ technicalities related to the implementation of TypeEq and TypeCast
 
 module DeepNarrow where
 
-import CommonMain
-import GhcSyntax
+import Data.HList.CommonMain
+import Data.HList.GhcSyntax
 
 data ItsRecord
 data ItsIO

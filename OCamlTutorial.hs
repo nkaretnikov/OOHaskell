@@ -1214,12 +1214,11 @@ money (x::Float) self = do
 
 -- Type checking runs into occurs check!
 
-myBinaryMethodOOP =
-   do
-        m <- mfix $ money 42.88 -- occurs check complains
-        m' <- mfix $ money 88.42 -- occurs check complains
-        putStrLn $ show (m # leq $ m') -- should print True
-        putStrLn $ show (m' # leq $ m) -- should print False
+myBinaryMethodOOP = do
+   m  <- mfix $ money 42.88 -- occurs check complains
+   m' <- mfix $ money 88.42 -- occurs check complains
+   putStrLn $ show (m  # leq $ m') -- should print True
+   putStrLn $ show (m' # leq $ m ) -- should print False
 
 -}
 

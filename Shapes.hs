@@ -19,7 +19,7 @@ module Shapes where
 
 import OOHaskell
 
-import MakeLabels
+import Data.HList.MakeLabels
 
 -- The class Shape
 

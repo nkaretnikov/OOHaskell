@@ -24,7 +24,7 @@ ghci = ghci \
 		-fglasgow-exts \
 		-fallow-overlapping-instances \
 		-fallow-undecidable-instances \
-		-i../HList/src
+		-i../HList/
 
 # All the local samples
 hs =			    \

@@ -15,7 +15,7 @@ module New (NotFixed, new, construct, constructWithSuper) where
 
 import Control.Monad.Fix
 import GHC.IOBase
-import Record
+import Data.HList.Record
 
 
 -- The data constructor is not exported!

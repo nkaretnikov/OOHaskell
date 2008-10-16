@@ -25,7 +25,7 @@ module ShapesUnion where
 
 import OOHaskell
 import Shapes
-import ConsUnion
+import Data.HList.ConsUnion
 
 
 -- The polymorphic scribble loop.

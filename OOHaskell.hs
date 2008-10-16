@@ -16,11 +16,11 @@ on overlapping: merely needed for the chosen model of labels.
 
 module OOHaskell (
 
- module CommonMain,
- module GhcSyntax,
- module GhcRecord,
- module GhcExperiments,
- module MakeLabels,
+ module Data.HList.CommonMain,
+ module Data.HList.GhcSyntax,
+ module Data.HList.GhcRecord,
+ module Data.HList.GhcExperiments,
+ module Data.HList.MakeLabels,
  module Data.STRef,
  module Data.IORef,
  module Data.Dynamic,
@@ -37,21 +37,21 @@ module OOHaskell (
 ) where
 
 
-import CommonMain hiding ( HDeleteMany
+import Data.HList.CommonMain hiding ( HDeleteMany
                          , hDeleteMany
                          , TypeCast -- no external uses are valid; see TypeEqGeneric1
                          , typeCast -- no external uses are valid; see TypeEqGeneric1
                          )
 
-import GhcSyntax hiding (( .*. ), ( :=: ))
-import GhcRecord
-import GhcExperiments
-import TypeEqBoolGeneric
-import FakePrelude
-import TypeEqGeneric1
-import TypeCastGeneric1
-import Label4
-import MakeLabels
+import Data.HList.GhcSyntax hiding (( .*. ), ( :=: ))
+import Data.HList.GhcRecord
+import Data.HList.GhcExperiments
+import Data.HList.TypeEqBoolGeneric
+import Data.HList.FakePrelude
+import Data.HList.TypeEqGeneric1
+import Data.HList.TypeCastGeneric1
+import Data.HList.Label4
+import Data.HList.MakeLabels
 import DeepNarrow
 import Nominal
 import Dynamic

@@ -16,10 +16,10 @@ module Nominal (
  module Nominal
 ) where
 
-import FakePrelude
-import HListPrelude
-import HOccurs
-import Record
+import Data.HList.FakePrelude
+import Data.HList.HListPrelude
+import Data.HList.HOccurs
+import Data.HList.Record
 
 
 -- A newtype wrapper for nominal types

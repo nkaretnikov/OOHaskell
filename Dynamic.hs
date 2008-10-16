@@ -19,8 +19,8 @@ module Dynamic (
 
 import Data.Typeable
 import Data.Dynamic
-import Record
-import GhcRecord
+import Data.HList.Record
+import Data.HList.GhcRecord
 
 
 -- Up-cast
