@@ -6,7 +6,7 @@ OOHaskell -- Haskell's overlooked object system
 
 Getting the code
 
-> darcs get darcs.org/OOHaskell
+> darcs get http://darcs.haskell.org/OOHaskell
 
 ----------------------------------------------------------------------
 
