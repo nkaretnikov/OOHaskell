@@ -27,6 +27,13 @@ class PrintType x
 data (PrintType x, PrintType y) => PrintPair x y = PrintPair x y
 
 
+-- Compose printable expressions (aka daisy chaining)
+
+infixl 7 << 
+(<<) ::  (PrintType x, PrintType y) => x -> y -> PrintPair x y 
+x << y = PrintPair x y 
+
+
 -- Strings are printable right away 
 
 instance PrintType String
@@ -58,10 +65,3 @@ instance Show x => PrintType x
 -- Print expression and begin a new line
 
 printLn x = print x >> putStr "\n" 
-
-
--- Compose printable expressions (aka daisy chaining)
-
-infixl 7 << 
-(<<) ::  (PrintType x, PrintType y) => x -> y -> PrintPair x y 
-x << y = PrintPair x y 

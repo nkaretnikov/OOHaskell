@@ -102,19 +102,21 @@ circle x y radius self
 
 -- Test case for heterogeneous collections
 
-main =
-  do
-       s1 <- mfix $ rectangle 10 20 5 6
-       s2 <- mfix $ circle 15 25 8
-       let scribble = cons s1 (cons s2 nil)
-       mapM_ (\s -> do
-                       s # draw
-                       (s # moveBy) 100 100
-                       s # draw)
-             scribble
+main = do
+          -- Construct a list of shapes
+          s1 <- mfix $ rectangle 10 20 5 6
+          s2 <- mfix $ circle 15 25 8
+          let scribble = cons s1 (cons s2 nil)
 
-      -- call a rectangle specific function
-       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
-       arec # setWidth $ 30
---       arec # setRadius $ 40
-       arec # draw
+          -- Handle the shapes in the list polymorphically       
+          mapM_ (\s -> do
+                          s # draw
+                          (s # moveBy) 100 100
+                          s # draw)
+                scribble
+
+          -- call a rectangle specific function
+          arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
+          arec # setWidth $ 30
+--          arec # setRadius $ 40
+          arec # draw

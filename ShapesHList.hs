@@ -50,11 +50,11 @@ data ScribbleBody -- a type code only!
 -- The polymorphic function on shapes
 
 instance ( HasField (Proxy Draw) r (IO ())
-         , HasField (Proxy RMoveTo) r (Int -> Int -> IO ())
+         , HasField (Proxy MoveBy) r (Int -> Int -> IO ())
          )
       => Apply ScribbleBody r (IO ())
   where
     apply _ x = do
                    x # draw
-                   (x # rMoveTo) 100 100
+                   (x # moveBy) 100 100
                    x # draw

@@ -18,33 +18,31 @@ import OOHaskell
 import ShapesBase hiding (main)
 
 
--- The polymorphic scribble loop.
+-- Test case for heterogeneous collections
 
-main =
-  do
-       -- set up list of shapes.
-       s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
-       s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
-       let scribble = [ HideShape s1
-                      , HideShape s2 ]
+main = do
+          -- Construct a list of shapes
+          s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
+          s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
+          let scribble = [ AnyShape s1
+                         , AnyShape s2 ]
        
-       -- iterate through the list
-       -- and handle shapes polymorphically
-       mapM_ ( \(HideShape shape) -> do
-                  shape # draw
-                  (shape # rMoveTo) 100 100
-                  shape # draw )
-             scribble
+          -- Handle the shapes in the list polymorphically       
+          mapM_ (\(AnyShape s) -> do
+                                     s # draw
+                                     (s # moveBy) 100 100
+                                     s # draw )
+                scribble
 
-       -- call a rectangle specific function
-       arec <- mfix (rectangle (0::Int) (0::Int) (15::Int) (15::Int))
-       arec # setWidth $ 30
-       arec # draw
+          -- call a rectangle specific function
+          arec <- mfix (rectangle (0::Int) (0::Int) (15::Int) (15::Int))
+          arec # setWidth $ 30
+          arec # draw
 
 
--- The well-quantified existential wrapper
+-- An appropriately bounded existential wrapper for shapes
 
-data OpaqueShape =
+data AnyShape =
  forall x. ( HasField (Proxy Draw) x (IO ())
-           , HasField (Proxy RMoveTo) x (Int -> Int -> IO ())
-           ) => HideShape x
+           , HasField (Proxy MoveBy) x (Int -> Int -> IO ())
+           ) => AnyShape x

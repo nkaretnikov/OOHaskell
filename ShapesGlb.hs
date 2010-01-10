@@ -64,7 +64,7 @@ main =
        -- and handle shapes polymorphically.
        mapM_ (\shape -> do
                            shape # draw
-                           (shape # rMoveTo) 100 100
+                           (shape # moveBy) 100 100
                            shape # draw)
              scribble
 

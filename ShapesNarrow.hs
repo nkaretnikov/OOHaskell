@@ -18,12 +18,14 @@ import ShapesBase hiding (main)
 
 -- When we want to make a list of Shapes, then we cast objects to this interface.
 
+-- The interface of all shapes
+
 type Shape a = Record (  GetX    :=: IO a
                      :*: GetY    :=: IO a
                      :*: SetX    :=: (a -> IO ())
                      :*: SetY    :=: (a -> IO ())
                      :*: MoveTo  :=: (a -> a -> IO ())
-                     :*: RMoveTo :=: (a -> a -> IO ())
+                     :*: MoveBy  :=: (a -> a -> IO ())
                      :*: Draw    :=: IO ()
                      :*: HNil )
 
@@ -31,31 +33,29 @@ type Shape a = Record (  GetX    :=: IO a
 -- In fact this interface would be sufficent.
 
 type Shape' a
- = Record (  (Proxy RMoveTo , a -> a -> IO ())
-         :*: (Proxy Draw    , IO ())
+ = Record (  MoveBy  :=: (a -> a -> IO ())
+         :*: Draw    :=: IO ()
          :*: HNil )
 
 
--- The polymorphic scribble loop.
+-- Test case for heterogeneous collections
 
-main =
-  do
-       -- set up array of shapes
-       s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
-       s2 <- mfix (circle (15::Int) 25 8)
-       let scribble :: [Shape Int]
-           scribble = [narrow s1, narrow s2]
-       
-       -- iterate through the array
-       -- and handle shapes polymorphically
-       mapM_ (\shape -> do
-                           shape # draw
-                           (shape # rMoveTo) 100 100
-                           shape # draw)
-             scribble
+main = do
+          -- Construct a list of shapes
+          s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
+          s2 <- mfix (circle (15::Int) 25 8)
+          let scribble :: [Shape Int]
+              scribble = [narrow s1, narrow s2]
 
-       -- call a rectangle specific function
-       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
-       arec # setWidth $ 30
---       arec # setRadius $ 40
-       arec # draw
+          -- Handle the shapes in the list polymorphically       
+          mapM_ (\s -> do
+                          s # draw
+                          (s # moveBy) 100 100
+                          s # draw)
+                scribble
+
+          -- call a rectangle specific function
+          arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
+          arec # setWidth $ 30
+--           arec # setRadius $ 40
+          arec # draw

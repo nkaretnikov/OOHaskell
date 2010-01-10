@@ -26,7 +26,7 @@ import Data.HList.MakeLabels
 -- We use proxies as of HList/Label4.hs
 
 -- This template Haskell splice
-$(makeLabels ["getX","getY","setX","setY","moveTo","rMoveTo","draw"])
+$(makeLabels ["getX","getY","setX","setY","moveTo","moveBy","draw"])
 
 -- is equivalent to the following
 {-
@@ -35,7 +35,7 @@ data GetY;     getY     = proxy::Proxy GetY
 data SetX;     setX     = proxy::Proxy SetX
 data SetY;     setY     = proxy::Proxy SetY
 data MoveTo;   moveTo   = proxy::Proxy MoveTo
-data RMoveTo;  rMoveTo  = proxy::Proxy RMoveTo
+data RMoveTo;  moveBy  = proxy::Proxy RMoveTo
 data Draw;     draw     = proxy::Proxy Draw
 -}
 
@@ -64,7 +64,7 @@ shape x y self
         .*. setX     .=. writeIORef xRef
         .*. setY     .=. writeIORef yRef
         .*. moveTo   .=. (\x y -> do (self # setX) x; (self # setY) y)
-        .*. rMoveTo  .=. (\dx dy ->
+        .*. moveBy  .=. (\dx dy ->
               do
                  x  <- self # getX
                  y  <- self # getY
@@ -186,7 +186,7 @@ main =
        let scribble = cons s1 (cons s2 nil)
        mapM_ (\x -> do
                        x # draw
-                       (x # rMoveTo) 100 100
+                       (x # moveBy) 100 100
                        x # draw)
              scribble
 
