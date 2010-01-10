@@ -26,7 +26,7 @@ $(label "getY")
 $(label "setX")
 $(label "setY")
 $(label "moveTo")
-$(label "rMoveTo")
+$(label "moveBy")
 $(label "draw")
 
 
@@ -44,22 +44,12 @@ shape x y self
         .*. setX     .=. writeIORef xRef
         .*. setY     .=. writeIORef yRef
         .*. moveTo   .=. (\x y -> do (self # setX) x; (self # setY) y)
-        .*. rMoveTo  .=. (\dx dy ->
+        .*. moveBy   .=. (\dx dy ->
               do
                  x  <- self # getX
                  y  <- self # getY
                  (self # moveTo) (x + dx) (y + dy))
         .*. emptyRecord
-
-
--- Helpers for C++-like daisy chaining
-
-infixl 7 <<
-a << m = a >> (m >>= (putStr . show))
-
-newtype LS = LS String
-ls = return . LS
-instance Show LS where show (LS x) = x
 
 
 -- More labels
@@ -74,20 +64,18 @@ $(label "setHeight")
 
 rectangle x y width height self
   = do
-       super <- shape x y self
-       widthRef <- newIORef width
+       super     <- shape x y self
+       widthRef  <- newIORef width
        heightRef <- newIORef height
        return $
-            getWidth  .=. readIORef widthRef
-        .*. getHeight .=. readIORef heightRef
+            getWidth  .=. readIORef  widthRef
+        .*. getHeight .=. readIORef  heightRef
         .*. setWidth  .=. writeIORef widthRef
         .*. setHeight .=. writeIORef heightRef
-        .*. draw      .=. 
-              putStr  "Drawing a Rectangle at:(" <<
-                      self # getX << ls "," << self # getY <<
-                      ls "), width " << self # getWidth <<
-                      ls ", height " << self # getHeight <<
-                      ls "\n"
+        .*. draw      .=. printLn ("Drawing a Rectangle at:("
+                               << self # getX << "," << self # getY
+                               << "), width " << self # getWidth
+                               << ", height " << self # getHeight)
         .*. super
 
 
@@ -101,20 +89,18 @@ $(label "setRadius")
 
 circle x y radius self
   = do
-       super <- shape x y self
+       super     <- shape x y self
        radiusRef <- newIORef radius
        return $
             getRadius  .=. readIORef radiusRef
         .*. setRadius  .=. writeIORef radiusRef
-        .*. draw       .=. 
-              putStr  "Drawing a Circle at:(" <<
-                      self # getX << ls "," << self # getY <<
-                      ls "), radius " << self # getRadius <<
-                      ls "\n"
+        .*. draw       .=. printLn ("Drawing a Circle at:("
+                                << self # getX << "," << self # getY
+                                << "), radius " << self # getRadius)
         .*. super
 
 
--- Weirich's / Rathman's test case
+-- Test case for heterogeneous collections
 
 main =
   do
@@ -123,7 +109,7 @@ main =
        let scribble = cons s1 (cons s2 nil)
        mapM_ (\x -> do
                        x # draw
-                       (x # rMoveTo) 100 100
+                       (x # moveBy) 100 100
                        x # draw)
              scribble
 

@@ -23,6 +23,7 @@ module OOHaskell (
  module Control.Monad.ST,
  module Control.Monad.Fix,
  returnIO,
+ module Print,
  module DeepNarrow,
  module Nominal,
  module Dynamic,
@@ -47,6 +48,7 @@ import Data.HList.TypeEqGeneric1
 import Data.HList.TypeCastGeneric1
 import Data.HList.Label4
 import Data.HList.MakeLabels
+import Print
 import DeepNarrow
 import Nominal
 import Dynamic

@@ -16,7 +16,7 @@ OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
 module ShapesBase where
 
-import OOHaskell
+import OOHaskell hiding ((<<))
 
 import Data.HList.MakeLabels
 
