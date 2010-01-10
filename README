@@ -2,6 +2,25 @@
 
 OOHaskell -- Haskell's overlooked object system
 
+----------------------------------------------------------------------
+
+Getting the code
+
+> darcs get darcs.org/OOHaskell
+
+----------------------------------------------------------------------
+
+Pushing changes
+
+You need an account at darcs.haskell.org
+
+> cd OOHaskell
+> darcs pull user@darcs.haskell.org:/srv/darcs/OOHaskell
+> darcs record
+> darcs push
+
+----------------------------------------------------------------------
+
 The code relies on the HList library.
 Since 10 September 2005, HList is contained in the OOHaskell distribution.
 The code has been released for GHC 6.4.
