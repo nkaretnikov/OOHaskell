@@ -118,7 +118,6 @@ test-shapes:
 
 # Variations on the shapes example (using the same baseline)
 	make ShapesNarrow.shapes-test
-	make ShapesLub.shapes-test
 	make ShapesHList.shapes-test
 	make ShapesExists.shapes-test
 

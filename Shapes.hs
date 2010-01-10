@@ -107,10 +107,10 @@ main =
        s1 <- mfix $ rectangle 10 20 5 6
        s2 <- mfix $ circle 15 25 8
        let scribble = cons s1 (cons s2 nil)
-       mapM_ (\x -> do
-                       x # draw
-                       (x # moveBy) 100 100
-                       x # draw)
+       mapM_ (\s -> do
+                       s # draw
+                       (s # moveBy) 100 100
+                       s # draw)
              scribble
 
       -- call a rectangle specific function

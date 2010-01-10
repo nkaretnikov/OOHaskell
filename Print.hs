@@ -60,7 +60,7 @@ instance Show x => PrintType x
 printLn x = print x >> putStr "\n" 
 
 
--- Compose printable expressions
+-- Compose printable expressions (aka daisy chaining)
 
 infixl 7 << 
 (<<) ::  (PrintType x, PrintType y) => x -> y -> PrintPair x y 
