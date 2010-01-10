@@ -1,10 +1,6 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
-
 {-
 
--- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
+-- (C) 2004-2010, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
 A variation on the shapes example.
@@ -19,7 +15,7 @@ BTW, hLubNarrow could just as well be a multi-variate function
 module ShapesLub where
 
 import OOHaskell
-import Shapes
+import ShapesBase hiding (main)
 
 
 -- Weirich's / Rathman's test case

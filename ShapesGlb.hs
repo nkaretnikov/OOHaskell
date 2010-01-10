@@ -1,6 +1,7 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 {-
 
@@ -36,7 +37,7 @@ to cast to types that are part of the union.
 module ShapesGlb where
 
 import OOHaskell
-import Shapes
+import ShapesBase hiding (main)
 
 
 -- The polymorphic scribble loop.

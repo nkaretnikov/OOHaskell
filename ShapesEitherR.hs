@@ -1,6 +1,7 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 {-
 
@@ -27,7 +28,7 @@ field permutation. This gives a shallower union.
 module ShapesUnion where
 
 import OOHaskell
-import Shapes
+import ShapesBase hiding (main)
 import Data.HList.ConsUnion
 
 

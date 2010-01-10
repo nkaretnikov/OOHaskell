@@ -1,6 +1,5 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ExistentialQuantification #-}
 
 {-
 
@@ -16,7 +15,7 @@ Thereby, all shapes can be inserted into a normal homogeneous list.
 module ShapesExists where
 
 import OOHaskell
-import Shapes
+import ShapesBase hiding (main)
 
 
 -- The polymorphic scribble loop.

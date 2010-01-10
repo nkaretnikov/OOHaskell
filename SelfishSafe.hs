@@ -1,13 +1,12 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 {-
 
 OOHaskell (C) 2004, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
 This module illustrates the notion of self, i.e., open recursion. 
-Safety
+It is a variation on module Selfish with safety addded.
 
 -}
 

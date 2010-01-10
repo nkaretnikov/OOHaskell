@@ -1,10 +1,8 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE TypeOperators #-}
 
 {-
 
--- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
+-- (C) 2004-2010, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
 A variation on the shapes example.
@@ -15,7 +13,7 @@ We use narrow (coerce) to prepare all objects before insertion into a list.
 module ShapesNarrow where
 
 import OOHaskell
-import Shapes
+import ShapesBase hiding (main)
 
 
 -- When we want to make a list of Shapes, then we cast objects to this interface.

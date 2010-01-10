@@ -1,12 +1,17 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
--- {-# OPTIONS -fallow-overlapping-instances #-}
-{-# OPTIONS -fth #-}
-
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE TemplateHaskell#-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverlappingInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 {-
 
-OOHaskell (C) 2004 -- 2007, Oleg Kiselyov, Ralf Laemmel
+OOHaskell (C) 2004 -- 2010, Oleg Kiselyov, Ralf Laemmel
 
 OOHaskell implementations of some excerpts from the OCaml Tutorial
 

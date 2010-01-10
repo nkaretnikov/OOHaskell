@@ -1,10 +1,13 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 {-
 
 OOHaskell (C) 2005, Oleg Kiselyov, Ralf Laemmel
+
+Objects with items of Dynamic
 
 -}
 

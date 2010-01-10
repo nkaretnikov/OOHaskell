@@ -1,6 +1,8 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 {-
 
@@ -18,7 +20,7 @@ We need to gather all used methods as constraints of the Apply instance.
 module ShapesHList where
 
 import OOHaskell
-import Shapes
+import ShapesBase hiding (main)
 
 
 -- The polymorphic scribble loop.

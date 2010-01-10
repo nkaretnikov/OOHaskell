@@ -1,6 +1,6 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 {-
 
@@ -21,10 +21,10 @@ libraries.
 
 -}
 
-module ShapesUnion where
+module ShapesEither where
 
 import OOHaskell
-import Shapes
+import ShapesBase hiding (main)
 import Data.HList.ConsUnion
 
 

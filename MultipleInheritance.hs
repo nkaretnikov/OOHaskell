@@ -1,6 +1,5 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
-{-# OPTIONS -fth #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE TemplateHaskell#-}
 
 {-
 

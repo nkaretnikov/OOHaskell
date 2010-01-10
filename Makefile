@@ -1,8 +1,3 @@
-#
-# This is mostly LEGACY at this point.
-# Needs to be worked on.
-#
-
 ##############################################################################
 #
 # Useful make targets
@@ -10,7 +5,7 @@
 # make test        -- run all GHC-based test cases.
 # make test-all    -- run more test cases (C/C++/Hugs, if any) 
 # make clean       -- remove all generated and temporary and backup files
-# make OOHaskell.o -- precompile OOHaskell (untested!!!)
+# See more below!  -- Not all targets are well maintained.
 #
 
 
@@ -20,7 +15,9 @@
 #
 
 # Pointer to GHC
-ghci = ghci \
+ghci = ghci -i../HList/
+
+ghci-old = ghci \
 		-fglasgow-exts \
 		-fallow-overlapping-instances \
 		-fallow-undecidable-instances \
@@ -79,57 +76,80 @@ all:
 #  Use "make test-all" to include C/C++/Hugs test cases.
 #
 
-%.test:
+# Start a ghci session for a particular OOHaskell module
+
+%.ghci:
 	${ghci}	-v0 $*.hs
 
 
+# Test a particular OOHaskell sample (assuming a baseline of the same name)
+
+%.test:
+	@rm -f $*.out
+	@${ghci} -v0 $*.hs < Main.in > $*.out
+	@diff -b $*.out refs/$*.ref
+	@rm -f $.*out
+
+
+# Like %.test but for a group of shapes examples with the same baseline
+
+%.shapes-test:
+	@rm -f $*.out
+	@${ghci} -v0 $*.hs < Main.in > $*.out
+	@diff -b $*.out refs/Shapes.ref
+	@rm -f $.*out
+
+
+# Test all the OOHaskell examples
+
 test:
-	${ghci}	-v0 OCamlTutorial.hs < Main.in > OCamlTutorial.out
-	diff -b OCamlTutorial.out OCamlTutorial.ref
-	${ghci}	-v0 MultipleInheritance.hs < Main.in > MultipleInheritance.out
-	diff -b MultipleInheritance.out MultipleInheritance.ref
-	${ghci}	-v0 OoCopy.hs < Main.in > OoCopy.out
-	diff -b OoCopy.out OoCopy.ref
-	${ghci}	-v0 SimpleST.hs < Main.in > SimpleST.out
-	diff -b SimpleST.out SimpleST.ref
-	${ghci}	-v0 CircBuffer.hs < Main.in > CircBuffer.out
-	diff -b CircBuffer.out CircBuffer.ref
-	${ghci}	-v0 Selfish.hs < Main.in > Selfish.out
-	diff -b Selfish.out Selfish.ref
-	${ghci}	-v0 SelfishSafe.hs < Main.in > SelfishSafe.out
-	diff -b SelfishSafe.out SelfishSafe.ref
-	${ghci}	-v0 ShapesAtGlance.hs < Main.in > Shapes.out
-	diff -b Shapes.out Shapes.ref
-	${ghci}	-v0 ShapesNarrow.hs < Main.in > Shapes.out
-	diff -b Shapes.out Shapes.ref
-	${ghci}	-v0 ShapesLub.hs < Main.in > Shapes.out
-	diff -b Shapes.out Shapes.ref
-	${ghci}	-v0 ShapesHList.hs < Main.in > Shapes.out
-	diff -b Shapes.out Shapes.ref
-	${ghci}	-v0 ShapesExists.hs < Main.in > Shapes.out
-	diff -b Shapes.out Shapes.ref
-	${ghci}	-v0 ShapesEither.hs < Main.in > Shapes.out
-	diff -b Shapes.out ShapesDown.ref
-	${ghci}	-v0 ShapesEitherR.hs < Main.in > Shapes.out
-	diff -b Shapes.out ShapesDownR.ref
-	${ghci}	-v0 ShapesGlb.hs < Main.in > Shapes.out
-	diff -b Shapes.out ShapesGlb.ref
-	${ghci}	-v0 SelfReturn.hs < Main.in > SelfReturn.out
-	diff -b SelfReturn.out SelfReturn.ref
-	${ghci}	-v0 DynamicOo.hs < Main.in > DynamicOo.out
-	diff -b DynamicOo.out DynamicOo.ref
-	${ghci}	-v0 DeepSubtyping.hs < Main.in > DeepSubtyping.out
-	diff -b DeepSubtyping.out DeepSubtyping.ref
-	${ghci}	-v0 CovariantReturn.hs < Main.in > CovariantReturn.out
-	diff -b CovariantReturn.out CovariantReturn.ref
-	${ghci}	-v0 CovariantArgs.hs < Main.in > CovariantArgs.out
-	diff -b CovariantArgs.out CovariantArgs.ref
-	${ghci}	-v0 RecList.hs < Main.in > RecList.out
-	diff -b RecList.out RecList.ref
-	${ghci}	-v0 NominalTest.hs < Main.in > NominalTest.out
-	diff -b NominalTest.out NominalTest.ref
-	${ghci}	-v0 EiffelFaqLcon.hs < Main.in > EiffelFaqLcon.out
-	diff -b EiffelFaqLcon.out EiffelFaqLcon.ref
+	make OCamlTutorial.test
+	make test-shapes
+	make test-many
+	make test-NonOOHaskell
+
+
+# Test the shapes examples only
+
+test-shapes:
+
+# The introductory shapes example
+	make Shapes.test
+
+# Variations on the shapes example (using the same baseline)
+	make ShapesNarrow.shapes-test
+	make ShapesLub.shapes-test
+	make ShapesHList.shapes-test
+	make ShapesExists.shapes-test
+
+# Even more shapes examples
+	make ShapesEither.test
+	make ShapesEitherR.test
+	make ShapesGlb.test
+
+
+# Test many more OOHaskell examples
+
+test-many:
+	make MultipleInheritance.test
+	make OoCopy.test
+	make SimpleST.test
+	make CircBuffer.test
+	make Selfish.test
+	make SelfishSafe.test
+	make SelfReturn.test
+	make DynamicOo.test
+	make DeepSubtyping.test
+	make CovariantReturn.test
+	make CovariantArgs.test
+	make RecList.test
+	make NominalTest.test
+	make EiffelFaqLcon.test
+
+
+# Test also some object encodings not using OOHaskell
+
+test-NonOOHaskell:
 	(cd Shapes1; make test)
 	(cd Shapes2; make test)
 	(cd Shapes3; make test)
@@ -162,7 +182,6 @@ clean:
 	rm -f *.out
 	rm -f *.o
 	rm -f *.hi
-	(cd HList; make clean)
 	rm -f index.html OOHaskell.zip
 	(cd Weirich; make clean)
 	(cd Rathman; make clean)
@@ -178,10 +197,7 @@ clean:
 ##############################################################################
 #
 # Precompilation of OOHaskell.
-#
-# BEWARE!!!
-# This may not work even if interpretation works.
-# Depending on versions and platforms.
+# This target has not been maintained in a while.
 #
 
 OOHaskell.o: OOHaskell.hs HList/*.hs Makefile
@@ -198,6 +214,7 @@ OOHaskell.o: OOHaskell.hs HList/*.hs Makefile
 ##############################################################################
 #
 # Target used by the authors for distributing OOHaskell.
+# This target has not been maintained in a while.
 #
 
 distr:

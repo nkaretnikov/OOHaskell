@@ -1,10 +1,13 @@
-{-# OPTIONS -fglasgow-exts #-}
-{-# OPTIONS -fallow-undecidable-instances #-}
-{-# OPTIONS -fallow-overlapping-instances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 {-
 
--- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
+-- (C) 2004-2010, Oleg Kiselyov & Ralf Laemmel
 -- Haskell's overlooked object system
 
 Support nominal subtyping.

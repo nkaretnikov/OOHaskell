@@ -1,4 +1,4 @@
-(C) 2004-2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+(C) 2004-2010, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
 
 OOHaskell -- Haskell's overlooked object system
 
@@ -22,7 +22,7 @@ You need an account at darcs.haskell.org
 ----------------------------------------------------------------------
 
 The code relies on the HList library.
-Since 10 September 2005, HList is contained in the OOHaskell distribution.
+(The Makefile attempts to find HList in the same root dir as OOHaskell.)
 The code has been released for GHC 6.4.
 See the Makefile for ways of running test cases.
 
