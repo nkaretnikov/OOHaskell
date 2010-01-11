@@ -15,7 +15,7 @@ The trouble is that resolved open recursion means that self can't be changed.
 -}
 
 
-module MultipleInheritance where
+module OoCopy where
 
 import OOHaskell
 import OCamlTutorial hiding (main)

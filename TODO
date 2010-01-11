@@ -1,0 +1,5 @@
+- The ShapesGlb approach is rather useless.
+- The ShapesEither implementation needs to make more reuse.
+- Use this notation: HasField r (Draw :=: IO ())
+- We need to cut down on redundancy, e.g., OCamlTutorial.hs vs. Selfish.hs
+

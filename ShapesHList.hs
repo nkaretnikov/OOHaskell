@@ -23,38 +23,33 @@ import OOHaskell
 import ShapesBase hiding (main)
 
 
--- The polymorphic scribble loop.
+-- Test case for heterogeneous collections
 
-main =
-  do
-       -- set up list of shapes.
-       s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
-       s2 <- mfix (circle (15::Int) 25 8)
-       let scribble = s1 `HCons` (s2 `HCons` HNil)
+main = do
+          -- Construct a list of shapes
+          s1 <- mfix (rectangle (10::Int) (20::Int) 5 6)
+          s2 <- mfix (circle (15::Int) 25 8)
+          let scribble = s1 `HCons` (s2 `HCons` HNil)
        
-       -- iterate through the list
-       -- and handle shapes polymorphically
-       hMapM_ (undefined::ScribbleBody) scribble
+          -- Handle the shapes in the list polymorphically       
+          hMapM_ (undefined::ScribbleBody) scribble
 
-       -- call a rectangle specific function
-       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
-       arec # setWidth $ 30
-       arec # draw
-
-
--- A type code for the polymorphic function on shapes
-
-data ScribbleBody -- a type code only!
+          -- call a rectangle specific function
+          arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
+          arec # setWidth $ 30
+          arec # draw
 
 
--- The polymorphic function on shapes
+-- The argument of hMapM_
+
+data ScribbleBody
 
 instance ( HasField (Proxy Draw) r (IO ())
          , HasField (Proxy MoveBy) r (Int -> Int -> IO ())
          )
       => Apply ScribbleBody r (IO ())
   where
-    apply _ x = do
-                   x # draw
-                   (x # moveBy) 100 100
-                   x # draw
+    apply _ s = do
+                   s # draw
+                   (s # moveBy) 100 100
+                   s # draw

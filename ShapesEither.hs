@@ -1,4 +1,6 @@
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
@@ -28,46 +30,68 @@ import ShapesBase hiding (main)
 import Data.HList.ConsUnion
 
 
--- The polymorphic scribble loop.
+-- The explicit type of circles.
+-- We can use this type in down-casting.
+-- We can also get away w/o such an explicit type.
+-- That is, we can do instance-based down-casting; see below.
 
-main =
-  do
-       --
-       -- Set up array of shapes.
-       -- We need full instantiation for the downcasts to work.
-       -- ... or a better comparsion function. (Omitted.)
-       --
-       s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
-       s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
-       s3 <- mfix (square (35::Int) (45::Int) (8::Int))
+type Circle a = Record (  GetRadius :=: IO a
+                      :*: SetRadius :=: (a -> IO ())
+                      :*: Draw      :=: IO ()
+                      :*: GetX      :=: IO a
+                      :*: GetY      :=: IO a
+                      :*: SetX      :=: (a -> IO ())
+                      :*: SetY      :=: (a -> IO ())
+                      :*: MoveTo    :=: (a -> a -> IO ())
+                      :*: MoveBy    :=: (a -> a -> IO ())
+                      :*: HNil )
 
-       -- We could have used a vararg function.
-       let scribble =  consEither s2
-                      (consEither s1
-                      (consEither s2
-                      (consEither s3
-                       nilEither)))
 
-       -- Iterate through the array
-       -- and handle shapes polymorphically.
-       mapM_ (\shape -> do
-                           shape # draw
-                           (shape # moveBy) 100 100
-                           shape # draw)
-             scribble
+-- We need full instantiation for the downcasts to work.
+-- ... or a better comparsion function. (Omitted.)
 
-       -- call a rectangle specific function
-       arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
-       arec # setWidth $ 30
---       arec # setRadius $ 40
-       arec # draw
+-- Test case for heterogeneous collections
 
-       -- iterate through the array and downcast to cirlce
-       mapM_ (\shape -> maybe (putStrLn "Not a circle.")
-	                      (\circ -> do circ # setRadius $ 10;
-			                   circ # draw)
-	                      ((downCast shape) `asTypeOf` (Just s2)))
-             scribble
+main = do
+          -- Construct a list of shapes
+          s1 <- mfix (rectangle (10::Int) (20::Int) (5::Int) (6::Int))
+          s2 <- mfix (circle (15::Int) (25::Int) (8::Int))
+          s3 <- mfix (square (35::Int) (45::Int) (8::Int))
+          s4 <- mfix (circle (42::Int) (88::Int) (77::Int))
+          let scribble =  consEither s1
+                         (consEither s2
+                         (consEither s3
+                         (consEither s4
+                          nilEither)))
+
+          -- Handle the shapes in the list polymorphically       
+          mapM_ (\s -> do
+                          s # draw
+                          (s # moveBy) 100 100
+                          s # draw)
+                scribble
+
+          -- Type-based bound for down-casting
+          mapM_ (\s -> maybe (return ())
+	                     (\(c::Circle Int) -> do
+                                                     c # setRadius $ 10
+			                             c # draw)
+	                     (downCast s))
+                scribble
+
+          -- Value-based bound for down-casting
+          mapM_ (\s -> maybe (return ())
+	                     (\c -> do
+                                       c # setRadius $ 10
+			               c # draw)
+	                     (downCast s `asTypeOf` Just s2))
+                scribble
+
+          -- call a rectangle specific function
+          arec <- mfix (rectangle (0::Int) (0::Int) 15 15)
+          arec # setWidth $ 30
+--          arec # setRadius $ 40
+          arec # draw
 
 
 -- We instantiate the look-up (HasField) class for records.
