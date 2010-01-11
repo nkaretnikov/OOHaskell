@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE TemplateHaskell#-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 {-
@@ -14,7 +15,7 @@
 -}
 
 
-module Covariance where
+module EiffelFaqLcon where
 
 import OOHaskell
 import qualified Prelude (print)
@@ -23,10 +24,10 @@ import Prelude hiding (print)
 
 {-
 
-Quoted from the aforementioned FAQ: "Here's another example where a
-real-world situation suggests a covariant solution. Herbivores eat
-plants. Cows are herbivores. Grass is a plant. Cows eat grass but not
-other plants."
+Quoted from the Eiffel FAQ: "Here's another example where a real-world
+situation suggests a covariant solution. Herbivores eat plants. Cows
+are herbivores. Grass is a plant. Cows eat grass but not other
+plants."
 
    class HERBIVORE                               class PLANT
    feature
@@ -45,17 +46,17 @@ other plants."
 
 -- Many labels
 
-data Eat;    eat       = proxy::Proxy Eat
-data Diet;   diet      = proxy::Proxy Diet
-data Print;  print     = proxy::Proxy Print
-data Meadow; meadow    = proxy::Proxy Meadow
+$(label "eat")
+$(label "diet")
+$(label "print")
+$(label "meadow")
 
 
 -- The plant base class
 
 plant self 
   = do
-       returnIO
+       return
           $  print .=. putStr "PLANT"
          .*. emptyRecord
  
@@ -65,7 +66,7 @@ plant self
 grass (aMeadow::String) self 
   = do
        super <- plant self
-       returnIO
+       return
           $  print  .=. putStr "GRASS"
          .<. meadow .=. aMeadow -- Grass is more than plant.
          .*. super
@@ -87,7 +88,7 @@ type IGrass
 
 herbivore self 
   = do
-       returnIO
+       return
           $  print .=. putStr "HERBIVORE"
          .*. eat   .=. (\food ->
                           do
@@ -107,11 +108,11 @@ test1 = do
            Prelude.print "test1"
            --
            aPlant <- mfix $ plant
-           aGrass <- mfix $ grass "MSFT grassland"
+           aGrass <- mfix $ grass "Prairie"
            aHerb1 <- mfix $ herbivore
            aHerb2 <- mfix $ herbivore
-           aHerb1 # eat $ aPlant
-           aHerb2 # eat $ aGrass
+           aHerb1 # eat $ aPlant -- eats fine
+           aHerb2 # eat $ aGrass -- eats fine, too
            --
            -- Alas, herbs need to be forced to eat grass once they had plant.
            -- And we cannot even force them to eat plant once they had grass.
@@ -122,13 +123,21 @@ test1 = do
            --
            Prelude.print "OK"
 
+{-
+
+HERBIVORE eats PLANT.
+HERBIVORE eats GRASS.
+HERBIVORE eats GRASS.
+
+-}
+
 
 -- Cow -- a subclass of herbivore
 
 cow self 
   = do
        super <- herbivore self
-       returnIO
+       return
           $  print .=. putStr "COW"
          .<. eat   .=. (\food ->
                           do
@@ -145,7 +154,7 @@ test2 = do
            Prelude.print "test2"
            --
            aPlant <- mfix $ plant
-           aGrass <- mfix $ grass "MSFT grassland"
+           aGrass <- mfix $ grass "Prairie"
            aHerb  <- mfix $ herbivore
            aCow   <- mfix $ cow
            aHerb # eat $ aPlant
@@ -154,6 +163,25 @@ test2 = do
            --
            Prelude.print "OK"
 
+{-
+
+HERBIVORE eats PLANT.
+COW eats GRASS.
+
+-}
+
+
+{-
+
+ The aforementioned Eiffel FAQ says:
+
+ "The compiler must stop us from putting a COW object into a HERBIVORE
+ attribute and trying to feed it a PLANT, but we shouldn't be trying
+ to do this anyway."
+
+ And indeed, OOHaskell does stop us.
+
+-}
 
 -- Let's try to place cows and herbivores together in a container.
 -- We will see that the eat method prevents us from doing so.
@@ -181,23 +209,9 @@ test3 = do
            -- We can treat non-eating cows and herbivores the same.
            --
 	   let herbList3 = [aCow .-. eat, aHerb .-. eat]
---	   let herbList4 = narrow aCow : herbList3 -- no need for narrow
 	   mapM_ (\x -> do x # print; putStr "\n" ) herbList3
            --
            Prelude.print "OK"
-
-
-{-
-
- The aforementioned Eiffel FAQ says:
-
- "The compiler must stop us from putting a COW object into a HERBIVORE
- attribute and trying to feed it a PLANT, but we shouldn't be trying
- to do this anyway."
-
- And indeed, OOHaskell does stop us.
-
--}
 
 
 main = do test1; test2; test3

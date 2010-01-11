@@ -7,4 +7,5 @@
 - Door.hs? Not even tested.
 - DML.hs? Not even tested.
 - We need to separate worked out examples from incomplete stuff: LocalSigs, ...
+- Should we try to challenge EiffelFAQ's test1 restriction?
 
