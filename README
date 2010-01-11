@@ -50,7 +50,5 @@ Non-OOHaskell examples:
 
 - Weirich	-- The C++ implementation from the Shapes Code Suite.
 - Rathman	-- The Haskell implementation from the Shape Code Suite.
-- Shapes1 .. 6  -- non-OOHaskell-based implementations of shapes example.
-- interpreter	-- An example that simulates extensible datatypes
-
-Last updated; September 10, 2005
+- Shapes1 ..    -- non-OOHaskell-based implementations of shapes example.
+- ...           -- See other subdirs in repository/shapes

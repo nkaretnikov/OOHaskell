@@ -2,4 +2,9 @@
 - The ShapesEither implementation needs to make more reuse.
 - Use this notation: HasField r (Draw :=: IO ())
 - We need to cut down on redundancy, e.g., OCamlTutorial.hs vs. Selfish.hs
+- Family needs to be cleaned up and/or documented, removed.
+- UpCast1.hs? Not even tested.
+- Door.hs? Not even tested.
+- DML.hs? Not even tested.
+- We need to separate worked out examples from incomplete stuff: LocalSigs, ...
 

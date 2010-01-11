@@ -2,8 +2,7 @@
 #
 # Useful make targets
 #
-# make test        -- run all GHC-based test cases.
-# make test-all    -- run more test cases (C/C++/Hugs, if any) 
+# make test        -- run all (GHC-based) test cases.
 # make clean       -- remove all generated and temporary and backup files
 # See more below!  -- Not all targets are well maintained.
 #
@@ -15,7 +14,7 @@
 #
 
 # Pointer to GHC
-ghci = ghci -i../HList/
+ghci = ghci -i../HList/:lib/:samples/
 
 ghci-old = ghci \
 		-fglasgow-exts \
@@ -85,19 +84,19 @@ all:
 # Test a particular OOHaskell sample (assuming a baseline of the same name)
 
 %.test:
-	@rm -f $*.out
-	@${ghci} -v0 $*.hs < Main.in > $*.out
-	@diff -b $*.out refs/$*.ref
-	@rm -f $.*out
+	@rm -f samples/$*.out
+	@${ghci} -v0 samples/$*.hs < include/Main.in > samples/$*.out
+	@diff -b samples/$*.out samples/refs/$*.ref
+	@rm -f samples/$.*out
 
 
 # Like %.test but for a group of shapes examples with the same baseline
 
 %.shapes-test:
-	@rm -f $*.out
-	@${ghci} -v0 $*.hs < Main.in > $*.out
-	@diff -b $*.out refs/Shapes.ref
-	@rm -f $.*out
+	@rm -f samples/$*.out
+	@${ghci} -v0 samples/$*.hs < include/Main.in > samples/$*.out
+	@diff -b samples/$*.out samples/refs/Shapes.ref
+	@rm -f samples/$.*out
 
 
 # Test all the OOHaskell examples
@@ -106,7 +105,6 @@ test:
 	make OCamlTutorial.test
 	make test-shapes
 	make test-many
-	make test-NonOOHaskell
 
 
 # Test the shapes examples only
@@ -158,39 +156,13 @@ test-NonOOHaskell:
 	(cd Shapes7; make test)
 	(cd Shapes8; make test)
 
-#
-# The following may require some particular C/C++ compilers.
-# Don't mind if these tests don't complete fine.
-# We also run the HList tests.
-# The normal "test" target is enough for using OOHaskell with ghc(i).
-#
-
-test-all: test
-	(cd Rathman; make test)
-	(cd interpreter; make test)
-	(cd HList; make test)
-
-
 ##############################################################################
 #
 # Clean up things
 #
 
 clean:
-	rm -f *~
-	rm -f *.out
-	rm -f *.o
-	rm -f *.hi
-	rm -f index.html OOHaskell.zip
-	(cd Weirich; make clean)
-	(cd Rathman; make clean)
-	(cd Shapes1; make clean)
-	(cd Shapes2; make clean)
-	(cd Shapes3; make clean)
-	(cd Shapes4; make clean)
-	(cd Shapes5; make clean)
-	(cd Shapes6; make clean)
-	(cd interpreter; make clean)
+	rm -f samples/*.out
 
 
 ##############################################################################
