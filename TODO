@@ -1,6 +1,6 @@
 - The ShapesGlb approach is rather useless.
 - The ShapesEither implementation needs to make more reuse.
-- Use this notation: HasField r (Draw :=: IO ())
+- Use this order: HasField r Draw (IO ())
 - We need to cut down on redundancy, e.g., OCamlTutorial.hs vs. Selfish.hs
 - Family needs to be cleaned up and/or documented, removed.
 - UpCast1.hs? Not even tested.
@@ -8,4 +8,5 @@
 - DML.hs? Not even tested.
 - We need to separate worked out examples from incomplete stuff: LocalSigs, ...
 - Should we try to challenge EiffelFAQ's test1 restriction?
+- DeepNarrow relies on overlapping instances; either it shouldn't, or we could eliminate the extra effort for TopTyCon and still be overlapping.
 

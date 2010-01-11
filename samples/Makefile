@@ -35,7 +35,7 @@ all:
 
 # Use this for starting a ghci session for a specific sample
 
-%.ghci: HList
+%.ghci:
 	${ghci}	$*.hs
 
 ##############################################################################

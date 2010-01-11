@@ -29,15 +29,15 @@ data GetColor; getColor = proxy::Proxy GetColor
 data GetMass;  getMass  = proxy::Proxy GetMass
 
 
--- Newtypes for nominal type distinctions
+-- Phantom types for nominal type distinctions
 
-data PP  = PP  -- Printable points
-data CP  = CP  -- Colored points
-data MCP = MCP -- Massive Colored points
-data SP  = SP  -- "Special" points
+data PP  -- Printable points
+data CP  -- Colored points
+data MCP -- Massive Colored points
+data SP  -- "Special" points
 
 
--- Nominations
+-- Register nominations for clarity
 
 instance Nomination PP
 instance Nomination CP
@@ -45,12 +45,13 @@ instance Nomination MCP
 instance Nomination SP
 
 
--- The familiar printable points but nominal this time
+-- The familiar printable point but nominal this time
 
 printable_point x_init s =
    do
       x <- newIORef x_init
-      returnIO $ nominate PP -- Nominal!
+      return 
+        $  nominate (undefined::PP)
         $  mutableX .=. x
        .*. getX     .=. readIORef x
        .*. moveX    .=. (\d -> modifyIORef x (+d))
@@ -64,11 +65,12 @@ printable_point x_init s =
 colored_point x_init (color::String) self =
    do
       super <- printable_point x_init self
-      returnIO $ nominate CP -- Nominal!
+      return 
+        $  nominate (undefined::CP)
         $  printi .=. ( do  putStr "so far - "; super # printi
                             putStr "color  - "; Prelude.print color )
-       .<. getColor .=. (returnIO color)
-       .*. anonymize super -- Access record!
+       .<. getColor .=. color
+       .*. anonymize super
 
 
 -- Massive Colored points exercising overriding and extension
@@ -76,11 +78,12 @@ colored_point x_init (color::String) self =
 mcolored_point x_init color (mass::Float) self =
    do
       super <- colored_point x_init color self
-      returnIO $ nominate MCP -- Nominal!
+      return 
+        $  nominate (undefined::MCP)
         $  printi .=. ( do  putStr "so far - "; super # printi
                             putStr "mass  - "; Prelude.print mass )
-       .<. getMass .=. (returnIO mass)
-       .*. anonymize super -- Access record!
+       .<. getMass .=. mass
+       .*. anonymize super
 
 
 -- Special points that are structurally equal to PP
@@ -88,19 +91,19 @@ mcolored_point x_init color (mass::Float) self =
 special_point x_init self = 
    do
       super <- printable_point x_init self
-      returnIO $ nominate SP $ anonymize super
+      return
+        $ nominate (undefined::SP)
+        $ anonymize super
 
 
--- These versions require explicit cast
+-- These versions insist on certain nominal types.
 
-cast_as_p :: p -> N p x -> N p x; cast_as_p _ = id
-
-printPP aPP = (cast_as_p PP aPP) # print
-printCP aCP = (cast_as_p CP aCP) # print
-printSP aSP = (cast_as_p SP aSP) # print
+printPP aPP = (aPP `hasNomination` (undefined::PP)) # print
+printCP aCP = (aCP `hasNomination` (undefined::CP)) # print
+printSP aSP = (aSP `hasNomination` (undefined::SP)) # print
 
 
--- These versions upcast by themselves
+-- These versions perform upcasts where necessary and possible.
 
 printPP' o = printPP (nUpCast o)
 printCP' o = printCP (nUpCast o)
@@ -154,11 +157,10 @@ main = do
            printPP' aCP -- No need to up-cast.
            printPP' aSP -- No need to up-cast.
            printPP' aMP -- No need to up-cast.
-           printPP' aMP -- No need to up-cast.
 
            -- moveX must be inherited from the remote parent
 	   putStrLn "    after moving MP..."
-           (nUpCastTo aMP PP) # moveX $ 10
+           (nUpCastTo aMP (undefined::PP)) # moveX $ 10
            printPP' aMP -- No need to up-cast.
 
            -- Nominal not equal structural subtyping

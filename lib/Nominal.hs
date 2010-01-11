@@ -27,34 +27,37 @@ import Data.HList.Record
 
 -- A newtype wrapper for nominal types
 
-newtype N nom rec = N rec
+newtype N n r = N r
 
 
 -- A class for nominal types
 
-class Nomination f
+class Nomination n
 
 
 -- An operation to `nominate' a record as nominal object
 
-nominate ::  Nomination nt => nt -> x -> N nt x
-nominate nt x = N x
+nominate ::  Nomination n => n -> r -> N n r
+nominate n = N
 
 
 -- An operation to `anonymize' a nominal object
 
-anonymize ::  Nomination nt => N nt x -> x
-anonymize (N x) = x
+anonymize ::  Nomination n => N n r -> r
+anonymize (N r) = r
 
 
 -- For method look-up. It should not overlap with anything else
 
-instance (HasField l x v, Nomination f) => HasField l (N f x) v
- where hLookupByLabel l o = hLookupByLabel l (anonymize o)
+instance ( HasField l r v
+         , Nomination n
+         )
+           => HasField l (N n r) v
+ where hLookupByLabel l r = hLookupByLabel l (anonymize r)
 
 
 --
--- The presentation of the nominal inheritance hierarchy
+-- The presentation of the nominal subtyping hierarchy.
 -- Define which nominal type is a parent for which type.
 --
 
@@ -117,13 +120,19 @@ instance ( Parents h l1
            => Ancestors (HCons h t) l0
 
 
+-- Guard the nomination of an operand
+
+hasNomination :: N n x -> n -> N n x
+hasNomination o _ = o
+
+
 -- An up-cast operation
 
-nUpCast :: Ancestor f g => N f x -> N g x
+nUpCast :: Ancestor n n' => N n x -> N n' x
 nUpCast = N . anonymize
 
 
 -- An up-cast operation with target type
 
-nUpCastTo :: Ancestor f g => N f x -> g -> N g x
-nUpCastTo x (nt::nt) = nUpCast x
+nUpCastTo :: Ancestor n n' => N n x -> n' -> N n' x
+nUpCastTo x n' = nUpCast x

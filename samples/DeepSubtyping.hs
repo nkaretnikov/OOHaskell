@@ -3,7 +3,7 @@
 
 {- 
 
-OOHaskell (C) 2004, 2005, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
+OOHaskell (C) 2004--2010, Oleg Kiselyov, Ralf Laemmel
 
 We illustrate a non-trivial substitution scenario where vectors over
 plain points vs. colored points are passed to the same function. We
@@ -36,10 +36,10 @@ data GetColor;  getColor = proxy::Proxy GetColor
 printable_point x_init s =
    do
       x <- newIORef x_init
-      returnIO
+      return
         $  mutableX .=. x
        .*. getX     .=. readIORef x
-       .*. moveX     .=. (\d -> modifyIORef x (+d))
+       .*. moveX    .=. (\d -> modifyIORef x (+d))
        .*. print    .=. ((s # getX ) >>= Prelude.print)
        .*. emptyRecord
 
@@ -60,10 +60,16 @@ data GetP1; getP1 = proxy::Proxy GetP1
 data GetP2; getP2 = proxy::Proxy GetP2
 
 
+{-
+
 -- Note that vector is a polymorphic class!
 -- It is equivalent to a C++ template class:
 --   class Vector<PointT> { PointT p1,p2; ...};
 -- In OOHaskell, we don't need to do declare such polymorphism.
+
+-}
+
+-- Polymorphic vectors
 
 vector p1 p2 self =
    do 
@@ -86,24 +92,24 @@ norm v =
       return (abs (x1 - x2))
 
 
--- We illustrate polymorphism in deep subtypes.
+-- Illustration of polymorphism in deep subtypes
 
 test1 = do
            putStrLn "test1"
-           p1  <- mfix (printable_point 0)
-           p2  <- mfix (printable_point 5)
-           cp1 <- mfix (colored_point 10 "red")
-           cp2 <- mfix (colored_point 25 "red")
-           v  <- mfix (vector p1 p2)
+           p1   <- mfix (printable_point 0)
+           p2   <- mfix (printable_point 5)
+           cp1  <- mfix (colored_point 10 "red")
+           cp2  <- mfix (colored_point 25 "red")
+           v    <- mfix (vector p1 p2)
+           cv   <- mfix (vector cp1 cp2)
            -- Note that cv is in depth subtyping to v.
-           cv <- mfix (vector cp1 cp2)
            putStrLn "Vector:"
            v  # print
            putStrLn "Colored vector:"
            cv # print
            putStrLn "Length of vector:"
-           norm v >>= Prelude.print
-           -- Now, pass a cv to a function that expects a just a vector.
+           norm v  >>= Prelude.print
+           -- Now, pass a cv to a function that expects just a vector.
            -- This shows that cv is substitutable for v.
            putStrLn "Length of colored vector:"
            norm cv >>= Prelude.print
