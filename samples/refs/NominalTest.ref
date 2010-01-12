@@ -10,18 +10,18 @@ Nominal subtyping with explicit up-cast
 5
 so far - 5
 color  - "red"
-42
 so far - so far - 7
 color  - "red"
 mass  - 14.7
+42
 Nominal subtyping with implicit up-cast
 5
 so far - 5
 color  - "red"
-42
 so far - so far - 7
 color  - "red"
 mass  - 14.7
+42
     after moving MP...
 so far - so far - 17
 color  - "red"

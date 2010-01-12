@@ -8,5 +8,5 @@ clean:
 	cd samples; make clean
 
 commit:
-	darcs record -a -m "Committed from the Makefile"
+	darcs record -a -m "See ChangeLog"
 	darcs push -a

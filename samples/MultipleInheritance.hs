@@ -40,12 +40,14 @@ import Prelude hiding (print)
 
 
 
--- The following method will be shared across all point objects.
+-- Methods as first class citizens
+
 move_method self
-   = moveX .=. (\d -> modifyIORef (self # varX) (+d))
+ = moveX .=. (\d -> modifyIORef (self # varX) (+d))
 
 
 -- The concrete classes derived from the abstract point class.
+
 concrete_point1 x_init self
    = do
         p <- abstract_point x_init self
@@ -58,7 +60,7 @@ concrete_point2 x_init self
    = do
         p <- abstract_point x_init self
         returnIO
-          $  getX .=. ((return 42):: IO Int)
+          $  getX .=. ((return 88):: IO Int)
          .*. move_method self
          .*. p
 
@@ -82,9 +84,10 @@ heavy_point x_init color self =
      super2 <- concrete_point2 x_init self 
      super3 <- mfix (concrete_point3 x_init)
      let myprint = do
-                      putStr "super1: "; (super1 # print)
-                      putStr "super2: "; (super2 # print)
-                      putStr "super3: "; (super3 # print)
+                      putStr "\nsuper1: "; (super1 # print)
+                      putStr "\nsuper2: "; (super2 # print)
+                      putStr "\nsuper3: "; (super3 # print)
+                      putStr "\n"
      let mymove  = ( \d -> do
                               super1 # moveX $ d
                               super2 # moveX $ d
@@ -104,6 +107,18 @@ myDiamondOOP =
      p # print -- All points still agree!
      p # moveX $ 2
      p # print -- The third point lacks behind!
+
+{-
+
+super1: 42
+super2: 42
+super3: 42
+
+super1: 46
+super2: 46
+super3: 44
+
+-}
 
 -- Note, try
 -- :type heavy_point

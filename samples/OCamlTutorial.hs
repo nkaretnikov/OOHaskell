@@ -718,8 +718,8 @@ abstract_point x_init self = do
     .*. print .=. (self # getX >>= putStr . show)
     .*. emptyRecord
  where
-   _ = (self # getX) `asTypeOf` return x_init
-   _ = (self # moveX) x_init `asTypeOf` return ()
+   _ = (self # getX)          `asTypeOf`  returnIO x_init
+   _ = (self # moveX) x_init  `asTypeOf`  returnIO ()
 
 
 {-

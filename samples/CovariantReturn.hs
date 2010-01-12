@@ -23,81 +23,74 @@ data GetWidth; getWidth               = proxy::Proxy GetWidth
 data GetHeight; getHeight             = proxy::Proxy GetHeight
 data GetDepth; getDepth               = proxy::Proxy GetDepth
 data GetSide; getSide                 = proxy::Proxy GetSide
-data GetCrossSection; getCrossSection = proxy::Proxy GetCrossSection
+data CrossSection; crossSection = proxy::Proxy CrossSection
 
 
 -- A base class for rectangles
 
 rectangle width height self
-  = do
-      returnIO $
-           getWidth    .=. returnIO width
-       .*. getHeight   .=. returnIO height
-       .*. emptyRecord
+  =  getWidth    .=. width
+ .*. getHeight   .=. height
+ .*. emptyRecord
 
 
--- A subtype of rectangle, square.
--- Note that we do not sublass for code reuse here.
--- We rather refine the superclass into its subclass.
+-- We refine the rectangles into squares.
 
-square width self
-  = do
-      super <- rectangle width width self
-      returnIO $
-           -- Of course we could as well omit this getter.
-           -- (The side length is identical to getWidth and getHeight.)
-           -- (Due to the extension, square is a proper subtype of rectangle).
-           getSide .=. returnIO width
+square side self
+  = let super = rectangle side side self
+    in getSide .=. side .*. super
+
+
+-- We extend rectangles into cuboids.
+
+cuboid width height depth self
+  = let super = rectangle width height self
+    in
+           getDepth     .=. depth
+       .*. crossSection .=. fix (rectangle width height)
        .*. super
 
 
--- A 3D base class
+-- We refine cuboid into cubes. 
 
-cuboid width height depth self
-  = do
-      returnIO
-        $  getWidth        .=. returnIO width
-       .*. getHeight       .=. returnIO height
-       .*. getDepth        .=. returnIO depth
-       .*. getCrossSection .=. mfix (rectangle width height)
-       .*. emptyRecord
+cube side self
+  = let super = cuboid side side side self
+    in     getSide .=. side
+       .*. crossSection .=. fix (square side)
+       .@. super
 
 
--- A subtype of a cuboid. 
--- We override the method getCrossSection to have a covariant return type.
--- We have to use (super .-. getCrossSection) rather than .<. super
+{-
 
-cube width self
-  = do
-      super <- cuboid width width width self
-      returnIO
-         $  getCrossSection .=. mfix (square width)
-        .*. (super .-. getCrossSection)
+In cube, the method crossSection has a covariant result type. Not that
+we have to use (super .-. crossSection) rather than .<. super
+
+-}
 
 
 -- Compute the volume of a cuboid
 
 volume aCuboid
-  = do
-       xs <- aCuboid # getCrossSection
-       w  <- xs # getWidth
-       h  <- xs # getHeight
-       d  <- aCuboid # getDepth
-       return (d * w * h)
+  = let
+     xs = aCuboid # crossSection
+     w  = xs # getWidth
+     h  = xs # getHeight
+     d  = aCuboid # getDepth
+    in d * w * h
 
 
 -- Time for a test case.
 
 test1 = do
            print "test1"
-           aCuboid <- mfix (cuboid 10 20 30)
-           aCube   <- mfix (cube 40)
+           let aCuboid = fix (cuboid 10 20 30)
+           let aCube = fix (cube 40)
            putStrLn "Volume of cuboid"
-           volume aCuboid >>= print
+           print $ volume aCuboid
            -- Now, pass a cube to a function that expects a cuboid.
            -- This shows that cube is substitutable for a cuboid.
            putStrLn "Volume of cube"
-           volume aCube >>= print
+           print $ volume aCube
            print "OK"
 
 
@@ -107,14 +100,15 @@ test1 = do
 
 test2 = do
            print "test2"
-           aCuboid <- mfix (cuboid (10::Int) (20::Int) (30::Int))
-           aCube   <- mfix (cube (40::Int))
+           let aCuboid = fix (cuboid (10::Int) (20::Int) (30::Int))
+           let aCube   = fix (cube (40::Int))
+           -- let cuboids = [aCuboid, aCube] -- Type error!
            let cuboids = [aCuboid, deep'narrow aCube]
            -- The following would raise a type error.
            -- There is no way a cuboid can be narrowed to a cube!
-           -- cuboids = [aCube, deep'narrow aCuboid]
+           -- cuboids = [deep'narrow aCuboid, aCube] -- Type error, too!
            putStrLn "Volumes of cuboids"
-           mapM_ (\cb -> volume cb >>= print) cuboids
+           mapM_ (\cb -> print $ volume cb) cuboids
            print "OK"
 
 

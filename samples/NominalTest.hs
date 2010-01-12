@@ -1,6 +1,8 @@
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 {-
@@ -37,12 +39,12 @@ data MCP -- Massive Colored points
 data SP  -- "Special" points
 
 
--- Register nominations for clarity
+-- Declare subtyping relationships
 
-instance Nomination PP
-instance Nomination CP
-instance Nomination MCP
-instance Nomination SP
+instance Parents PP HNil           -- Printable points don't have parents
+instance Parents CP  (PP :*: HNil) -- Colored points are printable points
+instance Parents MCP (CP :*: HNil) -- Massive colored points are colored points
+instance Parents SP  (PP :*: HNil) -- Special points are printable points
 
 
 -- The familiar printable point but nominal this time
@@ -110,26 +112,6 @@ printCP' o = printCP (nUpCast o)
 printSP' o = printSP (nUpCast o)
 
 
--- Printable points don't have parents
-
-instance Parents PP HNil
-
-
--- Colored points are printable points
-
-instance Parents CP (HCons PP HNil) 
-
-
--- Special points are printable points
- 
-instance Parents SP (HCons PP HNil)
-
-
--- Massive colored points are colored points
-
-instance Parents MCP (HCons CP HNil)
-
-
 -- Time to demo
 
 main = do
@@ -149,14 +131,14 @@ main = do
 	   printPP aPP
            -- printPP aCP -- Error! Up-cast needed.
            printPP (nUpCast aCP)
-           printPP (nUpCast aSP)
            printPP (nUpCast aMP)
+           printPP (nUpCast aSP)
 
            putStrLn "Nominal subtyping with implicit up-cast"
 	   printPP' aPP
            printPP' aCP -- No need to up-cast.
-           printPP' aSP -- No need to up-cast.
            printPP' aMP -- No need to up-cast.
+           printPP' aSP -- No need to up-cast.
 
            -- moveX must be inherited from the remote parent
 	   putStrLn "    after moving MP..."

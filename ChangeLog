@@ -1,5 +1,4 @@
 10-12 January 2010
-	Changed fixity level of <++
 	Pushed uses of LANGUAGE pragmas further for OOHaskell examples
 	Reorganized Makefile and directory structure for clarity
 	Some renaming in samples

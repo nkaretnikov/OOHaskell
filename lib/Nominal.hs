@@ -27,12 +27,31 @@ import Data.HList.Record
 
 -- A newtype wrapper for nominal types
 
-newtype N n r = N r
+newtype Nomination n => N n r = N r
+
+
+--
+-- The presentation of the nominal subtyping hierarchy.
+-- Define the parents of each nominal type by an HList.
+--
+
+class (Nomination child, Nominations parents) 
+   => Parents child parents | child -> parents
+
+
+-- Lists of nominations
+
+class Nominations ns
+instance Nominations HNil
+instance (Nomination h, Nominations t)
+      => Nominations (HCons h t)
 
 
 -- A class for nominal types
 
 class Nomination n
+instance (Parents n ns, Nominations ns)
+      => Nomination n
 
 
 -- An operation to `nominate' a record as nominal object
@@ -56,33 +75,10 @@ instance ( HasField l r v
  where hLookupByLabel l r = hLookupByLabel l (anonymize r)
 
 
---
--- The presentation of the nominal subtyping hierarchy.
--- Define which nominal type is a parent for which type.
---
-
-class ( Nomination child
-      , Nominations parents
-      ) 
-        => Parents child parents | child -> parents
-
-
--- Lists of nominations
-
-class Nominations ns
-instance Nominations HNil
-instance ( Nomination h
-         , Nominations t
-         )
-           => Nominations (HCons h t)
-
-
 -- Test whether g is an ancestor class of f
 
-class ( Nomination f
-      , Nomination g
-      )
-        => Ancestor f g
+class (Nomination f, Nomination g)
+   => Ancestor f g
 
 
 -- Compute all ancestors and perform membership test
