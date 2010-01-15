@@ -62,10 +62,7 @@ all:
 
 # Test all the OOHaskell examples
 
-test:
-	make OCamlTutorial.test
-	make test-shapes
-	make test-many
+test: OCamlTutorial.test test-shapes test-many
 
 ##############################################################################
 
@@ -74,37 +71,35 @@ test:
 test-shapes:
 
 # The introductory shapes example
-	make Shapes.test
+	$(MAKE) Shapes.test
 
 # Variations on the shapes example (using the same baseline)
-	make ShapesNarrow.shapes-test
-	make ShapesHList.shapes-test
-	make ShapesExists.shapes-test
+	$(MAKE) ShapesNarrow.shapes-test
+	$(MAKE) ShapesHList.shapes-test
+	$(MAKE) ShapesExists.shapes-test
 
 # Even more shapes examples
-	make ShapesEither.test
-	make ShapesEitherR.test
-	make ShapesGlb.test
+	$(MAKE) ShapesEither.test
+	$(MAKE) ShapesEitherR.test
+	$(MAKE) ShapesGlb.test
 
 ##############################################################################
 
 # Test many more OOHaskell examples
 
-test-many:
-	make MultipleInheritance.test
-	make OoCopy.test
-	make SimpleST.test
-	make CircBuffer.test
-	make Selfish.test
-	make SelfishSafe.test
-	make SelfReturn.test
-	make DynamicOo.test
-	make DeepSubtyping.test
-	make CovariantReturn.test
-	make CovariantArgs.test
-	make RecList.test
-	make NominalTest.test
-	make EiffelFaqLcon.test
+test-many: MultipleInheritance.test OoCopy.test \
+	SimpleST.test   \
+	CircBuffer.test \
+	Selfish.test \
+	SelfishSafe.test \
+	SelfReturn.test \
+	DynamicOo.test \
+	DeepSubtyping.test \
+	CovariantReturn.test \
+	CovariantArgs.test \
+	RecList.test     \
+	NominalTest.test \
+	EiffelFaqLcon.test
 
 ##############################################################################
 

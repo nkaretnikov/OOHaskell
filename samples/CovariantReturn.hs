@@ -62,8 +62,8 @@ cube side self
 
 {-
 
-In cube, the method crossSection has a covariant result type. Not that
-we have to use (super .-. crossSection) rather than .<. super
+In cube, the method crossSection has a covariant result type.
+We have to use (super .-. crossSection) rather than .<. super
 
 -}
 
