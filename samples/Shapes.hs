@@ -1,5 +1,4 @@
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE TemplateHaskell#-}
+{-# LANGUAGE EmptyDataDecls, DeriveDataTypeable, TemplateHaskell #-}
 
 {-
 

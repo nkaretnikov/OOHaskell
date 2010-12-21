@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeOperators #-}
+
 {-
 
 OOHaskell (C) 2004--2010, Oleg Kiselyov, Ralf Laemmel, Keean Schupke
@@ -22,7 +24,6 @@ module OOHaskell (
  module Control.Monad,
  module Control.Monad.ST,
  module Control.Monad.Fix,
- returnIO,
  module Print,
  module DeepNarrow,
  module Nominal,
@@ -62,8 +63,6 @@ import Control.Monad
 import Control.Monad.ST
 import Control.Monad.Fix
 
-import GHC.IOBase (returnIO)
-
 infixr 9 #
 m # field = (m .!. field) 
 
@@ -79,3 +78,6 @@ concrete generator self = generator self
 
 nil = nilLub
 cons h t = consLub h t
+
+returnIO :: a -> IO a
+returnIO = return

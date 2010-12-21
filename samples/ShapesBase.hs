@@ -1,6 +1,5 @@
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE TemplateHaskell#-}
+{-# LANGUAGE TypeOperators, EmptyDataDecls #-}
+{-# LANGUAGE TemplateHaskell, DeriveDataTypeable #-}
 
 {-
 

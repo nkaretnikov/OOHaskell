@@ -1,7 +1,5 @@
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE TemplateHaskell#-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators, EmptyDataDecls, ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell, DeriveDataTypeable #-}
 
 {-
 

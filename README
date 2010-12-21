@@ -6,18 +6,9 @@ OOHaskell -- Haskell's overlooked object system
 
 Getting the code
 
-> darcs get http://darcs.haskell.org/OOHaskell
+> darcs get http://code.haskell.org/OOHaskell
 
 ----------------------------------------------------------------------
-
-Pushing changes
-
-You need an account at darcs.haskell.org
-
-> cd OOHaskell
-> darcs pull user@darcs.haskell.org:/srv/darcs/OOHaskell
-> darcs record
-> darcs push
 
 ----------------------------------------------------------------------
 
