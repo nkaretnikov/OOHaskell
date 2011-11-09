@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 
@@ -20,7 +21,7 @@ We need to gather all used methods as constraints of the Apply instance.
 module ShapesHList where
 
 import OOHaskell
-import ShapesBase hiding (main)
+import ShapesBase
 
 
 -- Test case for heterogeneous collections

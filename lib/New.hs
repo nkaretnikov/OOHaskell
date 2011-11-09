@@ -1,5 +1,3 @@
-{-# OPTIONS -fglasgow-exts #-}
-
 {-
 
 -- (C) 2004-2005, Oleg Kiselyov & Ralf Laemmel
@@ -14,7 +12,6 @@
 module New (NotFixed, new, construct, constructWithSuper) where
 
 import Control.Monad.Fix
-import GHC.IOBase
 import Data.HList.Record
 
 
@@ -44,7 +41,7 @@ construct :: NotFixed (Record a)
           -> (Record a -> Record b)
           -> IO (NotFixed (Record b))
 
-construct (NotFixed self) f = returnIO $ NotFixed (f self)
+construct (NotFixed self) f = return $ NotFixed (f self)
 
 
 --

@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE EmptyDataDecls #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 

@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeOperators, EmptyDataDecls, ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell, DeriveDataTypeable #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 

@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 
@@ -15,7 +16,7 @@ Thereby, all shapes can be inserted into a normal homogeneous list.
 module ShapesExists where
 
 import OOHaskell
-import ShapesBase hiding (main)
+import ShapesBase
 
 
 -- Test case for heterogeneous collections

@@ -6,6 +6,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 
 {-
 
@@ -26,7 +27,6 @@ technicalities related to the implementation of TypeEq and TypeCast
 module DeepNarrow where
 
 import Data.HList.CommonMain
-import Data.HList.GhcSyntax
 
 data ItsRecord
 data ItsIO
@@ -37,7 +37,7 @@ class TopTyCon a b | a -> b
 instance TopTyCon (Record y) ItsRecord
 instance TopTyCon (IO y) ItsIO
 instance TopTyCon (a->b) ItsFunction
-instance TypeCast f ItsOther => TopTyCon a f
+instance f ~ ItsOther => TopTyCon a f
 
 class DeepNarrow a b where
     deep'narrow :: a -> b
@@ -48,8 +48,8 @@ instance (TopTyCon a f, DeepNarrow' f a b) => DeepNarrow a b where
 class DeepNarrow' f a b where
     deep'narrow' :: f -> a -> b
 
-instance TypeCast a b => DeepNarrow' ItsOther a b where
-    deep'narrow' _ = typeCast
+instance a ~ b => DeepNarrow' ItsOther a b where
+    deep'narrow' _ = id
 
 -- Contra-variance on the argument type, co-variance in the result-type
 -- The type-checker won't accept in any other way...

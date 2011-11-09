@@ -1,4 +1,5 @@
 {-# LANGUAGE EmptyDataDecls, DeriveDataTypeable, TemplateHaskell #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 

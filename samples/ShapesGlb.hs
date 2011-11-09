@@ -2,6 +2,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 
@@ -37,7 +38,7 @@ to cast to types that are part of the union.
 module ShapesGlb where
 
 import OOHaskell
-import ShapesBase hiding (main)
+import ShapesBase
 
 
 -- The polymorphic scribble loop.

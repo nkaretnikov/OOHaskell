@@ -11,7 +11,6 @@ module Print
    where
 
 import Prelude hiding (print)
-import GHC.IOBase (returnIO)
 import Data.HList.HListPrelude
 
 

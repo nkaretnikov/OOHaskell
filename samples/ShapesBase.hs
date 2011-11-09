@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeOperators, EmptyDataDecls #-}
 {-# LANGUAGE TemplateHaskell, DeriveDataTypeable #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 
@@ -178,7 +179,7 @@ circle x y radiusNew self
 
 -- Weirich's / Rathman's test case
 
-main =
+main' =
   do
        s1 <- mfix $ rectangle 10 20 5 6
        s2 <- mfix $ circle 15 25 8

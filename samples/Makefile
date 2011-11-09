@@ -87,7 +87,8 @@ test-shapes:
 
 # Test many more OOHaskell examples
 
-test-many: MultipleInheritance.test OoCopy.test \
+# Temporarily disabling OoCopy.test 
+test-many: MultipleInheritance.test \
 	SimpleST.test   \
 	CircBuffer.test \
 	Selfish.test \

@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 
@@ -10,10 +11,10 @@ We use narrow (coerce) to prepare all objects before insertion into a list.
 
 -}
 
-module ShapesNarrow where
+module ShapesNarrow (main) where
 
 import OOHaskell
-import ShapesBase hiding (main)
+import ShapesBase
 
 
 -- When we want to make a list of Shapes, then we cast objects to this interface.

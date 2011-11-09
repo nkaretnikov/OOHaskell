@@ -1,3 +1,7 @@
+8 November 2011
+	Cleanup, adjusted to work with the Oct 2011 version of HList
+	and GHC 7.0.4
+	
 10-12 January 2010
 	Pushed uses of LANGUAGE pragmas further for OOHaskell examples
 	Reorganized Makefile and directory structure for clarity

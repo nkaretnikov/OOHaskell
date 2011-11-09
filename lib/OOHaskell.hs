@@ -14,9 +14,7 @@ also import modules that are needed for mutable data and monads.
 module OOHaskell (
 
  module Data.HList.CommonMain,
- module Data.HList.GhcSyntax,
- module Data.HList.GhcRecord,
- module Data.HList.GhcExperiments,
+ module Data.HList.RecordAdv,
  module Data.HList.MakeLabels,
  module Data.STRef,
  module Data.IORef,
@@ -36,17 +34,12 @@ module OOHaskell (
 
 import Data.HList.CommonMain hiding ( HDeleteMany
                          , hDeleteMany
-                         , TypeCast -- no external uses are valid; see TypeEqGeneric1
-                         , typeCast -- no external uses are valid; see TypeEqGeneric1
+                         , ( .*. ), ( :=: )
                          )
 
-import Data.HList.GhcSyntax hiding (( .*. ), ( :=: ))
-import Data.HList.GhcRecord
-import Data.HList.GhcExperiments
-import Data.HList.TypeEqBoolGeneric
 import Data.HList.FakePrelude
-import Data.HList.TypeEqGeneric1
-import Data.HList.TypeCastGeneric1
+import Data.HList.RecordAdv
+import Data.HList.TypeEqO
 import Data.HList.Label4
 import Data.HList.MakeLabels
 import Print

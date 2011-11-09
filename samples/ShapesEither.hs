@@ -3,6 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 
@@ -26,7 +27,7 @@ libraries.
 module ShapesEither where
 
 import OOHaskell
-import ShapesBase hiding (main)
+import ShapesBase
 import Data.HList.ConsUnion
 
 

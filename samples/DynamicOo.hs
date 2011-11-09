@@ -15,7 +15,6 @@ Objects with items of Dynamic
 module DynamicOo where
 
 import OOHaskell
-import Data.HList.Record
 
 
 -- Some labels that derive Typeable

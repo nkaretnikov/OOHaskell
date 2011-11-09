@@ -2,6 +2,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# OPTIONS_GHC -fcontext-stack=100 #-}
 
 {-
 
@@ -28,7 +29,7 @@ field permutation. This gives a shallower union.
 module ShapesUnion where
 
 import OOHaskell
-import ShapesBase hiding (main)
+import ShapesBase
 import Data.HList.ConsUnion
 
 
