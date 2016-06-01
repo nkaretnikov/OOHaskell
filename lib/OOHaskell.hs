@@ -38,9 +38,9 @@ import Data.HList.CommonMain hiding ( HDeleteMany
                          )
 
 import Data.HList.FakePrelude
-import Data.HList.RecordAdv
+-- import Data.HList.RecordAdv
 import Data.HList.TypeEqO
-import Data.HList.Label4
+-- import Data.HList.Label4
 import Data.HList.MakeLabels
 import Print
 import DeepNarrow

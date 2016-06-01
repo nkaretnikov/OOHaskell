@@ -22,7 +22,7 @@ module Dynamic (
 import Data.Typeable
 import Data.Dynamic
 import Data.HList.Record
-import Data.HList.RecordAdv
+-- import Data.HList.RecordAdv
 
 
 -- Up-cast
