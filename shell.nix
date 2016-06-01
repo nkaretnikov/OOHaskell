@@ -3,6 +3,11 @@
 let
 
   inherit (nixpkgs) pkgs;
+  modHaskellPackages = pkgs.haskellPackages.override {
+    overrides = self: super: {
+      HList = self.callPackage ../HList {};
+    };
+  };
 
   f = { mkDerivation, array, base, cabal-install, HList, stdenv }:
       mkDerivation {
@@ -16,11 +21,11 @@ let
         license = stdenv.lib.licenses.mit;
       };
 
-  haskellPackages = if compiler == "default"
-                       then pkgs.haskellPackages
-                       else pkgs.haskell.packages.${compiler};
+  myHaskellPackages = if compiler == "default"
+                      then modHaskellPackages
+                      else pkgs.haskell.packages.${compiler};
 
-  drv = haskellPackages.callPackage f {};
+  drv = myHaskellPackages.callPackage f {};
 
 in
 
