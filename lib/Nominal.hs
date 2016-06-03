@@ -1,6 +1,8 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -20,6 +22,7 @@ module Nominal (
 ) where
 
 import Data.HList.FakePrelude
+import Data.HList.HList
 import Data.HList.HListPrelude
 import Data.HList.HOccurs
 import Data.HList.Record
@@ -42,9 +45,9 @@ class (Nomination child, Nominations parents)
 -- Lists of nominations
 
 class Nominations ns
-instance Nominations HNil
-instance (Nomination h, Nominations t)
-      => Nominations (HCons h t)
+instance Nominations (HList '[])
+instance (Nomination h, Nominations (HList t))
+  => Nominations (HList (h ': t))
 
 
 -- A class for nominal types
@@ -85,10 +88,9 @@ class (Nomination f, Nomination g)
 
 instance ( Nomination f
          , Nomination g
-         , Ancestors (HCons f HNil) hs
+         , Ancestors (HList (f ': '[])) hs
          , HOccurs g hs
-         )
-           => Ancestor f g
+         ) => Ancestor f g
 
 
 -- Compute transitive closure of ancestors
@@ -101,19 +103,19 @@ class ( Nominations fs
 
 -- No more ancestors
 
-instance Ancestors HNil HNil
+instance Ancestors (HList '[]) (HList '[])
 
 
 -- Append ancestors
+class HAppend a b => HAppend3 a b c | a b -> c
 
 instance ( Parents h l1
          , Ancestors l1 l2
-         , Ancestors t l3
-         , HAppend l2 l3 l4
-         , HAppend l4 (HCons h HNil) l0
+         , Ancestors (HList t) l3
+         , HAppend3 l2 l3 l4
+         , HAppend3 l4 (HList (h ': '[])) l0
          , Nominations l0
-         )
-           => Ancestors (HCons h t) l0
+         ) => Ancestors (HList (h ': t)) l0
 
 
 -- Guard the nomination of an operand
