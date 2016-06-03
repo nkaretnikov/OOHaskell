@@ -1,9 +1,12 @@
 { nixpkgs ? import <nixpkgs> {}, compiler ? "default" }:
 
+with nixpkgs.pkgs;
 let
+  selectedHaskellPackages = if compiler == "default"
+                            then haskellPackages
+                            else pkgs.haskell.packages.${compiler};
 
-  inherit (nixpkgs) pkgs;
-  modHaskellPackages = pkgs.haskellPackages.override {
+  modifiedHaskellPackages = selectedHaskellPackages.override {
     overrides = self: super: {
       HList = self.callPackage ../HList {};
     };
@@ -21,11 +24,7 @@ let
         license = stdenv.lib.licenses.mit;
       };
 
-  myHaskellPackages = if compiler == "default"
-                      then modHaskellPackages
-                      else pkgs.haskell.packages.${compiler};
-
-  drv = myHaskellPackages.callPackage f {};
+  drv = modifiedHaskellPackages.callPackage f {};
 
 in
 
