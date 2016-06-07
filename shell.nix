@@ -8,6 +8,8 @@ let
 
   modifiedHaskellPackages = selectedHaskellPackages.override {
     overrides = self: super: {
+      # Needs the 'RecordAdv' module from this branch:
+      # https://github.com/nkaretnikov/HList/tree/recordadv
       HList = self.callPackage ../HList {};
     };
   };
