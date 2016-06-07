@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators, EmptyDataDecls #-}
 {-# LANGUAGE TemplateHaskell, DeriveDataTypeable #-}
 {-# OPTIONS_GHC -fcontext-stack=100 #-}
@@ -48,8 +50,8 @@ data Draw;     draw     = proxy::Proxy Draw
 
 shape x_init y_init self 
   | const False ( narrow self ::
-                    Record (  Draw :=: IO ()
-                          :*: HNil ) )
+                    Record ( (LabelDraw :=: IO ())
+                          ': '[] ) )
   = undefined
 
 -- This is the actual definition
@@ -103,10 +105,12 @@ complete_shape = shape
 -- Rectange: inherits from Shape
 -- Again, it is polymorphic in the types of its fields
 
-data GetWidth;    getWidth     = proxy::Proxy GetWidth
-data GetHeight;   getHeight    = proxy::Proxy GetHeight
-data SetWidth;    setWidth     = proxy::Proxy SetWidth
-data SetHeight;   setHeight    = proxy::Proxy SetHeight
+$(makeLabels
+    [ "getWidth"
+    , "getHeight"
+    , "setWidth"
+    , "setHeight"
+    ])
 
 infixl 7 <<
 a << m = a >> (m >>= (putStr . show))
@@ -159,8 +163,10 @@ square x y width self
 -- Circle: inherits from Shape
 -- Again, it is polymorphic in the types of its fields
 
-data GetRadius;    getRadius     = proxy::Proxy GetRadius
-data SetRadius;    setRadius     = proxy::Proxy SetRadius
+$(makeLabels
+    [ "getRadius"
+    , "setRadius"
+    ])
 
 circle x y radiusNew self
   = do

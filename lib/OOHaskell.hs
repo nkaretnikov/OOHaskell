@@ -72,10 +72,12 @@ concrete generator self = generator self
   _ = mfix generator
 
 {-
-XXX: Commented out since the needed functions are commented out in HList.
+XXX: Undefined since the needed functions are commented out in HList.
 nil = nilLub
 cons h t = consLub h t
 -}
+nil      = undefined
+cons h t = undefined
 
 returnIO :: a -> IO a
 returnIO = return
