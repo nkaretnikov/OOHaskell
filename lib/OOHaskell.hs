@@ -1,4 +1,6 @@
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 {-
 
@@ -40,7 +42,7 @@ import Data.HList.CommonMain hiding ( HDeleteMany
 import Data.HList.FakePrelude
 import Data.HList.RecordAdv
 import Data.HList.TypeEqO
-import Data.HList.Label4
+-- import Data.HList.Label4
 import Data.HList.MakeLabels
 import Print
 import DeepNarrow
@@ -60,17 +62,20 @@ infixr 9 #
 m # field = (m .!. field) 
 
 infixr 2 .*.
-f@(LVPair v) .*. (Record r) = mkRecord (HCons f r)
+f@(Tagged v) .*. (Record r) = mkRecord (HCons f r)
 
 infixr 4 :=:
-type l :=: v = LVPair (Proxy l) v
+type l :=: v = Tagged (Proxy l) v
 
 concrete generator self = generator self
  where
   _ = mfix generator
 
+{-
+XXX: Commented out since the needed functions are commented out in HList.
 nil = nilLub
 cons h t = consLub h t
+-}
 
 returnIO :: a -> IO a
 returnIO = return
