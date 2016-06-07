@@ -1,7 +1,9 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -26,6 +28,7 @@ technicalities related to the implementation of TypeEq and TypeCast
 
 module DeepNarrow where
 
+import Data.HList.HList
 import Data.HList.CommonMain
 
 data ItsRecord
@@ -59,7 +62,7 @@ instance (DeepNarrow a' a, DeepNarrow b b')
     deep'narrow' _ f = \x -> deep'narrow (f (deep'narrow x))
 
 
-instance DeepNarrow' ItsRecord r (Record HNil) where
+instance DeepNarrow' ItsRecord r (Record '[]) where
     deep'narrow' _ _ = emptyRecord
 
 {-
@@ -72,16 +75,16 @@ constraints which are then indeed added as to complete the instance.
 -}
 
 instance ( DeepNarrow' ItsRecord (Record r) (Record r')
-         , H2ProjectByLabels (HCons l HNil) r (HCons (LVPair l v) HNil) rout
-	 , TopTyCon v f, DeepNarrow' f v v'
-	 , HRLabelSet (HCons (LVPair l v') r')
-	 )
-    => DeepNarrow' ItsRecord (Record r) (Record (HCons (LVPair l v') r')) where
+         , H2ProjectByLabels (l ': '[]) r ((Tagged l v) ': '[]) rout
+         , TopTyCon v f , DeepNarrow' f v v'
+         , HRLabelSet ((Tagged l v') ': r')
+         )
+    => DeepNarrow' ItsRecord (Record r) (Record ((Tagged l v') ': r')) where
     deep'narrow' _ r = result
 	where
 	r'       = (deep'narrow r) :: (Record r')
 	labels   = HCons (undefined::l) HNil
-	Record (HCons (LVPair v) HNil) = hProjectByLabels labels  r
+	Record (HCons (Tagged v) HNil) = hProjectByLabels labels  r
 	(v'::v') = deep'narrow v
 	result   = (newLVPair undefined v') .*. r'
 		  
